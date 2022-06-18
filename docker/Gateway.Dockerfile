@@ -10,4 +10,4 @@ COPY deps.ts ./
 COPY /src/gateway /src/gateway
 COPY /src/common /src/common
 
-RUN [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/gateway/mod.ts" ]
+ENTRYPOINT [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/gateway/mod.ts" ]
