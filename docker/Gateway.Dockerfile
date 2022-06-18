@@ -1,4 +1,4 @@
-FROM denoland/deno:alpine
+FROM denoland/deno:latest
 
 LABEL org.opencontainers.image.source="https://github.com/penpow/sentry"
 LABEL org.opencontainers.image.description="Sentry Gateway Image"
