@@ -1,0 +1,9 @@
+{
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "deno.importMap": "./importMap.json",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-issue-config.json": "file:///home/jshno/Sentry/.github/ISSUE_TEMPLATE/config.yml"
+  },
+}
