@@ -7,7 +7,6 @@ WORKDIR /app
 
 COPY config.ts ./
 COPY deps.ts ./
-COPY .env .
 COPY /src/rest /src/rest
 COPY /src/common /src/common
 EXPOSE 1236

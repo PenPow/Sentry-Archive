@@ -7,7 +7,6 @@ WORKDIR /app
 
 COPY config.ts ./
 COPY deps.ts ./
-COPY .env .
 COPY /src/gateway /src/gateway
 COPY /src/common /src/common
 
