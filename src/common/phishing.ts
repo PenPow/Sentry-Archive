@@ -41,7 +41,6 @@ export async function checkMessage(
   message: string,
   scanSuspiciousDomains = false,
 ) {
-  return true;
   const domains = await listDomains();
   const suspiciousDomains = scanSuspiciousDomains
     ? await listSuspicious()
