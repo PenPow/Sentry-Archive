@@ -4,6 +4,8 @@ import { isDocker } from "https://deno.land/x/is_docker@v2.0.0/mod.ts";
 
 const env = await isDocker() ? Deno.env.toObject() : dotEnvConfig({ export: true });
 
+console.log(env)
+
 export const GATEWAY_INTENTS: (keyof typeof GatewayIntents)[] = [
   "GuildMembers",
   "GuildMessages",
