@@ -66,7 +66,8 @@ export const EVENT_HANDLER_PORT = env.EVENT_HANDLER_PORT
   : 7050;
 
 export const DEVELOPMENT = env.DEVELOPMENT ?? false;
-export const DEPLOY_ON_START = env.DEPLOY_ON_START ?? false;
+
+export const DEPLOY_ON_START = env.DEPLOY_ON_START === 'true' ?? false;
 
 export const DEV_GUILD_ID = env.DEV_GUILD_ID ? BigInt(env.DEV_GUILD_ID) : 0n;
 export const DEV_USER_ID = env.DEV_USER_ID ? BigInt(env.DEV_USER_ID) : 0n;
