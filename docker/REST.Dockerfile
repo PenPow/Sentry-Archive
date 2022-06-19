@@ -11,8 +11,8 @@ WORKDIR /app
 COPY config.ts ./
 COPY deps.ts ./
 COPY importMap.json ./
-COPY /src/rest /src/rest
-COPY /src/common /src/common
+COPY /src/rest ./src/rest
+COPY /src/common ./src/common
 EXPOSE 1236
 
 ENTRYPOINT ["deno"]

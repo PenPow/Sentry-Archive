@@ -11,8 +11,8 @@ WORKDIR /app
 COPY config.ts ./
 COPY deps.ts ./
 COPY importMap.json ./
-COPY /src/gateway /src/gateway
-COPY /src/common /src/common
+COPY /src/gateway ./src/gateway
+COPY /src/common ./src/common
 
 ENTRYPOINT ["deno"]
 
