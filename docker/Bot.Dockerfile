@@ -10,6 +10,7 @@ WORKDIR /app
 
 COPY config.ts ./
 COPY deps.ts ./
+COPY importMap.json ./
 COPY /src/bot /src/bot
 COPY /src/common /src/common
 EXPOSE 1235
