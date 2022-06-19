@@ -3,12 +3,10 @@ name: Deno CI
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - README.md
-      - .github/**
-      - importMap.json
-      - LICENSE.md
-      - .gitignore
+    paths:
+      - "src"
+      - "./deps.ts"
+      - "./config.ts"
   pull_request:
     branches: [main]
 
