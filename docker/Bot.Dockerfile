@@ -1,4 +1,7 @@
-FROM denoland/deno:latest
+FROM frolvlad/alpine-glibc:alpine-3.11_glibc-2.31
+
+RUN apk update && apk add curl
+RUN curl -fsSL https://deno.land/x/install/install.sh | sh && mv /root/.deno/bin/deno /bin/deno
 
 LABEL org.opencontainers.image.source="https://github.com/penpow/sentry"
 LABEL org.opencontainers.image.description="Sentry Bot Image"
@@ -11,4 +14,6 @@ COPY /src/bot /src/bot
 COPY /src/common /src/common
 EXPOSE 1235
 
-ENTRYPOINT [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/bot/mod.ts" ]
+ENTRYPOINT ["deno"]
+
+CMD [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/bot/mod.ts" ]

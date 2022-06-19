@@ -1,4 +1,7 @@
-FROM denoland/deno:latest
+FROM frolvlad/alpine-glibc:alpine-3.11_glibc-2.31
+
+RUN apk update && apk add curl
+RUN curl -fsSL https://deno.land/x/install/install.sh | sh && mv /root/.deno/bin/deno /bin/deno
 
 LABEL org.opencontainers.image.source="https://github.com/penpow/sentry"
 LABEL org.opencontainers.image.description="Sentry REST Image"
@@ -11,4 +14,6 @@ COPY /src/rest /src/rest
 COPY /src/common /src/common
 EXPOSE 1236
 
-ENTRYPOINT [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/rest/mod.ts" ]
+ENTRYPOINT ["deno"]
+
+CMD [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/rest/mod.ts" ]
