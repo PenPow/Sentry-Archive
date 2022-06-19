@@ -10,7 +10,7 @@ import {
   REST_AUTHORIZATION_KEY,
   REST_PORT,
 REST_URL,
-} from "../../config.ts";
+} from "@config";
 
 // CREATE A SIMPLE MANAGER FOR REST
 const rest = createRestManager({
