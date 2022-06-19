@@ -2,7 +2,7 @@ import { DEV_USER_ID } from "@config";
 import { registerLocaleCommands } from "../../../../../common/deploy.ts";
 import { replyToInteraction } from "../../../../../common/replies.ts";
 import { Locale, translate } from "../../../../languages/translate.ts";
-import { Command } from "../../../../types/command.ts";
+import { Command } from "../../../../../common/command.ts";
 
 const command: Command = {
   name: "DEPLOY_COMMAND_NAME",
