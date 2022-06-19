@@ -3,14 +3,14 @@ import {
   createGatewayManager,
   createRestManager,
   endpoints,
-} from "../../deps.ts";
+} from "@deps";
 import {
   DISCORD_TOKEN,
   EVENT_HANDLER_SECRET_KEY,
   REST_AUTHORIZATION_KEY,
   REST_PORT,
 REST_URL,
-} from "../../config.ts";
+} from "@config";
 
 // CREATE A SIMPLE MANAGER FOR REST
 const rest = createRestManager({

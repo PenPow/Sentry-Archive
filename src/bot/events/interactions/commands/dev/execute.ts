@@ -6,7 +6,7 @@ import {
 } from "../../../../../common/replies.ts";
 import { Locale, translate } from "../../../../languages/translate.ts";
 import { Command } from "../../../../types/command.ts";
-import { avatarURL, Embed } from "../../../../../../deps.ts";
+import { avatarURL, Embed } from "@deps";
 
 const command: Command = {
   name: "EXECUTE_COMMAND_NAME",

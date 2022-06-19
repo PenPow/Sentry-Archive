@@ -1,4 +1,4 @@
-import { Message, Member, Bot, Role } from "../../deps.ts"
+import { Message, Member, Bot, Role } from "@deps"
 import { log, LogLevel } from "./logger.ts";
 
 export const hasPerms = (permission: bigint, flags: bigint | bigint[]) => {

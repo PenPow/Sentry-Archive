@@ -14,7 +14,7 @@ import {
   createBot,
   createRestManager,
   DiscordGatewayPayload,
-} from "../../deps.ts";
+} from "@deps";
 import { log, LogLevel } from "../common/logger.ts";
 import { registerLocaleCommands } from "./deploy.ts";
 import { setupEventHandlers } from "./events/mod.ts";

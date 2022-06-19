@@ -4,7 +4,7 @@ import {
   InteractionResponseTypes,
   InteractionTypes,
   sendPrivateInteractionResponse,
-} from "../../../../deps.ts";
+} from "@deps";
 import { log, LogLevel } from "../../../common/logger.ts";
 import { replyToInteraction } from "../../../common/replies.ts";
 import { Locale, translate } from "../../languages/translate.ts";

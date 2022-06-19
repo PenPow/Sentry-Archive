@@ -1,7 +1,7 @@
 import { psql } from "./db.ts";
 import {
   Bot
-} from "../../deps.ts";
+} from "@deps";
 
 export function getUserCases(
   guildId: bigint,
