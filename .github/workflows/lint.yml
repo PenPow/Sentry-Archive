@@ -4,11 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - "src"
+      - "src/**"
       - "./deps.ts"
       - "./config.ts"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "./deps.ts"
+      - "./config.ts"
 
 jobs:
   build:
