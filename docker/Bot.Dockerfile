@@ -15,6 +15,10 @@ COPY /src/bot ./src/bot
 COPY /src/common ./src/common
 EXPOSE 1235
 
+RUN deno cache deps.ts
+RUN deno cache config.ts
+RUN for f in $(find src/ -name '*.ts'); do deno cache --import-map ./importMap.json $f; done
+
 ENTRYPOINT ["deno"]
 
 CMD [ "run", "-A", "--unstable", "--import-map", "./importMap.json", "./src/bot/mod.ts" ]
