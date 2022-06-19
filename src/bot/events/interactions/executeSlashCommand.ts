@@ -7,8 +7,8 @@ import {
 } from "../../../../deps.ts";
 import { log, LogLevel } from "../../../common/logger.ts";
 import { replyToInteraction } from "../../../common/replies.ts";
-import { Locale, translate } from "../../../common/languages/translate.ts";
-import { Command } from "../../../common/command.ts";
+import { Locale, translate } from "../../languages/translate.ts";
+import { Command } from "../../types/command.ts";
 import commands from "./mod.ts";
 
 export async function executeSlashCommand(bot: Bot, interaction: Interaction) {

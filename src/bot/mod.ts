@@ -16,7 +16,7 @@ import {
   DiscordGatewayPayload,
 } from "../../deps.ts";
 import { log, LogLevel } from "../common/logger.ts";
-import { registerLocaleCommands } from "../common/deploy.ts";
+import { registerLocaleCommands } from "./deploy.ts";
 import { setupEventHandlers } from "./events/mod.ts";
 
 export const bot = createBot({

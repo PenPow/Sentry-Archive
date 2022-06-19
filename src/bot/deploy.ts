@@ -2,7 +2,7 @@ import commands from "../bot/events/interactions/mod.ts";
 import { DEV_GUILD_ID } from "@config";
 import { Bot, types } from "../../deps.ts";
 import { Locale, translate } from "./languages/translate.ts";
-import { IRESTSlashCommandOption } from "./command.ts";
+import { IRESTSlashCommandOption } from "./types/command.ts";
 
 export async function registerLocaleCommands(bot: Bot) {
   await bot.rest.runMethod<types.RESTPostAPIApplicationCommandsJSONBody[]>(

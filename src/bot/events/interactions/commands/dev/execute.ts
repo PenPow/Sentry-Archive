@@ -4,8 +4,8 @@ import {
   ephemeral,
   replyToInteraction,
 } from "../../../../../common/replies.ts";
-import { Locale, translate } from "../../../../../common/languages/translate.ts";
-import { Command } from "../../../../../common/command.ts";
+import { Locale, translate } from "../../../../languages/translate.ts";
+import { Command } from "../../../../types/command.ts";
 import { avatarURL, Embed } from "../../../../../../deps.ts";
 
 const command: Command = {

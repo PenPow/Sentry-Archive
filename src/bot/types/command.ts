@@ -5,8 +5,8 @@ import {
   Interaction,
   PermissionStrings,
   types,
-} from "../../deps.ts";
-import { Locale, translationKeys } from "./languages/translate.ts";
+} from "../../../deps.ts";
+import { Locale, translationKeys } from "../languages/translate.ts";
 
 export interface Command {
   /** The name of the command, used for both slash and message commands. */
