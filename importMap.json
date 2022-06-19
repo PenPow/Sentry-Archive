@@ -2,6 +2,7 @@
   "imports": {
     "/": "./",
     "./": "./",
-    "@config": "./config.ts"
+    "@config": "./config.ts",
+    "@deps": "./deps.ts"
   }
 }

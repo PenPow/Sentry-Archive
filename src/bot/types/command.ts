@@ -5,7 +5,7 @@ import {
   Interaction,
   PermissionStrings,
   types,
-} from "../../../deps.ts";
+} from "@deps";
 import { Locale, translationKeys } from "../languages/translate.ts";
 
 export interface Command {

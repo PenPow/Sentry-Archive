@@ -3,7 +3,7 @@ import {
   Interaction,
   InteractionApplicationCommandCallbackData,
   InteractionResponseTypes,
-} from "../../deps.ts";
+} from "@deps";
 
 export async function replyToInteraction(
   bot: Bot,

@@ -3,7 +3,7 @@ import {
   createGatewayManager,
   createRestManager,
   endpoints,
-} from "../../deps.ts";
+} from "@deps";
 import {
   DISCORD_TOKEN,
   EVENT_HANDLER_SECRET_KEY,
