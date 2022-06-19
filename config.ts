@@ -1,7 +1,8 @@
 import { config as dotEnvConfig } from "https://deno.land/x/dotenv@v3.1.0/mod.ts";
 import { GatewayIntents } from "https://deno.land/x/discordeno@13.0.0-rc31/mod.ts";
+import { isDocker } from "https://deno.land/x/is_docker@v2.0.0/mod.ts";
 
-const env = dotEnvConfig({ export: true });
+const env = await isDocker() ? Deno.env.toObject() : dotEnvConfig({ export: true });
 
 export const GATEWAY_INTENTS: (keyof typeof GatewayIntents)[] = [
   "GuildMembers",
