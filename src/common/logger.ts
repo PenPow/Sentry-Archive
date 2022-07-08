@@ -1,79 +1,68 @@
-import {
-  blue,
-  bold,
-  cyan,
-  gray,
-  green,
-  italic,
-  magenta,
-  red,
-  white,
-  yellow,
-} from "https://deno.land/std@0.141.0/fmt/colors.ts";
-import { DEVELOPMENT } from "@config";
-import { printf } from "https://deno.land/std@0.141.0/fmt/printf.ts";
+import { inspect } from 'node:util';
+import chalk from 'chalk';
+import { DEVELOPMENT } from "./config.js";
+
+export enum LogLevel {
+	Debug,
+	Info,
+	Success,
+	Warn,
+	Error,
+	Fatal,
+	Silly,
+}
 
 interface ILogOptions {
-  level: LogLevel;
-  prefix?: string;
+	level: LogLevel;
+	prefix?: string;
 }
 
 export function log(
-  opts: ILogOptions,
-  messages: string | Record<string | number | symbol, unknown>,
+	opts: ILogOptions,
+	messages: string | Record<string | number | symbol, unknown>,
 ) {
-  if (opts.level == LogLevel.Debug && !DEVELOPMENT) return;
+	if (opts.level === LogLevel.Debug && !DEVELOPMENT) return;
 
-  let toLog = italic(
-    gray(
-      `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} `,
-    ),
-  ) + cyan(opts.prefix ? opts.prefix + " " : "");
+	let toLog = chalk.italic(
+		chalk.gray(
+			`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} `,
+		),
+	) + chalk.cyan(opts.prefix ? `${opts.prefix} ` : '');
 
-  switch (opts.level) {
-    case LogLevel.Debug: {
-      toLog += bold(green("DEBUG"));
-      break;
-    }
-    case LogLevel.Info: {
-      toLog += bold(blue("INFO"));
-      break;
-    }
-    case LogLevel.Sucess: {
-      toLog += bold(green("SUCCESS"));
-      break;
-    }
-    case LogLevel.Warn: {
-      toLog += bold(yellow("WARN"));
-      break;
-    }
-    case LogLevel.Error: {
-      toLog += bold(red("ERROR"));
-      break;
-    }
-    case LogLevel.Fatal: {
-      toLog += bold(magenta("FATAL"));
-      break;
-    }
-    case LogLevel.Silly: {
-      toLog += bold(white("SILLY"));
-      break;
-    }
-  }
+	switch (opts.level) {
+		case LogLevel.Debug: {
+			toLog += chalk.bold(chalk.green('DEBUG'));
+			break;
+		}
+		case LogLevel.Info: {
+			toLog += chalk.bold(chalk.blue('INFO'));
+			break;
+		}
+		case LogLevel.Success: {
+			toLog += chalk.bold(chalk.green('SUCCESS'));
+			break;
+		}
+		case LogLevel.Warn: {
+			toLog += chalk.bold(chalk.yellow('WARN'));
+			break;
+		}
+		case LogLevel.Error: {
+			toLog += chalk.bold(chalk.red('ERROR'));
+			break;
+		}
+		case LogLevel.Fatal: {
+			toLog += chalk.bold(chalk.magenta('FATAL'));
+			break;
+		}
+		case LogLevel.Silly: {
+			toLog += chalk.bold(chalk.white('SILLY'));
+			break;
+		}
+	}
 
-  if (typeof messages == "object") {
-    messages = Deno.inspect(messages);
-  }
+	if (typeof messages == 'object') {
+		messages = inspect(messages);
+	}
 
-  printf(toLog + ` ${messages}\n`);
-}
-
-export enum LogLevel {
-  Debug,
-  Info,
-  Sucess,
-  Warn,
-  Error,
-  Fatal,
-  Silly,
+	console.log(`${toLog} ${messages}`);
 }

@@ -1,28 +1,47 @@
-name: Deno CI
+name: Linting CI
 
 on:
   push:
     branches: [main]
     paths:
       - "src/**"
-      - "./deps.ts"
-      - "./config.ts"
   pull_request:
     branches: [main]
     paths:
       - "src/**"
-      - "./deps.ts"
-      - "./config.ts"
-
 jobs:
-  lint:
+  build:
     runs-on: ubuntu-latest
+    if: github.repository == 'penpow/sentry'
     steps:
       - uses: actions/checkout@v3
 
-      - uses: denoland/setup-deno@v1
+      - name: Install Node v16
+        uses: actions/setup-node@v2
         with:
-          deno-version: v1.x
+          node-version: 16
+          cache: 'npm'
+        
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Lint Deno
-        run: deno lint
+      - name: Build Typescript
+        run: npm run build
+      
+  lint:
+    runs-on: ubuntu-latest
+    if: github.repository == 'penpow/sentry'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Node v16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'npm'
+        
+      - name: Run ESLint
+        uses: reviewdog/action-eslint@v1
+        with:
+          reporter: github-pr-review
+          eslint_flags: '--ext .ts'

@@ -15,16 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: REST
-            dockerfile: "./docker/REST.Dockerfile"
-            image: ghcr.io/penpow/sentry-REST
-
-          - name: Gateway
-            dockerfile: "./docker/Gateway.Dockerfile"
-            image: ghcr.io/penpow/sentry-gateway
-
           - name: Bot
-            dockerfile: "./docker/Bot.Dockerfile"
+            dockerfile: "Bot.Dockerfile"
             image: ghcr.io/penpow/sentry
 
     permissions:
