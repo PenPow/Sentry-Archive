@@ -15,10 +15,12 @@ module.exports = {
         parserOptions: {
           project: ['./tsconfig.json'],
         },
+
+		rules: {
+			"@typescript-eslint/comma-dangle": "off",
+			"@typescript-eslint/quotes": "off",
+			"@typescript-eslint/no-non-null-assertion": "off"
+		  }
       },
     ],
-    rules: {
-      "@typescript-eslint/comma-dangle": "off",
-      "@typescript-eslint/quotes": "off"
-    }
 }

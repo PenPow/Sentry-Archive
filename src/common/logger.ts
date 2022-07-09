@@ -31,7 +31,7 @@ export function log(
 
 	switch (opts.level) {
 		case LogLevel.Debug: {
-			toLog += chalk.bold(chalk.green('DEBUG'));
+			toLog += chalk.bold(chalk.cyan('DEBUG'));
 			break;
 		}
 		case LogLevel.Info: {

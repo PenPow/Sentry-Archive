@@ -7,8 +7,8 @@
   "scripts": {
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
-    "build": "npm install typescript && npx tsc --project ./",
-    "start:bot": "node dist/bot/"
+    "build": "npx tsc --project ./",
+    "start:bot": "node dist/bot"
   },
   "repository": {
     "type": "git",
@@ -24,18 +24,27 @@
   "devDependencies": {
     "@tsconfig/node18": "^1.0.1",
     "@types/node": "^18.0.3",
+    "@types/node-cron": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "eslint": "^8.19.0",
     "eslint-config-marine": "^9.4.1",
     "eslint-plugin-import": "^2.26.0",
+    "prisma": "^4.0.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {
     "@discordjs/rest": "^0.5.0",
+    "@prisma/client": "^4.0.0",
+    "bufferutil": "^4.0.6",
     "chalk": "^5.0.1",
+    "ctph.js": "^0.0.5",
     "discord-api-types": "^0.36.1",
     "discord.js": "^14.0.0-dev.1657239101-e78c9c9",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "erlpack": "github:discord/erlpack",
+    "ioredis": "^5.1.0",
+    "utf-8-validate": "^5.0.9",
+    "zlib-sync": "^0.1.7"
   }
 }

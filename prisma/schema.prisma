@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DEVELOPMENT_DATABASE_URL")
+}
+
+enum PunishmentType {
+  Warn
+  Timeout
+  Kick
+  Softban
+  Ban
+  AntiRaidNuke
+}
+
+model Punishment {
+  id      Int            @id @unique
+  user    String
+  type    PunishmentType
+  guild   Guild          @relation(fields: [guildId], references: [id])
+  guildId String
+  createdAt DateTime @default(now())
+  expires DateTime?
+}
+
+model Guild {
+  id          String       @id @unique
+  punishments Punishment[]
+}
