@@ -3,7 +3,6 @@ import pkg from 'ctph.js';
 import { ChannelType, EmbedBuilder } from "discord.js";
 import { prisma, PunishmentEnum, redis } from "../../common/db.js";
 import type { IListener } from "../structures/Listener.js";
-import { HYBRID_ANALYSIS } from "../../common/config.js";
 
 const { digest, similarity } = pkg;
 
