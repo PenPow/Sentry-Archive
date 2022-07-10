@@ -16,8 +16,13 @@ jobs:
       matrix:
         include:
           - name: Bot
-            dockerfile: "Bot.Dockerfile"
+            dockerfile: "Sentry.Dockerfile"
             image: ghcr.io/penpow/sentry
+          
+          - name: ClamAV
+            dockerfile: "ClamAV.Dockerfile"
+            image: ghcr.io/penpow/sentry-clamav
+
 
     permissions:
       contents: read

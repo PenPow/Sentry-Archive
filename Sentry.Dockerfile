@@ -3,6 +3,8 @@ FROM node:18-alpine
 LABEL org.opencontainers.image.source="https://github.com/penpow/sentry"
 LABEL org.opencontainers.image.description="Sentry Bot Image"
 
+ENV NODE_NO_WARNINGS=1
+
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++

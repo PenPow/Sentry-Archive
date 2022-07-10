@@ -2,7 +2,9 @@ version: "3.9"
 services:
   sentry:
     container_name: sentry
-    build: .
+    build:
+      context: .
+      dockerfile: Sentry.Dockerfile
     tty: true
     env_file:
       - .env
@@ -46,6 +48,23 @@ services:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
       timeout: 5s
+
+  clamav:
+    tty: true
+    build:
+      context: .
+      dockerfile: ClamAV.Dockerfile
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    depends_on:
+      redis:
+        condition: service_healthy
+
 
 volumes:
   postgres:

@@ -122,8 +122,27 @@ const messageCreateEvent: IListener = {
 			}
 
 			if (similarity(await redis.get(`${guildId}-${userId}-lastMessageHash`) ?? digest(""), digest(message.content)) >= 75) total += 25;
-
 			await redis.set(`${guildId}-${userId}-lastMessageHash`, digest(message.content));
+
+			if (message.attachments.size > 0) {
+				for (const attachment of message.attachments.values()) {
+					const res = await fetch("http://clamav:8080/scan", { method: "POST", body: JSON.stringify({ url: attachment.url }) });
+
+					if (res.status !== 200) continue;
+
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					const parsed: { message: 'Invalid Body' | 'Invalid API Key' | 'OK' | 'NOT OK' } = await res.json();
+
+					switch (parsed.message) {
+						case "Invalid Body":
+						case "Invalid API Key":
+						case "OK":
+							continue;
+						case "NOT OK":
+							total += 300;
+					}
+				}
+			}
 
 			await redis.setex(`${guildId}-${userId}-heat`, 15, Math.round(total));
 

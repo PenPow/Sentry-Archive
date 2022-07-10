@@ -10,6 +10,7 @@ services:
     links:
       - postgres:postgres
       - redis:redis
+      - clamav:clamav
     depends_on:
       postgres:
           condition: service_healthy
@@ -46,6 +47,17 @@ services:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
       timeout: 5s
+
+  clamav:
+    image: ghcr.io/penpow/sentry-clamav:latest
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - 8080
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres:
