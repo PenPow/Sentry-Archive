@@ -23,7 +23,7 @@
   "homepage": "https://github.com/PenPow/Sentry#readme",
   "devDependencies": {
     "@tsconfig/node18": "^1.0.1",
-    "@types/node": "^18.0.3",
+    "@types/node": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "eslint": "^8.19.0",
