@@ -51,7 +51,7 @@ export function log(
 			break;
 		}
 		case LogLevel.Fatal: {
-			toLog += chalk.bold(chalk.magenta('FATAL'));
+			toLog += chalk.bold(chalk.bgMagenta('FATAL'));
 			break;
 		}
 		case LogLevel.Silly: {
