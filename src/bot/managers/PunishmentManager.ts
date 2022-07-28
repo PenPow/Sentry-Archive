@@ -51,7 +51,6 @@ export const PunishmentManager = {
 					break;
 			}
 		} catch (e) {
-			console.log(e);
 			return Result.err(e as Error);
 		}
 
