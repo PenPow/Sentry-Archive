@@ -14,11 +14,12 @@ COPY tsconfig.json ./
 
 RUN npm i
 
-COPY ./src/bot ./src/bot
-COPY ./src/common ./src/common
 COPY ./prisma ./prisma
-
 RUN npx prisma generate
+
+COPY ./src/common ./src/common
+COPY ./src/bot ./src/bot
+
 RUN npm run build
 
 ENTRYPOINT [ "npm" ]

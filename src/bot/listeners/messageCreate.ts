@@ -1,9 +1,12 @@
 import crypto from "node:crypto";
 import { Stream } from "node:stream";
+import { PunishmentType } from "@prisma/client";
 import pkg from 'ctph.js';
-import { ChannelType, EmbedBuilder } from "discord.js";
-import { prisma, PunishmentEnum, redis } from "../../common/db.js";
+import { PermissionFlagsBits } from "discord.js";
+import { redis } from "../../common/db.js";
 import { log, LogLevel } from "../../common/logger.js";
+import { translate } from "../../common/translations/translate.js";
+import { PunishmentManager } from "../managers/PunishmentManager.js";
 import type { IListener } from "../structures/Listener.js";
 
 const { digest, similarity } = pkg;
@@ -43,12 +46,12 @@ interface IClamAVErrorResponse {
 const messageCreateEvent: IListener = {
 	execute: function(client) {
 		client.on("messageCreate", async message => {
-			if (message.author.bot) return;
+			if (message.author.bot || message.member?.permissions.has(PermissionFlagsBits.Administrator, true)) return;
 
 			const guildId = message.guildId!;
 			const userId = message.author.id;
 
-			let total = parseInt(await redis.get(`${guildId}-${userId}-heat`) ?? '0', 10) + 12.5;
+			let total = 6.25;
 			total += ((message.content.match(/\n/g) ?? '').length + 1) * 0.75;
 			total += (message.content.match(/o/g) ?? '').length * 0.005;
 			total += (message.content.match(/(<a?)?:\w+:(\d{18}>)?/g) ?? '').length * 3;
@@ -155,7 +158,7 @@ const messageCreateEvent: IListener = {
 				}
 			}
 
-			if (similarity(await redis.get(`${guildId}-${userId}-lastMessageHash`) ?? digest(""), digest(message.content)) >= 75) total += 25;
+			if (similarity(await redis.get(`${guildId}-${userId}-lastMessageHash`) ?? digest(""), digest(message.content.length === 0 ? "" : message.content)) >= 75) total += 25;
 			await redis.set(`${guildId}-${userId}-lastMessageHash`, digest(message.content));
 
 			if (message.attachments.size > 0) {
@@ -166,8 +169,10 @@ const messageCreateEvent: IListener = {
 					if (attachment.attachment instanceof Stream) { body.append('FILES', new Blob([await streamToBuffer(attachment.attachment)])); } else { body.append('FILES', new Blob([attachment.attachment.toString('utf-8')])); }
 				}
 
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-				const res = await fetch("http://clamav:3000/api/v1/scan", { method: "POST", body }).catch(e => log({ level: LogLevel.Fatal, prefix: 'ClamAV Handler' }, e));
+				const res = await fetch("http://clamav:3000/api/v1/scan", { method: "POST", body }).catch(e => {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+					if (!(e instanceof TypeError && e.message === 'fetch failed')) log({ level: LogLevel.Fatal, prefix: 'ClamAV Handler' }, e); // Our ClamAV wasnt online yet, just ignore the message - maybe replace with a queue so that when it comes online it can do so? would have to look into the effectiveness of doing so
+				});
 
 				if (res && res.status === 200) {
 					const raw = await res.json() as IClamAVResponse;
@@ -182,52 +187,22 @@ const messageCreateEvent: IListener = {
 				}
 			}
 
-			await redis.setex(`${guildId}-${userId}-heat`, 15, Math.round(total));
+			const userHeatResult = await PunishmentManager.setHeat(message.guildId!, message.author.id, total);
+			let userHeat: number;
 
-			if (total >= 300) {
-				if (message.member?.bannable) {
-					await message.member.ban({ reason: 'Heat Limit Reached', deleteMessageDays: 7 });
-				}
-			} else if (total >= 200) {
-				if (message.member?.bannable) {
-					await message.member.ban({ reason: 'Heat Limit Reached', deleteMessageDays: 7 });
-					await message.guild?.bans.remove(message.member, "Removing Softban for User");
-				}
-			} else if (total >= 100) {
-				if (message.member?.moderatable) {
-					await message.member.timeout(1800000, "Heat Limit Reached");
-				}
-			} else { return; }
+			try {
+				userHeat = userHeatResult.unwrap()!;
+			} catch (e) {
+				log({ level: LogLevel.Error, prefix: 'PunishmentManager' }, e as Error);
+				return;
+			}
 
-			const caseNumber = parseInt(await redis.get(`${guildId}-caseNo`) ?? '-1', 10) + 1;
-			await redis.set(`${guildId}-caseNo`, caseNumber);
+			// log({ level: LogLevel.Info, prefix: 'Heat System' }, userHeat);
 
-			const channelEmbed = new EmbedBuilder().setTitle(`${message.author.username} has been ${total >= 300 ? "Banned" : total >= 200 ? "Kicked" : "Timed Out"} ${total >= 100 && total < 200 ? "for 30 Minutes" : ""}`)
-				.setThumbnail(message.author.displayAvatarURL())
-				.setTimestamp()
-				.setDescription([`<:point:995372986179780758> **Member:** ${message.author.tag}`, `<:point:995372986179780758> **Reason:** User Exceeded Heat Limit`].join("\n"))
-				.setFooter({ text: `Case #${caseNumber}` });
+			if (userHeat < 100) return;
 
-			await message.channel.send({ embeds: [channelEmbed] });
-
-			const logChannel = message.guild?.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
-
-			// eslint-disable-next-line no-useless-return
-			if (!logChannel || logChannel.type !== ChannelType.GuildText) return;
-
-			const embed = new EmbedBuilder()
-				.setAuthor({ iconURL: client.user!.displayAvatarURL(), name: `${client.user!.tag} (${client.user!.id})` })
-				.setTimestamp()
-				.setDescription([`<:point:995372986179780758> **Member:** ${message.author.tag}`, `<:point:995372986179780758> **Action:** ${total >= 300 ? "Banned" : total >= 200 ? "Kicked" : "Timed Out"} ${total >= 100 && total < 200 ? `(<t:${Date.now() + 1800}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** User Exceeded Heat Limit`].join("\n"))
-				.setFooter({ text: `Case #${caseNumber}` });
-
-			await logChannel.send({ embeds: [embed] });
-
-
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-			await prisma.guild.upsert({ create: { id: guildId }, update: {}, where: { id: guildId } });
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-			await prisma.punishment.create({ data: { id: caseNumber, user: message.author.id, type: total >= 300 ? PunishmentEnum.Ban : total >= 200 ? PunishmentEnum.Softban : PunishmentEnum.Timeout, guildId: message.guildId!, expires: total >= 100 && total < 200 ? new Date(Date.now() + 1800000) : null } });
+			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+			await PunishmentManager.createPunishment(message.client, { user: message.author.id, moderator: message.guild?.members.me?.id ?? message.client.user?.id!, guildId: message.guildId!, reason: translate("en-GB", "HEAT_SYSTEM_PUNISHMENT_REASON", userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: new Date(Date.now() + (30 * 60000)) });
 		});
 	}
 };

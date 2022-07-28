@@ -17,10 +17,7 @@ interface ILogOptions {
 	prefix?: string;
 }
 
-export function log(
-	opts: ILogOptions,
-	messages: string | Record<string | number | symbol, unknown>,
-) {
+export function log(opts: ILogOptions, messages: string | number | Record<string | number | symbol, unknown> | Error) {
 	if (opts.level === LogLevel.Debug && !DEVELOPMENT) return;
 
 	let toLog = chalk.italic(
@@ -51,7 +48,7 @@ export function log(
 			break;
 		}
 		case LogLevel.Fatal: {
-			toLog += chalk.bold(chalk.bgMagenta('FATAL'));
+			toLog += chalk.bold(chalk.magenta('FATAL'));
 			break;
 		}
 		case LogLevel.Silly: {

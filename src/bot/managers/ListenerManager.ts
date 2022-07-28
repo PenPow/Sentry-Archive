@@ -12,11 +12,9 @@ export const ListenerManager = {
 
 		for (const file of files) {
 			if (['.disabled', '.d.ts', '.map'].some(suffix => file.endsWith(suffix))) continue;
-
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 			const event: IListener = (await import(join(process.cwd(), "dist", "bot", "listeners", file))).default;
-
-			await event.execute(client);
+			event.execute(client);
 		}
 	},
 };

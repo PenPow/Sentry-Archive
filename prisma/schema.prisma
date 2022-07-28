@@ -17,12 +17,15 @@ enum PunishmentType {
   Softban
   Ban
   AntiRaidNuke
+  Unban
 }
 
 model Punishment {
   id      Int            @id @unique
   user    String
+  moderator String
   type    PunishmentType
+  reason String
   guild   Guild          @relation(fields: [guildId], references: [id])
   guildId String
   createdAt DateTime @default(now())
