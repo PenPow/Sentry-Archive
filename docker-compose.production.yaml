@@ -16,7 +16,9 @@ services:
           condition: service_healthy
       redis:
         condition: service_healthy
-  
+    networks:
+      - local
+
   postgres:
     image: postgres:14.1-alpine
     restart: always
@@ -33,6 +35,8 @@ services:
       test: ['CMD-SHELL', 'pg_isready -U sentry']
       interval: 10s
       timeout: 5s
+    networks:
+      - local
 
   redis:
     image: redis:7.0.2-alpine
@@ -47,18 +51,39 @@ services:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
       timeout: 5s
+    networks:
+      - local
 
+  clamd:
+    image: clamav/clamav:0.104
+    restart: unless-stopped
+    networks:
+      - clamav
+  
   clamav:
-    image: ghcr.io/penpow/sentry-clamav:latest
+    image: benzino77/clamav-rest-api
     restart: always
-    env_file:
-      - .env
     expose:
-      - 8080
+     - 3000
+    links:
+      - clamd:clamd
     depends_on:
-      redis:
-        condition: service_healthy
+      - clamd
+    environment:
+      - NODE_ENV=production
+      - CLAMD_IP=clamd
+      - APP_FORM_KEY=FILES
+      - APP_PORT=3000
+    ports:
+      - '8080:3000'
+    networks:
+      - clamav
+      - local
 
 volumes:
   postgres:
     driver: local
+
+networks:
+  local:
+  clamav:

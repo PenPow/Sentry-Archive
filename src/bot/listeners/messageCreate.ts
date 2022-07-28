@@ -1,10 +1,44 @@
 import crypto from "node:crypto";
+import { Stream } from "node:stream";
 import pkg from 'ctph.js';
 import { ChannelType, EmbedBuilder } from "discord.js";
 import { prisma, PunishmentEnum, redis } from "../../common/db.js";
+import { log, LogLevel } from "../../common/logger.js";
 import type { IListener } from "../structures/Listener.js";
 
 const { digest, similarity } = pkg;
+
+async function streamToBuffer(stream: Stream): Promise<Buffer> {
+	return new Promise<Buffer>((resolve, reject) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const _buf = Array<any>();
+
+		stream.on("data", chunk => _buf.push(chunk));
+		stream.on("end", () => resolve(Buffer.concat(_buf)));
+		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+		stream.on("error", err => reject(`Failed Converting Stream: ${err}`));
+	});
+}
+
+export type IClamAVResponse = IClamAVErrorResponse | IClamAVSuccessResponse;
+
+interface IClamAVSuccessResponse {
+	readonly success: true;
+	readonly data: {
+		readonly result: {
+			readonly name: string;
+			readonly is_infected: boolean;
+			readonly viruses: string[];
+		}[];
+	};
+}
+
+interface IClamAVErrorResponse {
+	readonly success: false;
+	readonly data: {
+		readonly error: string;
+	};
+}
 
 const messageCreateEvent: IListener = {
 	execute: function(client) {
@@ -125,21 +159,25 @@ const messageCreateEvent: IListener = {
 			await redis.set(`${guildId}-${userId}-lastMessageHash`, digest(message.content));
 
 			if (message.attachments.size > 0) {
+				const body = new FormData();
+
 				for (const attachment of message.attachments.values()) {
-					const res = await fetch("http://clamav:8080/scan", { method: "POST", body: JSON.stringify({ url: attachment.url }) });
+					// eslint-disable-next-line max-statements-per-line
+					if (attachment.attachment instanceof Stream) { body.append('FILES', new Blob([await streamToBuffer(attachment.attachment)])); } else { body.append('FILES', new Blob([attachment.attachment.toString('utf-8')])); }
+				}
 
-					if (res.status !== 200) continue;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+				const res = await fetch("http://clamav:3000/api/v1/scan", { method: "POST", body }).catch(e => log({ level: LogLevel.Fatal, prefix: 'ClamAV Handler' }, e));
 
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					const parsed: { message: 'Invalid Body' | 'Invalid API Key' | 'OK' | 'NOT OK' } = await res.json();
+				if (res && res.status === 200) {
+					const raw = await res.json() as IClamAVResponse;
 
-					switch (parsed.message) {
-						case "Invalid Body":
-						case "Invalid API Key":
-						case "OK":
-							continue;
-						case "NOT OK":
-							total += 300;
+					// eslint-disable-next-line no-negated-condition, @typescript-eslint/brace-style
+					if (!raw.success) { log({ level: LogLevel.Error, prefix: 'ClamAV Handler' }, raw.data.error); }
+					else {
+						for (const result of raw.data.result) {
+							if (result.is_infected) total += 300;
+						}
 					}
 				}
 			}
