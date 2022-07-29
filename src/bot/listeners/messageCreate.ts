@@ -176,8 +176,9 @@ const messageCreateEvent: IListener = {
 				}
 
 				const res = await fetch("http://clamav:3000/api/v1/scan", { method: "POST", body }).catch(e => {
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, no-negated-condition
 					if (!(e instanceof TypeError && e.message === 'fetch failed')) log({ level: LogLevel.Fatal, prefix: 'ClamAV Handler' }, e); // Our ClamAV wasnt online yet, just ignore the message - maybe replace with a queue so that when it comes online it can do so? would have to look into the effectiveness of doing so
+					else log({ level: LogLevel.Debug, prefix: 'ClamAV Handler' }, `Request to use ClamAV failed as it was offline`);
 				});
 
 				if (res && res.status === 200) {
@@ -199,7 +200,7 @@ const messageCreateEvent: IListener = {
 			try {
 				userHeat = userHeatResult.unwrap()!;
 			} catch (e) {
-				log({ level: LogLevel.Error, prefix: 'PunishmentManager' }, e as Error);
+				log({ level: LogLevel.Error, prefix: 'Punishment Manager' }, e as Error);
 				return;
 			}
 
