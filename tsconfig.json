@@ -42,6 +42,6 @@
 		"skipLibCheck": true,
 		"noImplicitAny": true, 
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src/bot/listeners/debug.ts"],
 	"exclude": ["node_modules", "dist"]
 }

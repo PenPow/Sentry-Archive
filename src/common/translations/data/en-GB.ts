@@ -1,9 +1,7 @@
 const english = {
-	COMMAND_NOT_FOUND:
-    "Something went wrong. I was not able to find this command!",
-	COMMAND_ERROR:
-    "Something went wrong. The command execution has thrown an error.",
-	DEPLOY_COMMAND_RESPONSE: (num: number) => `🔷 Deployed ${num} commands`,
+	ANTI_RAID_NUKE_PUNISHMENT_REASON: "Anti Raid Punishment",
+	SOFTBAN_UNBAN_REASON: "User was softbanned",
+	HEAT_SYSTEM_PUNISHMENT_REASON: (reason: string, heat: number) => `${reason} (${Math.round(heat)} Heat)`
 };
 
 export default english;

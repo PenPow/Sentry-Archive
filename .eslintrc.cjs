@@ -13,12 +13,16 @@ module.exports = {
         ],
   
         parserOptions: {
-          project: ['./tsconfig.json'],
+            project: ['./tsconfig.json'],
+            tsconfigRootDir: __dirname,
+            sourceType: "module",
         },
+
+		rules: {
+			"@typescript-eslint/comma-dangle": "off",
+			"@typescript-eslint/quotes": "off",
+			"@typescript-eslint/no-non-null-assertion": "off"
+		  }
       },
     ],
-    rules: {
-      "@typescript-eslint/comma-dangle": "off",
-      "@typescript-eslint/quotes": "off"
-    }
 }

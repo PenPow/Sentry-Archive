@@ -2,7 +2,9 @@ version: "3.9"
 services:
   sentry:
     container_name: sentry
-    build: .
+    build:
+      context: .
+      dockerfile: Sentry.Dockerfile
     tty: true
     env_file:
       - .env
@@ -10,6 +12,7 @@ services:
     links:
       - postgres:postgres
       - redis:redis
+      - clamav:clamav
     depends_on:
       postgres:
           condition: service_healthy
@@ -46,6 +49,34 @@ services:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
       timeout: 5s
+
+  redis-web:
+    image: "redislabs/redisinsight:latest"
+    links:
+      - redis:redis
+    ports:
+      - "8001:8001"
+
+  clamd:
+    image: clamav/clamav:0.104
+    restart: unless-stopped
+  
+  clamav:
+    image: benzino77/clamav-rest-api
+    restart: always
+    expose:
+     - 3000
+    links:
+      - clamd:clamd
+    depends_on:
+      - clamd
+    environment:
+      - NODE_ENV=production
+      - CLAMD_IP=clamd
+      - APP_FORM_KEY=FILES
+      - APP_PORT=3000
+    ports:
+      - '8080:3000'
 
 volumes:
   postgres:
