@@ -54,7 +54,7 @@ const messageCreateEvent: IListener = {
 
 			let total = 6.25;
 			let reason = { msg: "Rapid Message Posting", heatAdded: total };
-			total += ((message.content.match(/\n/g) ?? '').length + 1) * 0.75;
+			total += ((message.content.match(/\n/g) ?? '').length + 1) * 2.5;
 			total += (message.content.match(/o/g) ?? '').length * 0.05;
 
 			total += (message.content.match(/(<a?)?:\w+:(\d{18}>)?/g) ?? '').length * 3;
