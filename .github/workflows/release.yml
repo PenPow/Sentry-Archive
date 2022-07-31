@@ -18,11 +18,6 @@ jobs:
           - name: Bot
             dockerfile: "Sentry.Dockerfile"
             image: ghcr.io/penpow/sentry
-          
-          - name: ClamAV
-            dockerfile: "ClamAV.Dockerfile"
-            image: ghcr.io/penpow/sentry-clamav
-
 
     permissions:
       contents: read
