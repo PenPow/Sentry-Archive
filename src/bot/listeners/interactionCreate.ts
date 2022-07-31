@@ -1,6 +1,6 @@
 import { inspect } from "node:util";
+import { Result } from "@sapphire/result";
 import { ApplicationCommandType, ComponentType, InteractionType, PermissionsBitField } from "discord.js";
-import { Result } from "../../common/Result.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { ResponseType, InteractionManager, store, generateNoPermissionsEmbed } from "../managers/InteractionManager.js";
 import { FunctionType, PermissionTier } from "../structures/Interaction.js";
@@ -26,7 +26,7 @@ const interactionCreateListener: IListener = {
 
 				try {
 					const output = await command.execute(interaction);
-					if (output instanceof Result) {
+					if (Result.is(output)) {
 						output.unwrap();
 					}
 				} catch (e) {
