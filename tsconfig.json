@@ -41,6 +41,12 @@
 		// Completeness
 		"skipLibCheck": true,
 		"noImplicitAny": true, 
+
+		// Custom Types
+		"typeRoots": [
+			"node_modules/@types",
+			"src/@types"
+		]
 	},
 	"include": ["src/**/*.ts", "src/bot/listeners/debug.ts"],
 	"exclude": ["node_modules", "dist"]

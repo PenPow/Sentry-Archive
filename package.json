@@ -9,8 +9,7 @@
     "lint:fix": "npx eslint . --fix",
     "lint:ci": "npx lint-staged",
     "build": "npx tsc --project ./",
-    "start:bot": "node dist/bot",
-    "start:av": "node dist/antivirus",
+    "start:bot": "node dist/bot --enable-source-maps",
     "prepare": "husky install"
   },
   "repository": {
@@ -49,6 +48,9 @@
     "dotenv": "^16.0.1",
     "erlpack": "github:discord/erlpack",
     "ioredis": "^5.1.0",
+    "nanoid": "^4.0.0",
+    "source-map-support": "^0.5.21",
+    "sourcebin": "^4.3.5",
     "utf-8-validate": "^5.0.9",
     "zlib-sync": "^0.1.7"
   }

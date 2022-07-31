@@ -5,4 +5,6 @@ export const DEVELOPMENT = Boolean(process.env.DEVELOPMENT);
 export const DISCORD_TOKEN = process.env.DISCORD;
 export const DB_URL = process.env.DATABASE_URL;
 
-export const AV_API_TOKEN = process.env.AV_API_TOKEN;
+export const DEV_GUILD_ID = process.env.DEV_GUILD_ID;
+export const DEPLOY_ON_START = process.env.DEPLOY_ON_START === "true";
+

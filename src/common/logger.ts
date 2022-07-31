@@ -14,7 +14,7 @@ export enum LogLevel {
 
 interface ILogOptions {
 	level: LogLevel;
-	prefix?: string;
+	prefix: string;
 }
 
 export function log(opts: ILogOptions, messages: string | number | Record<string | number | symbol, unknown> | Error) {
@@ -24,7 +24,9 @@ export function log(opts: ILogOptions, messages: string | number | Record<string
 		chalk.gray(
 			`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} `,
 		),
-	) + chalk.cyan(opts.prefix ? `${opts.prefix} ` : '');
+	) + chalk.cyan(opts.prefix.length > 15 ? `${opts.prefix.substring(0, 15)}...` : opts.prefix);
+
+	toLog += ' '.repeat(16 - opts.prefix.length <= 0 ? 1 : 16 - opts.prefix.length + 3);
 
 	switch (opts.level) {
 		case LogLevel.Debug: {
@@ -57,9 +59,11 @@ export function log(opts: ILogOptions, messages: string | number | Record<string
 		}
 	}
 
-	if (typeof messages == 'object') {
-		messages = inspect(messages);
+	if (messages instanceof Error) {
+		console.log(`${toLog} ${inspect(messages, { depth: 100, getters: true, colors: true }).replaceAll("'", "")}`);
+
+		return;
 	}
 
-	console.log(`${toLog} ${messages}`);
+	console.log(`${toLog} ${inspect(messages, { depth: 100, getters: true, colors: false }).replaceAll("'", "")}`);
 }

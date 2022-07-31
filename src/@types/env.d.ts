@@ -7,6 +7,5 @@ declare namespace NodeJS {
 		DEPLOY_ON_START: string;
 		DEVELOPMENT_DATABASE_URL: string;
 		DATABASE_URL: string;
-		AV_API_TOKEN: string;
 	}
 }

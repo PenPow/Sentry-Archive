@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
-import { DEVELOPMENT } from "../../common/config.js";
+import { DEPLOY_ON_START, DEVELOPMENT } from "../../common/config.js";
 import { redis } from "../../common/db.js";
 import { log, LogLevel } from "../../common/logger.js";
+import { InteractionManager } from "../managers/InteractionManager.js";
 import type { IListener } from "../structures/Listener.js";
 
 const reloadDomains = async () => {
@@ -22,7 +23,11 @@ const reloadDomains = async () => {
 const readyEvent: IListener = {
 	execute: function(client) {
 		client.once("ready", async () => {
-			log({ prefix: 'Ready', level: LogLevel.Success }, "Client is Ready");
+			log({ prefix: 'Ready Listener', level: LogLevel.Success }, "Client is Ready");
+
+			await InteractionManager.loadInteractions();
+			if (DEPLOY_ON_START) await InteractionManager.registerInteractions(client.application!.id);
+
 
 			// TODO: RE-ENABLE THIS IN PRODUCTION
 			if (DEVELOPMENT) await reloadDomains();
