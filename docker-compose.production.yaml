@@ -16,8 +16,6 @@ services:
           condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - local
 
   postgres:
     image: postgres:14.1-alpine
@@ -35,36 +33,26 @@ services:
       test: ['CMD-SHELL', 'pg_isready -U sentry']
       interval: 10s
       timeout: 5s
-    networks:
-      - local
 
   redis:
     image: redis:7.0.2-alpine
     restart: always
     ports:
       - "6379:6379"
-    expose:
-      - 6379
     volumes:
       - "postgres:/var/lib/postgresql/data"
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
       timeout: 5s
-    networks:
-      - local
 
   clamd:
     image: clamav/clamav:0.104
     restart: unless-stopped
-    networks:
-      - clamav
   
   clamav:
     image: benzino77/clamav-rest-api
     restart: always
-    expose:
-     - 3000
     links:
       - clamd:clamd
     depends_on:
@@ -76,14 +64,7 @@ services:
       - APP_PORT=3000
     ports:
       - '8080:3000'
-    networks:
-      - clamav
-      - local
 
 volumes:
   postgres:
     driver: local
-
-networks:
-  local:
-  clamav:
