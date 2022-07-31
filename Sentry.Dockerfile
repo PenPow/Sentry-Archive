@@ -12,6 +12,7 @@ RUN apk add --no-cache python3 make g++
 COPY tsconfig.json ./
 COPY package*.json ./
 
+RUN npm set-script prepare ""
 RUN npm i
 
 COPY ./prisma ./prisma

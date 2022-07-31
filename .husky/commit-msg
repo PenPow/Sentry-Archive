@@ -1,4 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+npm install
+npm run prepare
+
 npx --no -- commitlint --edit "${1}"
