@@ -1,12 +1,12 @@
 import { Punishment, PunishmentType } from "@prisma/client";
+import { Result } from "@sapphire/result";
 import { ChannelType, Client, EmbedBuilder, PermissionsBitField, Snowflake } from "discord.js";
-import { Result } from "../../common/Result.js";
 import { prisma, redis } from "../../common/db.js";
 import { translate } from "../../common/translations/translate.js";
 
 export const PunishmentManager = {
 	getHeat: async function(guildId: Snowflake, userId: Snowflake): Promise<number> { return parseInt(await redis.get(`${guildId}-${userId}-heat`) ?? '0', 10); },
-	setHeat: async function(guildId: Snowflake, userId: Snowflake, heat: number): Promise<Result<number>> {
+	setHeat: async function(guildId: Snowflake, userId: Snowflake, heat: number): Promise<Result<number, Error>> {
 		try {
 			const ttl = await redis.ttl(`${guildId}-${userId}-heat`);
 			const userHeat = await this.getHeat(guildId, userId);
@@ -17,7 +17,7 @@ export const PunishmentManager = {
 			return Result.err(e as Error);
 		}
 	},
-	createPunishment: async function(client: Client, data: Omit<Punishment, 'id' | 'createdAt'>): Promise<Result<Punishment>> {
+	createPunishment: async function(client: Client, data: Omit<Punishment, 'id' | 'createdAt'>): Promise<Result<Punishment, Error>> {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		if (!(await this.canPunish(client, data.type, data.user, data.moderator, data.guildId))) return Result.err(new Error("Cannot Moderate User"));
 

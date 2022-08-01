@@ -1,8 +1,8 @@
 import { readdir } from "fs/promises";
 import { join } from "path";
 import { REST } from "@discordjs/rest";
+import { Result } from "@sapphire/result";
 import { RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody, APIApplicationCommandOption, ApplicationCommandOptionType, APIApplicationCommandOptionChoice, APIApplicationCommandIntegerOption, APIApplicationCommandNumberOption, APIApplicationCommandStringOption, Routes, RESTPostAPIContextMenuApplicationCommandsJSONBody, InteractionReplyOptions, InteractionType, ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, AutocompleteInteraction, InteractionDeferReplyOptions, EmbedBuilder, Interaction, ContextMenuCommandInteraction, SelectMenuInteraction, ButtonInteraction, ModalSubmitInteraction } from "discord.js";
-import { Result } from "../../common/Result.js";
 import { DEVELOPMENT, DEV_GUILD_ID } from "../../common/config.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { translate } from "../../common/translations/translate.js";
@@ -23,7 +23,7 @@ export enum ResponseType {
 }
 
 export const InteractionManager = {
-	sendInteractionResponse: async function(interaction: ChatInputCommandInteraction | AutocompleteInteraction | ContextMenuCommandInteraction | SelectMenuInteraction | ButtonInteraction | ModalSubmitInteraction, data: InteractionReplyOptions | InteractionDeferReplyOptions | ApplicationCommandOptionChoiceData[], action?: ResponseType): Promise<Result<true>> {
+	sendInteractionResponse: async function(interaction: ChatInputCommandInteraction | AutocompleteInteraction | ContextMenuCommandInteraction | SelectMenuInteraction | ButtonInteraction | ModalSubmitInteraction, data: InteractionReplyOptions | InteractionDeferReplyOptions | ApplicationCommandOptionChoiceData[], action?: ResponseType): Promise<Result<true, Error>> {
 		try {
 			if (!interaction.isRepliable()) return Result.err(new Error("Cannot Reply to Interaction"));
 
