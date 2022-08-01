@@ -110,6 +110,8 @@ export const InteractionManager = {
 		for (const command of store.commands.values()) {
 			const parsed = command.toJSON();
 
+			if (!DEVELOPMENT && command.permissions === PermissionTier.Developer) continue;
+
 			const transformed: RESTPostAPIChatInputApplicationCommandsJSONBody = {
 				...parsed,
 				name: translate("en-GB", parsed.name),
