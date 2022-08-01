@@ -23,7 +23,7 @@ const reloadDomains = async () => {
 const readyEvent: IListener = {
 	execute: function(client) {
 		client.once("ready", async () => {
-			log({ prefix: 'Ready Listener', level: LogLevel.Success }, "Client is Ready");
+			log({ prefix: 'Ready Listener', level: LogLevel.Success }, "Client is Ready!");
 
 			await InteractionManager.loadInteractions();
 			if (DEPLOY_ON_START) await InteractionManager.registerInteractions(client.application!.id);
