@@ -7,7 +7,15 @@ compare_versions() {
 
 VERSION='Loading...'
 
-[[ -z "${SENTRY_PRODUCTION_VERSION}" ]] && VERSION='0.0.0' || VERSION="${SENTRY_PRODUCTION_VERSION}"
+VERSION_FILE="/tmp/sentry_version.dat"
+
+if [ ! -f "$VERSION_FILE" ]; then
+    VERSION='0.0.0'
+else
+	VERSION=$(cat $VERSION_FILE)
+fi
+
+echo $VERSION
 
 REQUEST=$(curl -s -H "Accept: application/vnd.github+json"  -H "Authorization: token ${GH_PAT}" "https://api.github.com/repos/PenPow/Sentry/releases/latest")
 
@@ -15,11 +23,13 @@ NEW_VERSION=$(jq -r 'if .draft or .prerelease then "999.999.999" else if .messag
 
 UPDATE=$(compare_versions ${NEW_VERSION} ${VERSION}) && true || false
 
-
-if [[ UPDATE ]] ; then
+if [[ UPDATE ]] && [[ $VERSION != $NEW_VERSION ]]; then
 	# Time to update
 
+	echo Updating from $VERSION to $NEW_VERSION
 	docker compose pull -f docker-compose.production.yaml && docker compose up -d -f docker-compose.production.yaml
 
-	export SENTRY_PRODUCTION_VERSION=$NEW_VERSION
+	echo $NEW_VERSION > "$VERSION_FILE"
+else
+	echo No Version Bump Needed
 fi
