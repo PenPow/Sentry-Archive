@@ -3,6 +3,7 @@ services:
   sentry:
     container_name: sentry
     image: ghcr.io/penpow/sentry:latest
+    pull_policy: always
     tty: true
     env_file:
       - .env
