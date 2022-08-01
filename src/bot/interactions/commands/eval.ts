@@ -21,6 +21,9 @@ const EvalCommand: IFunction = {
 		let code = bin.files[0].content.replaceAll(/[“”]/gim, '"');
 
 		if (code.includes('return')) code = `(() => { \n${code} })()`;
+		if (code.includes('await')) code = `(async () => { \n${bin.files[0].content.replaceAll(/[“”]/gim, '"')} })()`;
+
+		code = code.replaceAll('client', "interaction.client");
 
 		const embed = new EmbedBuilder();
 
