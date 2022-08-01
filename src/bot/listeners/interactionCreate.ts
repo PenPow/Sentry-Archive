@@ -1,4 +1,3 @@
-import { inspect } from "node:util";
 import { Result } from "@sapphire/result";
 import { ApplicationCommandType, ComponentType, InteractionType, PermissionsBitField } from "discord.js";
 import { log, LogLevel } from "../../common/logger.js";
@@ -30,7 +29,7 @@ const interactionCreateListener: IListener = {
 						output.unwrap();
 					}
 				} catch (e) {
-					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, inspect(e, { depth: 100, getters: true, colors: true }));
+					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ApplicationCommand && [ApplicationCommandType.User, ApplicationCommandType.Message].includes(interaction.commandType)) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -50,7 +49,7 @@ const interactionCreateListener: IListener = {
 				try {
 					return void await command.execute(interaction);
 				} catch (e) {
-					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, inspect(e, { depth: 100, getters: true, colors: true }));
+					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Failed to Load Autocompletes", value: "-1" }]);
@@ -70,7 +69,7 @@ const interactionCreateListener: IListener = {
 				try {
 					return void await InteractionManager.sendInteractionResponse(interaction, await command.handleAutocomplete(interaction));
 				} catch (e) {
-					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, inspect(e, { depth: 100, getters: true, colors: true }));
+					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.MessageComponent) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -93,7 +92,7 @@ const interactionCreateListener: IListener = {
 
 					throw new Error("Unknown Component Type");
 				} catch (e) {
-					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, inspect(e, { depth: 100, getters: true, colors: true }));
+					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ModalSubmit) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Your guild was not cached for some reason 🤷 - report this to the developers", value: "-1" }]);
@@ -113,7 +112,7 @@ const interactionCreateListener: IListener = {
 				try {
 					return void await command.handleModal(interaction.customId.split('-')[1], interaction);
 				} catch (e) {
-					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, inspect(e, { depth: 100, getters: true, colors: true }));
+					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			}
 
