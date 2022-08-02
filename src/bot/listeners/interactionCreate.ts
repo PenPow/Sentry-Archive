@@ -9,7 +9,7 @@ const interactionCreateListener: IListener = {
 	execute: function(client) {
 		client.on("interactionCreate", async interaction => {
 			if (interaction.type === InteractionType.ApplicationCommand && interaction.commandType === ApplicationCommandType.ChatInput) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
 				const command = store.commands.get(interaction.commandName);
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -32,7 +32,7 @@ const interactionCreateListener: IListener = {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ApplicationCommand && [ApplicationCommandType.User, ApplicationCommandType.Message].includes(interaction.commandType)) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
 				const command = store.contexts.get(interaction.commandName);
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -72,7 +72,7 @@ const interactionCreateListener: IListener = {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.MessageComponent && !interaction.customId.startsWith("ignore")) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
 				const command = store.components.get(interaction.customId);
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -95,7 +95,7 @@ const interactionCreateListener: IListener = {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ModalSubmit) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Your guild was not cached for some reason 🤷 - report this to the developers", value: "-1" }]);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Please run these commands in a guild!", value: "-1" }]);
 
 				const command = store.commands.get(interaction.customId.split('-')[0]);
 				if (!command || !command.handleModal) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
