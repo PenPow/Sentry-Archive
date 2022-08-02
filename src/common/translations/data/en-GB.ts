@@ -18,6 +18,10 @@ const english = {
 	// KICK COMMAND
 	KICK_COMMAND_NAME: "kick",
 	KICK_COMMAND_DESCRIPTION: "Remove a user from your server",
+
+	// SOFTBAN COMMAND
+	SOFTBAN_COMMAND_NAME: "softban",
+	SOFTBAN_COMMAND_DESCRIPTION: "Kick a user and remove their messages! Best of both worlds.",
 	// GENERAL MODERATION COMMANDS
 	MODERATION_DEFAULT_REASON: 'No Reason Specified',
 	MODERATION_TARGET_OPTION_NAME: "user",
