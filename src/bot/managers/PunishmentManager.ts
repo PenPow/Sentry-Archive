@@ -86,8 +86,10 @@ export const PunishmentManager = {
 				break;
 		}
 
+		const mod = await guild.members.fetch(data.moderator).catch(() => null);
+
 		const embed = new EmbedBuilder()
-			.setAuthor({ iconURL: client.user!.displayAvatarURL(), name: `${client.user!.tag} (${client.user!.id})` })
+			.setAuthor({ iconURL: mod ? mod.user.displayAvatarURL() : client.user!.displayAvatarURL(), name: `${mod ? mod.user.tag : client.user!.tag} (${mod ? mod.user.id : client.user!.id})` })
 			.setTimestamp()
 			.setColor(color)
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -97,7 +99,7 @@ export const PunishmentManager = {
 		const logChannel = guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
 
-		const log = await logChannel.send({ embeds: [embed] });
+		const log = await logChannel.send({ embeds: [embed] }).catch();
 
 		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id } });
 
@@ -123,7 +125,7 @@ export const PunishmentManager = {
 
 		if (member.permissions.has(PermissionsBitField.Flags.Administrator, true)) return false;
 
-		if (([PunishmentType.Ban, PunishmentType.AntiRaidNuke, PunishmentType.Softban] as PunishmentType[]).includes(type)) {
+		if (([PunishmentType.Ban, PunishmentType.AntiRaidNuke, PunishmentType.Softban, PunishmentType.Unban] as PunishmentType[]).includes(type)) {
 			if (!moderator.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!me?.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!member.bannable) return false;

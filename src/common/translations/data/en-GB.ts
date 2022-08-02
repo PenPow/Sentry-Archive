@@ -15,6 +15,11 @@ const english = {
 	BAN_COMMAND_NAME: "ban",
 	BAN_COMMAND_DESCRIPTION: "Remove troublemakers from your server",
 
+	// UNBAN COMMAND
+	UNBAN_COMMAND_NAME: "unban",
+	UNBAN_COMMAND_DESCRIPTION: "Let them back in",
+	UNBAN_MEMBER_OPTION_DESCRIPTION: "Enter their user ID here",
+
 	// KICK COMMAND
 	KICK_COMMAND_NAME: "kick",
 	KICK_COMMAND_DESCRIPTION: "Remove a user from your server",
