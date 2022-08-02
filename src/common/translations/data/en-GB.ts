@@ -22,6 +22,13 @@ const english = {
 	// SOFTBAN COMMAND
 	SOFTBAN_COMMAND_NAME: "softban",
 	SOFTBAN_COMMAND_DESCRIPTION: "Kick a user and remove their messages! Best of both worlds.",
+
+	// TIMEOUT COMMAND
+	TIMEOUT_COMMAND_NAME: "timeout",
+	TIMEOUT_COMMAND_DESCRIPTION: "Ssssh a user",
+	TIMEOUT_DURATION_OPTION_NAME: "duration",
+	TIMEOUT_DURATION_OPTION_DESCRIPTION: "Number of hours to timeout for",
+
 	// GENERAL MODERATION COMMANDS
 	MODERATION_DEFAULT_REASON: 'No Reason Specified',
 	MODERATION_TARGET_OPTION_NAME: "user",
