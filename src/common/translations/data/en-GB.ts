@@ -29,6 +29,10 @@ const english = {
 	TIMEOUT_DURATION_OPTION_NAME: "duration",
 	TIMEOUT_DURATION_OPTION_DESCRIPTION: "Number of hours to timeout for",
 
+	// WARN COMMAND
+	WARN_COMMAND_NAME: "warn",
+	WARN_COMMAND_DESCRIPTION: "Thats an infraction! Slap them on the wrist",
+
 	// GENERAL MODERATION COMMANDS
 	MODERATION_DEFAULT_REASON: 'No Reason Specified',
 	MODERATION_TARGET_OPTION_NAME: "user",
