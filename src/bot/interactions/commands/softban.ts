@@ -39,7 +39,16 @@ const SoftbanCommand: IFunction = {
 
 		if (!(int instanceof InteractionResponse)) return;
 
-		const response = await int.awaitMessageComponent({ componentType: ComponentType.Button, time: 10000, filter: i => [(row.components[0].toJSON() as APIButtonComponentWithCustomId).custom_id, (row.components[1].toJSON() as APIButtonComponentWithCustomId).custom_id].includes(i.customId) && i.user.id === interaction.user.id }).catch(async () => void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, content: "You didnt respond in time!", components: [] }, ResponseType.FollowUp));
+		const response = await int.awaitMessageComponent({ componentType: ComponentType.Button, time: 120000, filter: i => [(row.components[0].toJSON() as APIButtonComponentWithCustomId).custom_id, (row.components[1].toJSON() as APIButtonComponentWithCustomId).custom_id].includes(i.customId) && i.user.id === interaction.user.id }).catch(async () => {
+			const embed = new EmbedBuilder()
+				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
+				.setTimestamp()
+				.setColor(0xFF5C5C)
+				.setTitle(`❌ Cancelled`);
+
+			void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
+		});
+
 		if (!response) return;
 
 		switch (response.customId) {
