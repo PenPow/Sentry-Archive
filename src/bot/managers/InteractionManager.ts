@@ -2,7 +2,7 @@ import { readdir } from "fs/promises";
 import { join } from "path";
 import { REST } from "@discordjs/rest";
 import { Result } from "@sapphire/result";
-import { RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody, APIApplicationCommandOption, ApplicationCommandOptionType, APIApplicationCommandOptionChoice, APIApplicationCommandIntegerOption, APIApplicationCommandNumberOption, APIApplicationCommandStringOption, Routes, RESTPostAPIContextMenuApplicationCommandsJSONBody, InteractionReplyOptions, InteractionType, ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, AutocompleteInteraction, InteractionDeferReplyOptions, EmbedBuilder, Interaction, ContextMenuCommandInteraction, SelectMenuInteraction, ButtonInteraction, ModalSubmitInteraction } from "discord.js";
+import { RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody, APIApplicationCommandOption, ApplicationCommandOptionType, APIApplicationCommandOptionChoice, APIApplicationCommandIntegerOption, APIApplicationCommandNumberOption, APIApplicationCommandStringOption, Routes, RESTPostAPIContextMenuApplicationCommandsJSONBody, InteractionReplyOptions, InteractionType, ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, AutocompleteInteraction, InteractionDeferReplyOptions, EmbedBuilder, Interaction, ContextMenuCommandInteraction, SelectMenuInteraction, ButtonInteraction, ModalSubmitInteraction, InteractionResponse, Message, InteractionUpdateOptions } from "discord.js";
 import { DEVELOPMENT, DEV_GUILD_ID } from "../../common/config.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { translate } from "../../common/translations/translate.js";
@@ -19,52 +19,56 @@ export enum ResponseType {
 	Reply,
 	Defer,
 	FollowUp,
-	EditReply
+	EditReply,
+	Update
 }
 
 export const InteractionManager = {
-	sendInteractionResponse: async function(interaction: ChatInputCommandInteraction | AutocompleteInteraction | ContextMenuCommandInteraction | SelectMenuInteraction | ButtonInteraction | ModalSubmitInteraction, data: InteractionReplyOptions | InteractionDeferReplyOptions | ApplicationCommandOptionChoiceData[], action?: ResponseType): Promise<Result<true, Error>> {
+	sendInteractionResponse: async function(interaction: ChatInputCommandInteraction | AutocompleteInteraction | ContextMenuCommandInteraction | SelectMenuInteraction | ButtonInteraction | ModalSubmitInteraction, data: InteractionReplyOptions | InteractionDeferReplyOptions | InteractionUpdateOptions | ApplicationCommandOptionChoiceData[], action?: ResponseType): Promise<Result<void | InteractionResponse | Message, Error>> {
 		try {
 			if (!interaction.isRepliable()) return Result.err(new Error("Cannot Reply to Interaction"));
 
 			if (interaction.type === InteractionType.ApplicationCommandAutocomplete && Array.isArray(data)) {
-				await interaction.respond(data);
-				return Result.ok(true);
+				const d = await interaction.respond(data);
+				return Result.ok(d);
 			}
 
-			if (interaction.type === InteractionType.ApplicationCommand && !Array.isArray(data)) {
+			if ([InteractionType.ApplicationCommand, InteractionType.MessageComponent].includes(interaction.type) && !Array.isArray(data)) {
 				if (action === undefined) return Result.err(new Error("No Action Supplied"));
 
+				// @ts-expect-error it works
 				if (data.ephemeral === undefined) data.ephemeral = true;
 
 				if (action === ResponseType.Reply) {
 					if (interaction.replied || interaction.deferred) return Result.err(new Error("Already Replied"));
 
-					await interaction.reply(data);
+					const d = await interaction.reply(data as InteractionReplyOptions);
 
-					return Result.ok(true);
+					return Result.ok(d);
 				} else if (action === ResponseType.Defer) {
 					if (interaction.replied || interaction.deferred) return Result.err(new Error("Already Deferred"));
 
-					await interaction.deferReply(data);
+					const d = await interaction.deferReply(data);
 
-					return Result.ok(true);
+					return Result.ok(d);
 				} else if (action === ResponseType.FollowUp) {
 					if (!interaction.replied && !interaction.deferred) return Result.err(new Error("No Reply"));
 
-					await interaction.followUp(data);
+					const d = await interaction.followUp(data as InteractionReplyOptions);
 
-					return Result.ok(true);
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+					return Result.ok(d);
 				} else if (action === ResponseType.EditReply) {
 					if (!interaction.replied && !interaction.deferred) return Result.err(new Error("No Reply"));
 
-					await interaction.editReply(data as InteractionReplyOptions);
+					const d = await interaction.editReply(data as InteractionReplyOptions);
 
-					return Result.ok(true);
+					return Result.ok(d);
+				// eslint-disable-next-line no-else-return
+				} else {
+					const d = await (interaction as unknown as ButtonInteraction | SelectMenuInteraction).update(data as InteractionUpdateOptions);
+
+					return Result.ok(d);
 				}
-
-				return Result.err(new TypeError('Invalid Action'));
 			}
 		} catch (e) {
 			log({ level: LogLevel.Error, prefix: 'Interaction Response' }, `Failed to send response: ${(e as Error).message}`);

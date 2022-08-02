@@ -71,7 +71,7 @@ const interactionCreateListener: IListener = {
 				} catch (e) {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
-			} else if (interaction.type === InteractionType.MessageComponent) {
+			} else if (interaction.type === InteractionType.MessageComponent && !interaction.customId.startsWith("ignore")) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
 
 				const command = store.components.get(interaction.customId);

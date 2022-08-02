@@ -21,18 +21,26 @@ enum PunishmentType {
 }
 
 model Punishment {
-  id      Int            @id @unique
-  user    String
+  id        Int            @id @unique @default(autoincrement())
+  caseID    Int
+  user      User           @relation(fields: [userID], references: [id])
+  userID    String
   moderator String
-  type    PunishmentType
-  reason String
-  guild   Guild          @relation(fields: [guildId], references: [id])
-  guildId String
-  createdAt DateTime @default(now())
-  expires DateTime?
+  type      PunishmentType
+  reason    String
+  guild     Guild          @relation(fields: [guildID], references: [id])
+  guildID   String
+  createdAt DateTime       @default(now())
+  expires   DateTime?
+  modLogID  String?
 }
 
 model Guild {
+  id          String       @id @unique
+  punishments Punishment[]
+}
+
+model User {
   id          String       @id @unique
   punishments Punishment[]
 }
