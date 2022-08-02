@@ -71,10 +71,10 @@ export const PunishmentManager = {
 			case PunishmentType.Timeout:
 				color = 0x5C6CFF;
 				break;
+			case PunishmentType.Softban:
 			case PunishmentType.Kick:
 				color = 0xF79454;
 				break;
-			case PunishmentType.Softban:
 			case PunishmentType.Ban:
 				color = 0xFF5C5C;
 				break;
@@ -151,7 +151,7 @@ export const PunishmentManager = {
 			.setAuthor({ iconURL: user.displayAvatarURL(), name: `${user.tag} (${user.id})` })
 			.setTimestamp()
 			.setColor(0xF79454)
-			.setTitle(`Are you sure you want to ban ${user.tag}`)
+			.setTitle(`Are you sure you want to punish ${user.tag}`)
 			.setDescription([`<:point:995372986179780758> **${punishments.filter(punishment => punishment.type === PunishmentType.Ban).length}** Ban${punishments.filter(punishment => punishment.type === PunishmentType.Ban).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Softban).length}** Softban${punishments.filter(punishment => punishment.type === PunishmentType.Softban).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Kick).length}** Kick${punishments.filter(punishment => punishment.type === PunishmentType.Kick).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Timeout).length}** Timeout${punishments.filter(punishment => punishment.type === PunishmentType.Timeout).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Warn).length}** Warn${punishments.filter(punishment => punishment.type === PunishmentType.Warn).length === 1 ? '' : 's'}`].join('\n <:point:995372986179780758> ')), new ActionRowBuilder<ButtonBuilder>().addComponents(...[new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-accept`).setEmoji('🔨')
 			.setStyle(ButtonStyle.Primary)
 			.setLabel('Punish'), new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-decline`).setEmoji('❌')
