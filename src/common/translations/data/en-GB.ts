@@ -43,7 +43,12 @@ const english = {
 	MODERATION_TARGET_OPTION_NAME: "user",
 	MODERATION_TARGET_OPTION_DESCRIPTION: "User to punish",
 	MODERATION_REASON_OPTION_NAME: "reason",
-	MODERATION_REASON_OPTION_DESCRIPTION: "Note to add to punishment"
+	MODERATION_REASON_OPTION_DESCRIPTION: "Note to add to punishment",
+
+	// SLOWMODE COMMAND
+	SLOWMODE_COMMAND_NAME: "slowmode",
+	SLOWMODE_COMMAND_DESCRIPTION: "Slow this party down",
+	SLOWMODE_DURATION_OPTION_DESCRIPTION: "Number of seconds to set slowmode to",
 };
 
 export default english;
