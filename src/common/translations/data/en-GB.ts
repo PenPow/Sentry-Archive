@@ -14,6 +14,10 @@ const english = {
 	// BAN COMMAND
 	BAN_COMMAND_NAME: "ban",
 	BAN_COMMAND_DESCRIPTION: "Remove troublemakers from your server",
+
+	// KICK COMMAND
+	KICK_COMMAND_NAME: "kick",
+	KICK_COMMAND_DESCRIPTION: "Remove a user from your server",
 	// GENERAL MODERATION COMMANDS
 	MODERATION_DEFAULT_REASON: 'No Reason Specified',
 	MODERATION_TARGET_OPTION_NAME: "user",
