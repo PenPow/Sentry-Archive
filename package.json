@@ -8,6 +8,7 @@
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "lint:ci": "npx lint-staged",
+	"lint:staged": "npx eslint",
     "build": "npx tsc --project ./",
     "start:bot": "node dist/bot --enable-source-maps",
     "prepare": "husky install"
