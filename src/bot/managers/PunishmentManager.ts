@@ -18,7 +18,7 @@ export const PunishmentManager = {
 			return Result.err(e as Error);
 		}
 	},
-	createPunishment: async function(client: Client, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'caseID'>): Promise<Result<EmbedBuilder, Error>> {
+	createPunishment: async function(client: Client, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'caseID' | 'modLogChannelID'>): Promise<Result<EmbedBuilder, Error>> {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		if (!(await this.canPunish(client, data.type, data.userID, data.moderator, data.guildID))) return Result.err(new Error("Cannot Moderate"));
 
@@ -71,11 +71,11 @@ export const PunishmentManager = {
 
 		const log = await logChannel.send({ embeds: [embed] }).catch();
 
-		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id } });
+		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id, modLogChannelID: logChannel.id } });
 
 		return result instanceof Error ? Result.err(result) : Result.ok(embed);
 	},
-	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID'>, moderator: GuildMember, user: GuildMember | User): Promise<EmbedBuilder> {
+	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: GuildMember | User): Promise<EmbedBuilder> {
 		let color = 0x000000;
 
 		switch (data.type) {
@@ -102,12 +102,20 @@ export const PunishmentManager = {
 
 		const mod = await guild.members.fetch(moderator).catch(() => null);
 
+		const arr = [`<:point:995372986179780758> **Member:** ${(await guild.members.fetch(user.id)).user.tag} (${((await guild.members.fetch(user)).id)})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`];
+
+		if (data.reference !== null) {
+			const ref = await this.fetchPunishment(data.reference, data.guildID);
+
+			if (ref.isOkAnd(val => val.modLogID !== null && val.modLogChannelID !== null)) arr.push(`<:point:995372986179780758> **Reference:** [#${ref.unwrap().caseID}](https://discord.com/channels/${ref.unwrap().guildID}/${ref.unwrap().modLogChannelID!}/${ref.unwrap().modLogID!})`);
+		}
+
 		return new EmbedBuilder()
 			.setAuthor({ iconURL: mod ? mod.user.displayAvatarURL() : guild.client.user!.displayAvatarURL(), name: `${mod ? mod.user.tag : guild.client.user!.tag} (${mod ? mod.user.id : guild.client.user!.id})` })
 			.setTimestamp()
 			.setColor(color)
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-			.setDescription([`<:point:995372986179780758> **Member:** ${(await guild.members.fetch(user.id)).user.tag} (${((await guild.members.fetch(user)).id)})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`].join("\n"))
+			.setDescription(arr.join("\n"))
 			.setFooter({ text: `Case #${data.caseID}` });
 	},
 	fetchPunishmentId: async function(guildId: Snowflake): Promise<number> {

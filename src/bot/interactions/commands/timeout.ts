@@ -54,7 +54,7 @@ const TimeoutCommand: IFunction = {
 		switch (response.customId) {
 			case (row.components[0].toJSON() as APIButtonComponentWithCustomId).custom_id:
 				// eslint-disable-next-line no-case-declarations
-				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Timeout, userID: interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: new Date(new Date().setTime(new Date(Date.now()).getTime() + (interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 60 * 60 * 1000))) });
+				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Timeout, userID: interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: new Date(new Date().setTime(new Date(Date.now()).getTime() + (interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 60 * 60 * 1000))), reference: interaction.options.getNumber(translate("en-GB", "MODERATION_REFERENCE_OPTION_NAME")) });
 
 				if (punishment.isErr()) {
 					const embed = new EmbedBuilder()
@@ -101,6 +101,13 @@ const TimeoutCommand: IFunction = {
 				name: "MODERATION_REASON_OPTION_NAME",
 				description: "MODERATION_REASON_OPTION_DESCRIPTION",
 				type: ApplicationCommandOptionType.String,
+				required: false
+			},
+			{
+				name: "MODERATION_REFERENCE_OPTION_NAME",
+				description: "MODERATION_REFERENCE_OPTION_DESCRIPTION",
+				type: ApplicationCommandOptionType.Number,
+				min_value: 0,
 				required: false
 			}]
 		};

@@ -33,6 +33,8 @@ model Punishment {
   createdAt DateTime       @default(now())
   expires   DateTime?
   modLogID  String?
+  modLogChannelID String?
+  reference Int?
 }
 
 model Guild {

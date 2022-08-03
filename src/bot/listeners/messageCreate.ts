@@ -209,7 +209,7 @@ const messageCreateEvent: IListener = {
 			if (userHeat < 100) return;
 
 			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-			await PunishmentManager.createPunishment(message.client, { userID: message.author.id, moderator: message.guild?.members.me?.id ?? message.client.user?.id!, guildID: message.guildId!, reason: translate("en-GB", "HEAT_SYSTEM_PUNISHMENT_REASON", reason.msg, userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: userHeat < 150 ? new Date(Date.now() + (30 * 60000)) : null });
+			await PunishmentManager.createPunishment(message.client, { userID: message.author.id, moderator: message.guild?.members.me?.id ?? message.client.user?.id!, guildID: message.guildId!, reason: translate("en-GB", "HEAT_SYSTEM_PUNISHMENT_REASON", reason.msg, userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: userHeat < 150 ? new Date(Date.now() + (30 * 60000)) : null, reference: null });
 		});
 	}
 };

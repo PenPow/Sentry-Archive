@@ -17,6 +17,8 @@ const english = {
 	MODERATION_TARGET_OPTION_DESCRIPTION: "User to punish",
 	MODERATION_REASON_OPTION_NAME: "reason",
 	MODERATION_REASON_OPTION_DESCRIPTION: "Note to add to punishment",
+	MODERATION_REFERENCE_OPTION_NAME: "reference",
+	MODERATION_REFERENCE_OPTION_DESCRIPTION: "Reference another case in this punishment!",
 
 	// BAN COMMAND
 	BAN_COMMAND_NAME: "ban",
