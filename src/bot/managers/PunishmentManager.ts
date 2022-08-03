@@ -116,10 +116,10 @@ export const PunishmentManager = {
 
 		return caseNumber;
 	},
-	fetchUserPunishments: async function(userId: Snowflake): Promise<Punishment[]> {
+	fetchUserPunishments: async function(userId: Snowflake, guildId: Snowflake): Promise<Punishment[]> {
 		await prisma.user.upsert({ create: { id: userId }, update: {}, where: { id: userId } });
 
-		return (await prisma.user.findUnique({ where: { id: userId }, include: { punishments: true } }))?.punishments ?? [];
+		return (await prisma.user.findUnique({ where: { id: userId }, include: { punishments: true } }))?.punishments.filter(punishment => punishment.guildID === guildId) ?? [];
 	},
 	fetchGuildPunishments: async function(guildId: Snowflake): Promise<Punishment[]> {
 		await prisma.guild.upsert({ create: { id: guildId }, update: {}, where: { id: guildId } });
@@ -182,8 +182,8 @@ export const PunishmentManager = {
 
 		return true;
 	},
-	createPunishmentPrompt: async function(user: User): Promise<[EmbedBuilder, ActionRowBuilder<ButtonBuilder>]> {
-		const punishments = await this.fetchUserPunishments(user.id);
+	createPunishmentPrompt: async function(user: User, guildId: Snowflake): Promise<[EmbedBuilder, ActionRowBuilder<ButtonBuilder>]> {
+		const punishments = await this.fetchUserPunishments(user.id, guildId);
 
 		return [new EmbedBuilder()
 			.setAuthor({ iconURL: user.displayAvatarURL(), name: `${user.tag} (${user.id})` })
