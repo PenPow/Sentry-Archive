@@ -9,7 +9,7 @@ const interactionCreateListener: IListener = {
 	execute: function(client) {
 		client.on("interactionCreate", async interaction => {
 			if (interaction.type === InteractionType.ApplicationCommand && interaction.commandType === ApplicationCommandType.ChatInput) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
 				const command = store.commands.get(interaction.commandName);
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -19,7 +19,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, { embeds: [generateNoPermissionsEmbed(interaction, userPermission, command.permissions)] }, ResponseType.Reply);
 
@@ -32,7 +31,7 @@ const interactionCreateListener: IListener = {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ApplicationCommand && [ApplicationCommandType.User, ApplicationCommandType.Message].includes(interaction.commandType)) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
 				const command = store.contexts.get(interaction.commandName);
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -42,7 +41,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, { embeds: [generateNoPermissionsEmbed(interaction, userPermission, command.permissions)] }, ResponseType.Reply);
 
@@ -62,7 +60,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Invalid Permissions", value: "-1" }]);
 
@@ -71,10 +68,17 @@ const interactionCreateListener: IListener = {
 				} catch (e) {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
-			} else if (interaction.type === InteractionType.MessageComponent) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Your guild was not cached for some reason 🤷 - report this to the developers" }, ResponseType.Reply);
+			} else if (interaction.type === InteractionType.MessageComponent && !interaction.customId.startsWith("ignore")) {
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
-				const command = store.components.get(interaction.customId);
+				const splitID = interaction.customId.split('-');
+				const reconstructedID: string[] = [];
+
+				for (const item of splitID) {
+					reconstructedID.push(item.startsWith('r:') ? 'r:*' : item);
+				}
+
+				const command = store.components.get(reconstructedID.join('-'));
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
 
 				let userPermission = PermissionTier.User;
@@ -82,7 +86,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, { embeds: [generateNoPermissionsEmbed(interaction, userPermission, command.permissions)] }, ResponseType.Reply);
 
@@ -95,7 +98,7 @@ const interactionCreateListener: IListener = {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ModalSubmit) {
-				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Your guild was not cached for some reason 🤷 - report this to the developers", value: "-1" }]);
+				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Please run these commands in a guild!", value: "-1" }]);
 
 				const command = store.commands.get(interaction.customId.split('-')[0]);
 				if (!command || !command.handleModal) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
@@ -105,7 +108,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Invalid Permissions", value: "-1" }]);
 

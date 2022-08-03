@@ -26,7 +26,7 @@ services:
       - POSTGRES_USER=sentry
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5433:5432"
+      - "5432:5432"
     expose:
       - 5432
     volumes:
@@ -58,11 +58,11 @@ services:
       - "8001:8001"
 
   clamd:
-    image: clamav/clamav:0.104
+    image: clamav/clamav:latest
     restart: unless-stopped
   
   clamav:
-    image: benzino77/clamav-rest-api
+    image: benzino77/clamav-rest-api:latest
     restart: always
     expose:
      - 3000

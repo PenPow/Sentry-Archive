@@ -5,7 +5,7 @@ import { ListenerManager } from "./managers/ListenerManager.js";
 import { DISCORD_TOKEN } from "../common/config.js";
 
 export const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages],
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildBans],
 	allowedMentions: { parse: [], repliedUser: false },
 	failIfNotExists: false,
 	partials: [Partials.Channel, Partials.Message, Partials.User, Partials.GuildMember],

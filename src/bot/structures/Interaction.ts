@@ -3,7 +3,6 @@ import type { translationKeys } from '../../common/translations/translate.js';
 
 export enum PermissionTier {
 	User,
-	Moderator,
 	Admin,
 	Owner,
 	Developer,
@@ -61,7 +60,6 @@ export interface RESTApplicationCommandJSON extends RESTPostAPIChatInputApplicat
 
 export interface RESTContextMenuJSON extends RESTPostAPIContextMenuApplicationCommandsJSONBody {
 	name: translationKeys;
-	description: translationKeys;
 	type: ApplicationCommandType.User | ApplicationCommandType.Message;
 }
 
