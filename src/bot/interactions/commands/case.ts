@@ -6,7 +6,7 @@ import { FunctionType, IFunction, PermissionTier } from "../../structures/Intera
 
 const CaseCommand: IFunction = {
 	type: FunctionType.ChatInput,
-	permissions: PermissionTier.User,
+	permissions: PermissionTier.Moderator,
 	async execute(interaction) {
 		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
