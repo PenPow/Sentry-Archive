@@ -74,7 +74,14 @@ const interactionCreateListener: IListener = {
 			} else if (interaction.type === InteractionType.MessageComponent && !interaction.customId.startsWith("ignore")) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
 
-				const command = store.components.get(interaction.customId);
+				const splitID = interaction.customId.split('-');
+				const reconstructedID: string[] = [];
+
+				for (const item of splitID) {
+					reconstructedID.push(item.startsWith('r:') ? 'r:*' : item);
+				}
+
+				const command = store.components.get(reconstructedID.join('-'));
 				if (!command) return void await InteractionManager.sendInteractionResponse(interaction, { content: "We dont have this command tracked 🤷 - report this to the developers" }, ResponseType.Reply);
 
 				let userPermission = PermissionTier.User;

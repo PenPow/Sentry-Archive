@@ -61,7 +61,6 @@ export interface RESTApplicationCommandJSON extends RESTPostAPIChatInputApplicat
 
 export interface RESTContextMenuJSON extends RESTPostAPIContextMenuApplicationCommandsJSONBody {
 	name: translationKeys;
-	description: translationKeys;
 	type: ApplicationCommandType.User | ApplicationCommandType.Message;
 }
 

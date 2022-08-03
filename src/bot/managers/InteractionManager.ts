@@ -94,7 +94,7 @@ export const InteractionManager = {
 
 					if (folder === "commands") store.commands.set(translate("en-GB", (interaction as ICommandFunction).toJSON().name), interaction as ICommandFunction);
 					else if (folder === "components") store.components.set((interaction as IComponentFunction).id, interaction as IComponentFunction);
-					else if (folder === "context") store.contexts.set(translate("en-GB", (interaction as IContextMenuFunction).toJSON().name), interaction as IContextMenuFunction);
+					else if (folder === "contexts") store.contexts.set(translate("en-GB", (interaction as IContextMenuFunction).toJSON().name), interaction as IContextMenuFunction);
 				}
 			}
 

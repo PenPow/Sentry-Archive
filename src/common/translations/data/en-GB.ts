@@ -11,6 +11,13 @@ const english = {
 	EVAL_COMMAND_SOURCE_OPTION_NAME: "sourcebin",
 	EVAL_COMMAND_SOURCE_OPTION_DESCRIPTION: "link to sourcebin",
 
+	// GENERAL MODERATION COMMANDS
+	MODERATION_DEFAULT_REASON: 'No Reason Specified',
+	MODERATION_TARGET_OPTION_NAME: "user",
+	MODERATION_TARGET_OPTION_DESCRIPTION: "User to punish",
+	MODERATION_REASON_OPTION_NAME: "reason",
+	MODERATION_REASON_OPTION_DESCRIPTION: "Note to add to punishment",
+
 	// BAN COMMAND
 	BAN_COMMAND_NAME: "ban",
 	BAN_COMMAND_DESCRIPTION: "Remove troublemakers from your server",
@@ -38,13 +45,6 @@ const english = {
 	WARN_COMMAND_NAME: "warn",
 	WARN_COMMAND_DESCRIPTION: "Thats an infraction! Slap them on the wrist",
 
-	// GENERAL MODERATION COMMANDS
-	MODERATION_DEFAULT_REASON: 'No Reason Specified',
-	MODERATION_TARGET_OPTION_NAME: "user",
-	MODERATION_TARGET_OPTION_DESCRIPTION: "User to punish",
-	MODERATION_REASON_OPTION_NAME: "reason",
-	MODERATION_REASON_OPTION_DESCRIPTION: "Note to add to punishment",
-
 	// SLOWMODE COMMAND
 	SLOWMODE_COMMAND_NAME: "slowmode",
 	SLOWMODE_COMMAND_DESCRIPTION: "Slow this party down",
@@ -61,6 +61,14 @@ const english = {
 	// CASE COMMAND
 	CASE_COMMAND_NAME: "case",
 	CASE_COMMAND_DESCRIPTION: "Lookup a case",
+
+	// HISTORY COMMAND
+	HISTORY_COMMAND_NAME: "history",
+	HISTORY_COMMAND_DESCRIPTION: "Lookup a users history",
+	HISTORY_COMMAND_USER_OPTION_DESCRIPTION: "User to lookup",
+
+	// HISTORY CONTEXT
+	HISTORY_CONTEXT_NAME: "Moderation History",
 };
 
 export default english;
