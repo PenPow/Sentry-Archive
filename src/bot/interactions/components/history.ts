@@ -7,7 +7,7 @@ import { FunctionType, IFunction, PermissionTier } from "../../structures/Intera
 const HistoryComponent: IFunction = {
 	type: FunctionType.Button,
 	id: `user-r:*-history-page-r:*-r:*`,
-	permissions: PermissionTier.Moderator,
+	permissions: PermissionTier.User,
 	async execute(interaction) {
 		const splitID = interaction.customId.split('-');
 		const reconstructedID: string[] = [];

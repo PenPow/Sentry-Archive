@@ -19,7 +19,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, { embeds: [generateNoPermissionsEmbed(interaction, userPermission, command.permissions)] }, ResponseType.Reply);
 
@@ -42,7 +41,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, { embeds: [generateNoPermissionsEmbed(interaction, userPermission, command.permissions)] }, ResponseType.Reply);
 
@@ -62,7 +60,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Invalid Permissions", value: "-1" }]);
 
@@ -89,7 +86,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, { embeds: [generateNoPermissionsEmbed(interaction, userPermission, command.permissions)] }, ResponseType.Reply);
 
@@ -112,7 +108,6 @@ const interactionCreateListener: IListener = {
 				if (interaction.user.id === "207198455301537793") userPermission = PermissionTier.Developer;
 				else if (interaction.user.id === interaction.guild.ownerId) userPermission = PermissionTier.Owner;
 				else if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator, true)) userPermission = PermissionTier.Admin;
-				else if (interaction.member.permissions.has([PermissionsBitField.Flags.BanMembers, PermissionsBitField.Flags.KickMembers, PermissionsBitField.Flags.ModerateMembers])) userPermission = PermissionTier.Moderator;
 
 				if (userPermission < command.permissions) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Invalid Permissions", value: "-1" }]);
 

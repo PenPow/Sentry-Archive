@@ -1,5 +1,5 @@
 import { PunishmentType } from "@prisma/client";
-import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ComponentType, EmbedBuilder, InteractionResponse } from "discord.js";
+import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ComponentType, EmbedBuilder, InteractionResponse, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -7,7 +7,7 @@ import { FunctionType, IFunction, PermissionTier } from "../../structures/Intera
 
 const WarnCommand: IFunction = {
 	type: FunctionType.ChatInput,
-	permissions: PermissionTier.Moderator,
+	permissions: PermissionTier.User,
 	async execute(interaction) {
 		// await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true }, ResponseType.Defer);
 
@@ -82,6 +82,7 @@ const WarnCommand: IFunction = {
 			name: "WARN_COMMAND_NAME",
 			description: "WARN_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
 			options: [{
 				name: "MODERATION_TARGET_OPTION_NAME",
 				description: "MODERATION_TARGET_OPTION_DESCRIPTION",

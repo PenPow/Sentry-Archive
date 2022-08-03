@@ -1,5 +1,5 @@
 import { PunishmentType } from "@prisma/client";
-import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -7,7 +7,7 @@ import { FunctionType, IFunction, PermissionTier } from "../../structures/Intera
 
 const HistoryCommand: IFunction = {
 	type: FunctionType.ChatInput,
-	permissions: PermissionTier.Moderator,
+	permissions: PermissionTier.User,
 	async execute(interaction) {
 		const punishments = await PunishmentManager.fetchUserPunishments(interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.guildId);
 
@@ -30,6 +30,7 @@ const HistoryCommand: IFunction = {
 			name: "HISTORY_COMMAND_NAME",
 			description: "HISTORY_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
 			options: [{
 				name: "MODERATION_TARGET_OPTION_NAME",
 				description: "HISTORY_COMMAND_USER_OPTION_DESCRIPTION",

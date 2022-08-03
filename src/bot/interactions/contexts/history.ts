@@ -1,12 +1,12 @@
 import { PunishmentType } from "@prisma/client";
-import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, EmbedBuilder, UserContextMenuCommandInteraction } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits, UserContextMenuCommandInteraction } from "discord.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
 import { FunctionType, IFunction, PermissionTier } from "../../structures/Interaction.js";
 
 const HistoryCommand: IFunction = {
 	type: FunctionType.ContextMenu,
-	permissions: PermissionTier.Moderator,
+	permissions: PermissionTier.User,
 	async execute(interaction) {
 		const punishments = await PunishmentManager.fetchUserPunishments((interaction as UserContextMenuCommandInteraction).targetUser.id, interaction.guildId);
 
@@ -28,6 +28,7 @@ const HistoryCommand: IFunction = {
 		return {
 			name: "HISTORY_CONTEXT_NAME",
 			type: ApplicationCommandType.User,
+			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString()
 		};
 	},
 };

@@ -3,7 +3,6 @@ import type { translationKeys } from '../../common/translations/translate.js';
 
 export enum PermissionTier {
 	User,
-	Moderator,
 	Admin,
 	Owner,
 	Developer,

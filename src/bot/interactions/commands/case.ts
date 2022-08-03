@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -6,7 +6,7 @@ import { FunctionType, IFunction, PermissionTier } from "../../structures/Intera
 
 const CaseCommand: IFunction = {
 	type: FunctionType.ChatInput,
-	permissions: PermissionTier.Moderator,
+	permissions: PermissionTier.User,
 	async execute(interaction) {
 		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
@@ -29,6 +29,7 @@ const CaseCommand: IFunction = {
 			name: "CASE_COMMAND_NAME",
 			description: "CASE_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
 			options: [{
 				name: "REASON_CASE_OPTION_NAME",
 				description: "REASON_CASE_OPTION_DESCRIPTION",

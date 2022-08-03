@@ -6,7 +6,7 @@ import { FunctionType, IFunction, PermissionTier } from "../../structures/Intera
 
 const SlowmodeCommand: IFunction = {
 	type: FunctionType.ChatInput,
-	permissions: PermissionTier.Moderator,
+	permissions: PermissionTier.User,
 	async execute(interaction) {
 		if (interaction.guild.members.me?.permissions.missing(PermissionFlagsBits.ManageChannels)) {
 			const embed = new EmbedBuilder()
@@ -39,6 +39,7 @@ const SlowmodeCommand: IFunction = {
 			name: "SLOWMODE_COMMAND_NAME",
 			description: "SLOWMODE_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			default_member_permissions: PermissionFlagsBits.ManageChannels.toString(),
 			options: [{
 				name: "TIMEOUT_DURATION_OPTION_NAME",
 				description: "SLOWMODE_DURATION_OPTION_DESCRIPTION",
