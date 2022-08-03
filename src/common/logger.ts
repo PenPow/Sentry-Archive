@@ -30,11 +30,11 @@ export function log(opts: ILogOptions, messages: string | number | Record<string
 
 	switch (opts.level) {
 		case LogLevel.Debug: {
-			toLog += chalk.bold(chalk.cyan('DEBUG'));
+			toLog += `${chalk.bold(chalk.cyan('DEBUG'))}  `;
 			break;
 		}
 		case LogLevel.Info: {
-			toLog += chalk.bold(chalk.blue('INFO'));
+			toLog += `${chalk.bold(chalk.blue('INFO'))}   `;
 			break;
 		}
 		case LogLevel.Success: {
@@ -42,19 +42,19 @@ export function log(opts: ILogOptions, messages: string | number | Record<string
 			break;
 		}
 		case LogLevel.Warn: {
-			toLog += chalk.bold(chalk.yellow('WARN'));
+			toLog += `${chalk.bold(chalk.yellow('WARN'))}   `;
 			break;
 		}
 		case LogLevel.Error: {
-			toLog += chalk.bold(chalk.red('ERROR'));
+			toLog += `${chalk.bold(chalk.red('ERROR'))}  `;
 			break;
 		}
 		case LogLevel.Fatal: {
-			toLog += chalk.bold(chalk.magenta('FATAL'));
+			toLog += `${chalk.bold(chalk.magenta('FATAL'))}  `;
 			break;
 		}
 		case LogLevel.Silly: {
-			toLog += chalk.bold(chalk.white('SILLY'));
+			toLog += `${chalk.bold(chalk.white('SILLY'))}  `;
 			break;
 		}
 	}
@@ -65,5 +65,5 @@ export function log(opts: ILogOptions, messages: string | number | Record<string
 		return;
 	}
 
-	console.log(`${toLog} ${inspect(messages, { depth: 100, getters: true, colors: false }).replaceAll("'", "")}`);
+	console.log(`${toLog} ${(typeof messages === "string" || typeof messages === "number" ? messages : inspect(messages, { depth: 100, getters: true, colors: false }).replaceAll("'", "")).toString().replaceAll("\n", `\n${" ".repeat(toLog.length - 47)}`)} `);
 }
