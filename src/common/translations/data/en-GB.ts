@@ -49,6 +49,14 @@ const english = {
 	SLOWMODE_COMMAND_NAME: "slowmode",
 	SLOWMODE_COMMAND_DESCRIPTION: "Slow this party down",
 	SLOWMODE_DURATION_OPTION_DESCRIPTION: "Number of seconds to set slowmode to",
+
+	// REASON COMMAND
+	REASON_COMMAND_NAME: "reason",
+	REASON_COMMAND_DESCRIPTION: "Modify reason of case",
+	REASON_CASE_OPTION_NAME: "case",
+	REASON_CASE_OPTION_DESCRIPTION: "What case are we talking about?",
+	REASON_NEWREASON_OPTION_NAME: "reason",
+	REASON_NEWREASON_OPTION_DESCRIPTION: "Whats the new reason",
 };
 
 export default english;

@@ -116,6 +116,37 @@ export const PunishmentManager = {
 
 		return (await prisma.user.findUnique({ where: { id: userId }, include: { punishments: true } }))?.punishments ?? [];
 	},
+	fetchGuildPunishments: async function(guildId: Snowflake): Promise<Punishment[]> {
+		await prisma.guild.upsert({ create: { id: guildId }, update: {}, where: { id: guildId } });
+
+		return (await prisma.guild.findUnique({ where: { id: guildId }, include: { punishments: true } }))?.punishments ?? [];
+	},
+	fetchPunishment: async function(caseID: number, guildID: Snowflake): Promise<Result<Punishment, Error>> {
+		const punishments = await this.fetchGuildPunishments(guildID).catch(() => null);
+
+		if (!punishments) return Result.err(new Error("No Cases Found"));
+
+		let start = 0;
+		let end = punishments.length - 1;
+
+		let punishment: Punishment | null = null;
+
+		while (start <= end) {
+			const mid = Math.floor((start + end) / 2);
+
+			if (punishments[mid].caseID === caseID) {
+				punishment = punishments[mid];
+				break;
+			}
+
+			if (caseID < punishments[mid].caseID) end = mid - 1;
+			else start = mid + 1;
+		}
+
+		if (punishment !== null) return Result.ok(punishment);
+
+		return Result.err(new Error("no punishment found"));
+	},
 	canPunish: async function(client: Client, type: PunishmentType, user: Snowflake, punisher: Snowflake, guildId: Snowflake): Promise<boolean> {
 		const member = await (await client.guilds.fetch(guildId)).members.fetch(user);
 		const moderator = await (await client.guilds.fetch(guildId)).members.fetch(punisher);
