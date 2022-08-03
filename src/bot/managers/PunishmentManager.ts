@@ -1,6 +1,6 @@
 import { Punishment, PunishmentType } from "@prisma/client";
 import { Result } from "@sapphire/result";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder, PermissionsBitField, Snowflake, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder, Guild, GuildMember, PermissionsBitField, Snowflake, User } from "discord.js";
 import { nanoid } from "nanoid";
 import { prisma, redis } from "../../common/db.js";
 import { translate } from "../../common/translations/translate.js";
@@ -62,6 +62,20 @@ export const PunishmentManager = {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		const result = await prisma.punishment.create({ data: { caseID, ...data } }).catch(e => new Error(e));
 
+		const mod = await guild.members.fetch(data.moderator).catch(() => null);
+
+		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.members.fetch(data.userID));
+
+		const logChannel = guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
+		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
+
+		const log = await logChannel.send({ embeds: [embed] }).catch();
+
+		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id } });
+
+		return result instanceof Error ? Result.err(result) : Result.ok(embed);
+	},
+	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID'>, moderator: GuildMember, user: GuildMember | User): Promise<EmbedBuilder> {
 		let color = 0x000000;
 
 		switch (data.type) {
@@ -86,24 +100,15 @@ export const PunishmentManager = {
 				break;
 		}
 
-		const mod = await guild.members.fetch(data.moderator).catch(() => null);
+		const mod = await guild.members.fetch(moderator).catch(() => null);
 
-		const embed = new EmbedBuilder()
-			.setAuthor({ iconURL: mod ? mod.user.displayAvatarURL() : client.user!.displayAvatarURL(), name: `${mod ? mod.user.tag : client.user!.tag} (${mod ? mod.user.id : client.user!.id})` })
+		return new EmbedBuilder()
+			.setAuthor({ iconURL: mod ? mod.user.displayAvatarURL() : guild.client.user!.displayAvatarURL(), name: `${mod ? mod.user.tag : guild.client.user!.tag} (${mod ? mod.user.id : guild.client.user!.id})` })
 			.setTimestamp()
 			.setColor(color)
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-			.setDescription([`<:point:995372986179780758> **Member:** ${(await guild.members.fetch(data.userID)).user.tag} (${((await guild.members.fetch(data.userID)).id)})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`].join("\n"))
-			.setFooter({ text: `Case #${caseID}` });
-
-		const logChannel = guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
-		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
-
-		const log = await logChannel.send({ embeds: [embed] }).catch();
-
-		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id } });
-
-		return result instanceof Error ? Result.err(result) : Result.ok(embed);
+			.setDescription([`<:point:995372986179780758> **Member:** ${(await guild.members.fetch(user.id)).user.tag} (${((await guild.members.fetch(user)).id)})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`].join("\n"))
+			.setFooter({ text: `Case #${data.caseID}` });
 	},
 	fetchPunishmentId: async function(guildId: Snowflake): Promise<number> {
 		const caseNumber = parseInt(await redis.get(`${guildId}-caseNo`) ?? '-1', 10) + 1;

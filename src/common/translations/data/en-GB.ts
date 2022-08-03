@@ -52,11 +52,15 @@ const english = {
 
 	// REASON COMMAND
 	REASON_COMMAND_NAME: "reason",
-	REASON_COMMAND_DESCRIPTION: "Modify reason of case",
+	REASON_COMMAND_DESCRIPTION: "Modify the reason of a case",
 	REASON_CASE_OPTION_NAME: "case",
 	REASON_CASE_OPTION_DESCRIPTION: "What case are we talking about?",
 	REASON_NEWREASON_OPTION_NAME: "reason",
 	REASON_NEWREASON_OPTION_DESCRIPTION: "Whats the new reason",
+
+	// CASE COMMAND
+	CASE_COMMAND_NAME: "case",
+	CASE_COMMAND_DESCRIPTION: "Lookup a case",
 };
 
 export default english;
