@@ -8,7 +8,7 @@ const SlowmodeCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
-		if (interaction.guild.members.me?.permissions.missing(PermissionFlagsBits.ManageChannels)) {
+		if (!interaction.guild.members.me?.permissions.has(PermissionFlagsBits.ManageChannels, true)) {
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
