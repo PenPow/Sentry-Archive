@@ -64,7 +64,7 @@ export const PunishmentManager = {
 
 		const mod = await guild.members.fetch(data.moderator).catch(() => null);
 
-		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.members.fetch(data.userID));
+		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, data.type === PunishmentType.Unban ? await guild.client.users.fetch(data.userID) : await guild.members.fetch(data.userID));
 
 		const logChannel = guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
@@ -161,15 +161,23 @@ export const PunishmentManager = {
 		return Result.err(new Error("no punishment found"));
 	},
 	canPunish: async function(client: Client, type: PunishmentType, user: Snowflake, punisher: Snowflake, guildId: Snowflake): Promise<boolean> {
-		const member = await (await client.guilds.fetch(guildId)).members.fetch(user);
 		const moderator = await (await client.guilds.fetch(guildId)).members.fetch(punisher);
 		const me = (await client.guilds.fetch(guildId)).members.me;
+
+		if (type === PunishmentType.Unban) {
+			if (!moderator.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
+			if (!me?.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
+
+			return true;
+		}
+
+		const member = await (await client.guilds.fetch(guildId)).members.fetch(user);
 
 		if (member.user.bot || (await client.guilds.fetch(guildId)).ownerId === member.id || member.id === moderator.id) return false;
 
 		if (member.permissions.has(PermissionsBitField.Flags.Administrator, true)) return false;
 
-		if (([PunishmentType.Ban, PunishmentType.AntiRaidNuke, PunishmentType.Softban, PunishmentType.Unban] as PunishmentType[]).includes(type)) {
+		if (([PunishmentType.Ban, PunishmentType.AntiRaidNuke, PunishmentType.Softban] as PunishmentType[]).includes(type)) {
 			if (!moderator.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!me?.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!member.bannable) return false;
