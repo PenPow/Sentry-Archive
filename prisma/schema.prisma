@@ -21,25 +21,38 @@ enum PunishmentType {
 }
 
 model Punishment {
-  id        Int            @id @unique @default(autoincrement())
-  caseID    Int
-  user      User           @relation(fields: [userID], references: [id])
-  userID    String
-  moderator String
-  type      PunishmentType
-  reason    String
-  guild     Guild          @relation(fields: [guildID], references: [id])
-  guildID   String
-  createdAt DateTime       @default(now())
-  expires   DateTime?
-  modLogID  String?
+  id              Int            @id @unique @default(autoincrement())
+  caseID          Int
+  user            User           @relation(fields: [userID], references: [id])
+  userID          String
+  moderator       String
+  type            PunishmentType
+  reason          String
+  guild           Guild          @relation(fields: [guildID], references: [id])
+  guildID         String
+  createdAt       DateTime       @default(now())
+  expires         DateTime?
+  modLogID        String?
   modLogChannelID String?
-  reference Int?
+  reference       Int?
+}
+
+model Settings {
+  id       String   @id @unique
+  guild    Guild    @relation(fields: [id], references: [id])
+  automod  Boolean? @default(true)
+  phrase   Boolean? @default(true)
+  username Boolean? @default(true)
+  invite   Boolean? @default(true)
+  url      Boolean? @default(true)
+  spam     Boolean? @default(true)
+  clamav   Boolean? @default(true)
 }
 
 model Guild {
   id          String       @id @unique
   punishments Punishment[]
+  settings    Settings?
 }
 
 model User {
