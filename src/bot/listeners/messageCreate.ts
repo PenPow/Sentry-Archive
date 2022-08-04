@@ -47,7 +47,7 @@ interface IClamAVErrorResponse {
 const messageCreateEvent: IListener = {
 	execute: function(client) {
 		client.on("messageCreate", async message => {
-			if (message.author.bot || message.member?.permissions.has(PermissionFlagsBits.Administrator, true)) return;
+			if (message.author.bot || message.member?.permissions.any([PermissionFlagsBits.Administrator, PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers, PermissionFlagsBits.ModerateMembers], true)) return;
 
 			const guildId = message.guildId!;
 			const userId = message.author.id;
