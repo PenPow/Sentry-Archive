@@ -43,8 +43,6 @@ services:
       - "6379:6379"
     expose:
       - 6379
-    volumes:
-      - "postgres:/var/lib/postgresql/data"
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
