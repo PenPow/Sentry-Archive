@@ -50,13 +50,6 @@ services:
       interval: 10s
       timeout: 5s
 
-  redis-web:
-    image: "redislabs/redisinsight:latest"
-    links:
-      - redis:redis
-    ports:
-      - "8001:8001"
-
   clamd:
     image: clamav/clamav:latest
     restart: unless-stopped
