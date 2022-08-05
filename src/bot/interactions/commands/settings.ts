@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
-import { SettingsManager } from "../../managers/GuildSettingsManager.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
+import { SettingsManager } from "../../managers/SettingsManager.js";
 
 import { FunctionType, IFunction, PermissionTier } from "../../structures/Interaction.js";
 
