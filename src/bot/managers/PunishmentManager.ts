@@ -1,7 +1,7 @@
 import speakeasy from "@levminer/speakeasy";
 import { Punishment, PunishmentType } from "@prisma/client";
 import { Result } from "@sapphire/result";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, EmbedBuilder, Guild, GuildMember, ModalBuilder, ModalSubmitInteraction, PermissionsBitField, Snowflake, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, EmbedBuilder, Guild, GuildMember, GuildMFALevel, ModalBuilder, ModalSubmitInteraction, PermissionsBitField, Snowflake, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { nanoid } from "nanoid";
 import { InteractionManager, ResponseType } from "./InteractionManager.js";
 import { SettingsManager } from "./SettingsManager.js";
@@ -220,7 +220,22 @@ export const PunishmentManager = {
 	handleUser2FA: async function(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction, userId: Snowflake): Promise<[boolean, ModalSubmitInteraction | null]> {
 		const user = await SettingsManager.getUserSettings(userId);
 
-		if (!user.secret) return [true, null];
+		if (!user.secret) {
+			if (interaction.guild?.mfaLevel === GuildMFALevel.Elevated || (await SettingsManager.getSettings(interaction.guildId!)).enforce2fa) {
+				const embed = new EmbedBuilder()
+					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
+					.setTimestamp()
+					.setColor(0xFF5C5C)
+					.setDescription("<:point:995372986179780758> This guild requires 2FA for moderation access, please setup 2FA to run this command.\n\n> Dont want this enabled? Modify it with /settings, and make sure 2FA requirement for moderation is disabled in Server Settings > Safety Setup")
+					.setTitle("Please Enable 2FA");
+
+				await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
+
+				return [false, null];
+			}
+
+			return [true, null];
+		}
 
 		const customId = `ignore-${nanoid()}-modal`;
 		const textId = `${nanoid()}-text`;

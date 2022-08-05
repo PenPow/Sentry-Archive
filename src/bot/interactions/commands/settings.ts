@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, GuildMFALevel, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -19,7 +19,7 @@ const SettingsCommand: IFunction = {
 
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
-				.setDescription([`${settings.automod ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Auto Moderator\n`, `${settings.automod && settings.phrase ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Phrase Detection`, `${settings.automod && settings.username ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Username Detection`, `${settings.automod && settings.invite ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Invite Detection and Blocking`, `${settings.automod && settings.url ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious URL Detection`, `${settings.automod && settings.spam ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Spam Protection`, `${settings.automod && settings.clamav ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Virus for Attachments`].join('\n'))
+				.setDescription([`${settings.automod ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Auto Moderator\n`, `${settings.automod && settings.phrase ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Phrase Detection`, `${settings.automod && settings.username ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Username Detection`, `${settings.automod && settings.invite ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Invite Detection and Blocking`, `${settings.automod && settings.url ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious URL Detection`, `${settings.automod && settings.spam ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Spam Protection`, `${settings.automod && settings.clamav ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Virus for Attachments\n`, `${interaction.guild.mfaLevel === GuildMFALevel.Elevated || settings.enforce2fa ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} **Enforce 2FA for Moderators**`].join('\n'))
 				.setTimestamp()
 				.setColor(0x202225)
 				.setTitle(`Settings`);
@@ -35,13 +35,14 @@ const SettingsCommand: IFunction = {
 		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_URL_OPTION_NAME"), false) !== null) { settings.url = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_URL_OPTION_NAME"), true); }
 		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_SPAM_OPTION_NAME"), false) !== null) { settings.spam = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_SPAM_OPTION_NAME"), true); }
 		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME"), false) !== null) { settings.clamav = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME"), false) !== null) { settings.enforce2fa = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME"), true); }
 
 		await SettingsManager.setSettings(interaction.guildId, settings);
 
 		const embed = new EmbedBuilder()
 			.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 			.setTimestamp()
-			.setDescription([`${settings.automod ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Auto Moderator\n`, `${settings.automod && settings.phrase ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Phrase Detection`, `${settings.automod && settings.username ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Username Detection`, `${settings.automod && settings.invite ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Invite Detection and Blocking`, `${settings.automod && settings.url ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious URL Detection`, `${settings.automod && settings.spam ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Spam Protection`, `${settings.automod && settings.clamav ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Virus for Attachments`].join('\n'))
+			.setDescription([`${settings.automod ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} **Auto Moderator**\n`, `${settings.automod && settings.phrase ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Phrase Detection`, `${settings.automod && settings.username ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Username Detection`, `${settings.automod && settings.invite ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Invite Detection and Blocking`, `${settings.automod && settings.url ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious URL Detection`, `${settings.automod && settings.spam ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Spam Protection`, `${settings.automod && settings.clamav ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Virus for Attachments\n`, `${interaction.guild.mfaLevel === GuildMFALevel.Elevated || settings.enforce2fa ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} **Enforce 2FA for Moderators**`].join('\n'))
 			.setColor(0x202225)
 			.setTitle(`Settings`);
 
@@ -95,6 +96,11 @@ const SettingsCommand: IFunction = {
 				{
 					name: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME",
 					description: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_DESCRIPTION",
+					type: ApplicationCommandOptionType.Boolean
+				},
+				{
+					name: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME",
+					description: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_DESCRIPTION",
 					type: ApplicationCommandOptionType.Boolean
 				}]
 			}]
