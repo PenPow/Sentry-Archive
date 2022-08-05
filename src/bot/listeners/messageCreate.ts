@@ -7,8 +7,8 @@ import { PermissionFlagsBits } from "discord.js";
 import { redis } from "../../common/db.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { translate } from "../../common/translations/translate.js";
-import { SettingsManager } from "../managers/GuildSettingsManager.js";
 import { PunishmentManager } from "../managers/PunishmentManager.js";
+import { SettingsManager } from "../managers/SettingsManager.js";
 import type { IListener } from "../structures/Listener.js";
 
 const { digest, similarity } = pkg;

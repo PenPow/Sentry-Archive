@@ -33,7 +33,7 @@ export const InteractionManager = {
 				return Result.ok(d);
 			}
 
-			if ([InteractionType.ApplicationCommand, InteractionType.MessageComponent].includes(interaction.type) && !Array.isArray(data)) {
+			if ([InteractionType.ApplicationCommand, InteractionType.MessageComponent, InteractionType.ModalSubmit].includes(interaction.type) && !Array.isArray(data)) {
 				if (action === undefined) return Result.err(new Error("No Action Supplied"));
 
 				// @ts-expect-error it works
@@ -65,7 +65,9 @@ export const InteractionManager = {
 					return Result.ok(d);
 				// eslint-disable-next-line no-else-return
 				} else {
-					const d = await (interaction as unknown as ButtonInteraction | SelectMenuInteraction).update(data as InteractionUpdateOptions);
+					// @ts-expect-error it works
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+					const d = await interaction.update(data as InteractionUpdateOptions);
 
 					return Result.ok(d);
 				}

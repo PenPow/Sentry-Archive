@@ -1,5 +1,5 @@
 import { PunishmentType } from "@prisma/client";
-import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, PermissionFlagsBits } from "discord.js";
+import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, Message, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -11,6 +11,10 @@ const UnbanCommand: IFunction = {
 	async execute(interaction) {
 		// await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true }, ResponseType.Defer);
 
+		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
+
+		if (!success) return;
+
 		if (!(await PunishmentManager.canPunish(interaction.client, PunishmentType.Unban, interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.user.id, interaction.guildId))) {
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
@@ -18,12 +22,12 @@ const UnbanCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ Cannot Unban User`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
 		}
 
 		const [embed, row] = await PunishmentManager.createPunishmentPrompt(interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true), interaction.guildId);
 
-		const res = await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [row] }, ResponseType.Reply);
+		const res = await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [row], fetchReply: true }, ResponseType.Reply);
 
 		if (res.isErr()) {
 			const embed = new EmbedBuilder()
@@ -32,12 +36,12 @@ const UnbanCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ An Error Occurred`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
 		}
 
 		const int = res.unwrap();
 
-		if (!(int instanceof InteractionResponse)) return;
+		if (!(int instanceof InteractionResponse) && !(int instanceof Message)) return;
 
 		const response = await int.awaitMessageComponent({ componentType: ComponentType.Button, time: 120000, filter: i => [(row.components[0].toJSON() as APIButtonComponentWithCustomId).custom_id, (row.components[1].toJSON() as APIButtonComponentWithCustomId).custom_id].includes(i.customId) && i.user.id === interaction.user.id }).catch(async () => {
 			const embed = new EmbedBuilder()
@@ -46,7 +50,7 @@ const UnbanCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ Cancelled`);
 
-			void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
+			void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
 		});
 
 		if (!response) return;

@@ -1,4 +1,4 @@
 {
-  "*.ts": "npm run lint:staged",
+  "*.ts": "eslint",
   "*": "echo Doing Nothing"
 }

@@ -97,7 +97,7 @@ const interactionCreateListener: IListener = {
 				} catch (e) {
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
-			} else if (interaction.type === InteractionType.ModalSubmit) {
+			} else if (interaction.type === InteractionType.ModalSubmit && !interaction.customId.startsWith("ignore")) {
 				if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, [{ name: "Please run these commands in a guild!", value: "-1" }]);
 
 				const command = store.commands.get(interaction.customId.split('-')[0]);
