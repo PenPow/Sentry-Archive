@@ -2,12 +2,17 @@ import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, Embe
 import ms from "ms";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
+import { PunishmentManager } from "../../managers/PunishmentManager.js";
 import { FunctionType, IFunction, PermissionTier } from "../../structures/Interaction.js";
 
 const SlowmodeCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
+
+		if (!success) return;
+
 		if (!interaction.guild.members.me?.permissions.has(PermissionFlagsBits.ManageChannels, true)) {
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
@@ -15,7 +20,7 @@ const SlowmodeCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ Cannot Modify Slowmode`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
 		}
 
 		await interaction.channel?.setRateLimitPerUser(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true), interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"));
@@ -29,7 +34,7 @@ const SlowmodeCommand: IFunction = {
 			.setDescription([`<:point:995372986179780758> **Channel:** <#${interaction.channel?.id}>`, `<:point:995372986179780758> **Action:** Slowmode`, `<:point:995372986179780758> **Delay**: ${ms(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 1000)}`, `<:point:995372986179780758> **Reason:** ${interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON")}`].join("\n"))
 			.setFooter({ text: `Slowmode` });
 
-		await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+		await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return;
 		return void await logChannel.send({ embeds: [embed] }).catch();

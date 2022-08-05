@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
+import { PunishmentManager } from "../../managers/PunishmentManager.js";
 import { SettingsManager } from "../../managers/SettingsManager.js";
 
 import { FunctionType, IFunction, PermissionTier } from "../../structures/Interaction.js";
@@ -9,6 +10,10 @@ const SettingsCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.Admin,
 	async execute(interaction) {
+		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
+
+		if (!success) return;
+
 		if (interaction.options.getSubcommand(true) === translate("en-GB", "SETTINGS_COMMAND_VIEW_SUBCOMMAND_NAME")) {
 			const settings = await SettingsManager.getSettings(interaction.guildId);
 
@@ -19,7 +24,7 @@ const SettingsCommand: IFunction = {
 				.setColor(0x202225)
 				.setTitle(`Settings`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 		}
 		const settings = await SettingsManager.getSettings(interaction.guildId);
 
@@ -40,7 +45,7 @@ const SettingsCommand: IFunction = {
 			.setColor(0x202225)
 			.setTitle(`Settings`);
 
-		return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+		return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 	},
 	toJSON() {
 		return {
