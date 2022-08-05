@@ -308,7 +308,6 @@ export const InteractionManager = {
 
 					if ([ApplicationCommandOptionType.Subcommand, ApplicationCommandOptionType.SubcommandGroup].includes(option.type as ApplicationCommandOptionType) && option.options) {
 						const transformedSubOptions: APIApplicationCommandOption[] = [];
-
 						for (const opt of option.options) {
 							const transformedSubOption: APIApplicationCommandOption = {
 								...opt,
@@ -422,9 +421,9 @@ export const InteractionManager = {
 										value: choi.value
 									});
 								}
-
-								transformedSubOptions.push(transformedSubOption);
 							}
+
+							transformedSubOptions.push(transformedSubOption);
 						}
 
 						// @ts-expect-error its a sub command
