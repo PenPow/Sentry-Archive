@@ -9,6 +9,10 @@ const ReasonCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
+
+		if (!success) return;
+
 		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
 		if (punishment.isErr()) {
@@ -18,7 +22,7 @@ const ReasonCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ Cannot Find Case`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 		}
 
 		const unwrapped = punishment.unwrap();
@@ -34,7 +38,7 @@ const ReasonCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ Cannot Find Log Channel`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 		}
 
 		const msg = await logChannel.messages.fetch(unwrapped.modLogID).catch(() => null);
@@ -46,7 +50,7 @@ const ReasonCommand: IFunction = {
 				.setColor(0xFF5C5C)
 				.setTitle(`❌ Cannot Find Log Message`);
 
-			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 		}
 
 		const embed = EmbedBuilder.from(msg.embeds[0]);
@@ -55,7 +59,7 @@ const ReasonCommand: IFunction = {
 		description[2] = `<:point:995372986179780758> **Reason:** ${interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true)}`;
 
 		embed.setDescription(description.join('\n'));
-		await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
+		await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 
 		return void await msg.edit({ embeds: [embed] }).catch();
 	},
