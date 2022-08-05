@@ -54,13 +54,10 @@ const HistoryComponent: IFunction = {
 			case PunishmentType.Unban:
 				color = 0x5CFF9D;
 				break;
-			case PunishmentType.AntiRaidNuke:
-				color = 0x202225;
-				break;
 		}
 
 		const embed = new EmbedBuilder()
-			.setDescription([`<:point:995372986179780758> **Member:** ${(await interaction.guild.members.fetch(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID)).user.tag} (${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID})`, `<:point:995372986179780758> **Action:** ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type} ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type === PunishmentType.Timeout && data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires ? `(<t:${Math.round(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires!.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].reason}`].join("\n"))
+			.setDescription([`<:point:995372986179780758> **Member:** ${(await interaction.guild.members.fetch(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID)).user.tag} (${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID})`, `<:point:995372986179780758> **Action:** ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type} ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type === PunishmentType.Timeout && data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires ? `(<t:${Math.round(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires!.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].reason}`].join("\n"))
 			.setTimestamp()
 			.setColor(color)
 			.setFooter({ text: `Page ${parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1)}/${data.length + 1}` })

@@ -27,7 +27,7 @@ const ReasonCommand: IFunction = {
 
 		const unwrapped = punishment.unwrap();
 
-		await prisma.punishment.update({ data: { reason: interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true) }, where: { id: unwrapped.id } });
+		await prisma.punishment.update({ data: { reason: interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true).substring(0, 900) }, where: { id: unwrapped.id } });
 
 		const logChannel = interaction.guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 
@@ -56,7 +56,7 @@ const ReasonCommand: IFunction = {
 		const embed = EmbedBuilder.from(msg.embeds[0]);
 
 		const description = embed.data.description?.split('\n') ?? [];
-		description[2] = `<:point:995372986179780758> **Reason:** ${interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true)}`;
+		description[2] = `<:point:995372986179780758> **Reason:** ${interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true).substring(0, 900)}`;
 
 		embed.setDescription(description.join('\n'));
 		await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);

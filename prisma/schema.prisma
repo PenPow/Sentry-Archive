@@ -16,7 +16,6 @@ enum PunishmentType {
   Kick
   Softban
   Ban
-  AntiRaidNuke
   Unban
 }
 

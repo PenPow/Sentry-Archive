@@ -32,10 +32,9 @@ export const PunishmentManager = {
 			switch (data.type) {
 				case PunishmentType.Warn:
 					break;
-				case PunishmentType.AntiRaidNuke:
 				case PunishmentType.Ban:
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					await guild.bans.create(data.userID, { deleteMessageDays: 7, reason: data.type === PunishmentType.Ban ? data.reason : translate("en-GB", "ANTI_RAID_NUKE_PUNISHMENT_REASON") });
+					await guild.bans.create(data.userID, { deleteMessageDays: 7, reason: data.reason });
 					break;
 				case PunishmentType.Timeout:
 					if (!data.expires) throw new Error("No Expiry Provided");
@@ -73,9 +72,7 @@ export const PunishmentManager = {
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
 
 		const log = await logChannel.send({ embeds: [embed] }).catch();
-
 		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id, modLogChannelID: logChannel.id } });
-
 		return result instanceof Error ? Result.err(result) : Result.ok(embed);
 	},
 	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: User): Promise<EmbedBuilder> {
@@ -98,14 +95,14 @@ export const PunishmentManager = {
 			case PunishmentType.Unban:
 				color = 0x5CFF9D;
 				break;
-			case PunishmentType.AntiRaidNuke:
+			default:
 				color = 0x202225;
 				break;
 		}
 
 		const mod = await guild.members.fetch(moderator).catch(() => null);
 
-		const arr = [`<:point:995372986179780758> **Member:** ${user.tag} (${user.id})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`];
+		const arr = [`<:point:995372986179780758> **Member:** ${user.tag} (${user.id})`, `<:point:995372986179780758> **Action:** ${data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason.substring(0, 900)}`];
 
 		if (data.reference !== null) {
 			const ref = await this.fetchPunishment(data.reference, data.guildID);
@@ -182,7 +179,7 @@ export const PunishmentManager = {
 
 		if (member.permissions.has(PermissionsBitField.Flags.Administrator, true)) return false;
 
-		if (([PunishmentType.Ban, PunishmentType.AntiRaidNuke, PunishmentType.Softban] as PunishmentType[]).includes(type)) {
+		if (([PunishmentType.Ban, PunishmentType.Softban] as PunishmentType[]).includes(type)) {
 			if (!moderator.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!me?.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!member.bannable) return false;
