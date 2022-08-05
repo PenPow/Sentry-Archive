@@ -1,7 +1,10 @@
+import speakeasy from "@levminer/speakeasy";
 import { Punishment, PunishmentType } from "@prisma/client";
 import { Result } from "@sapphire/result";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder, Guild, GuildMember, PermissionsBitField, Snowflake, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, EmbedBuilder, Guild, GuildMember, ModalBuilder, ModalSubmitInteraction, PermissionsBitField, Snowflake, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { nanoid } from "nanoid";
+import { InteractionManager, ResponseType } from "./InteractionManager.js";
+import { SettingsManager } from "./SettingsManager.js";
 import { prisma, redis } from "../../common/db.js";
 import { translate } from "../../common/translations/translate.js";
 
@@ -64,7 +67,7 @@ export const PunishmentManager = {
 
 		const mod = await guild.members.fetch(data.moderator).catch(() => null);
 
-		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, data.type === PunishmentType.Unban ? await guild.client.users.fetch(data.userID) : await guild.members.fetch(data.userID));
+		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.client.users.fetch(data.userID));
 
 		const logChannel = guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
@@ -75,7 +78,7 @@ export const PunishmentManager = {
 
 		return result instanceof Error ? Result.err(result) : Result.ok(embed);
 	},
-	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: GuildMember | User): Promise<EmbedBuilder> {
+	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: User): Promise<EmbedBuilder> {
 		let color = 0x000000;
 
 		switch (data.type) {
@@ -102,7 +105,7 @@ export const PunishmentManager = {
 
 		const mod = await guild.members.fetch(moderator).catch(() => null);
 
-		const arr = [`<:point:995372986179780758> **Member:** ${(await guild.members.fetch(user.id)).user.tag} (${((await guild.members.fetch(user)).id)})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`];
+		const arr = [`<:point:995372986179780758> **Member:** ${user.tag} (${user.id})`, `<:point:995372986179780758> **Action:** ${data.type === PunishmentType.AntiRaidNuke ? "Anti Raid Nuke" : data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason}`];
 
 		if (data.reference !== null) {
 			const ref = await this.fetchPunishment(data.reference, data.guildID);
@@ -165,6 +168,8 @@ export const PunishmentManager = {
 		const me = (await client.guilds.fetch(guildId)).members.me;
 
 		if (type === PunishmentType.Unban) {
+			const ban = await (await client.guilds.fetch(guildId)).bans.fetch(user).catch(() => undefined);
+			if (!ban) return false;
 			if (!moderator.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!me?.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 
@@ -211,5 +216,59 @@ export const PunishmentManager = {
 			.setLabel('Punish'), new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-decline`).setEmoji('❌')
 			.setStyle(ButtonStyle.Secondary)
 			.setLabel('Cancel')])];
+	},
+	handleUser2FA: async function(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction, userId: Snowflake): Promise<[boolean, ModalSubmitInteraction | null]> {
+		const user = await SettingsManager.getUserSettings(userId);
+
+		if (!user.secret) return [true, null];
+
+		const customId = `ignore-${nanoid()}-modal`;
+		const textId = `${nanoid()}-text`;
+
+		await interaction.showModal(new ModalBuilder().setTitle('Verify Identity').setCustomId(customId)
+			.addComponents(...[new ActionRowBuilder<TextInputBuilder>().addComponents(...[new TextInputBuilder().setCustomId(textId).setLabel('2FA Code')
+				.setMinLength(6)
+				.setRequired(true)
+				.setStyle(TextInputStyle.Short)])]));
+
+		const response = await interaction.awaitModalSubmit({ time: 120000, filter: i => i.customId === customId && i.user.id === interaction.user.id }).catch(async () => {
+			const embed = new EmbedBuilder()
+				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
+				.setTimestamp()
+				.setColor(0xFF5C5C)
+				.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
+				.setTitle(`Failed to Verify 2FA Token`);
+
+			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
+		});
+
+		if (!response) return [false, null];
+
+		try {
+			if (!speakeasy.totp.verify({ secret: user.secret, token: response.fields.getTextInputValue(textId), digits: response.fields.getTextInputValue(textId).length, encoding: "base32" })) {
+				const embed = new EmbedBuilder()
+					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
+					.setTimestamp()
+					.setColor(0xFF5C5C)
+					.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
+					.setTitle(`Failed to Verify 2FA Token`);
+
+				await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
+
+				return [false, null];
+			}
+		} catch {
+			const embed = new EmbedBuilder()
+				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
+				.setTimestamp()
+				.setColor(0xFF5C5C)
+				.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
+				.setTitle(`Failed to Verify 2FA Token`);
+
+			await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
+			return [false, null];
+		}
+
+		return [true, response];
 	}
 };
