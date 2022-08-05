@@ -69,7 +69,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 				.setTimestamp()
 				.setColor(0x202225)
 				.setImage("attachment://qrcode.png")
-				.setDescription(["<:point:995372986179780758> Install [Google Authenticator](https://support.google.com/accounts/answer/1066447?hl=en&co=GENIE.Platform%3DAndroid&oco=0), [Authy](https://authy.com), or an authenticator application", "<:point:995372986179780758> Scan the QR code or manually input the code", "<:point:995372986179780758> Once your 2FA application is setup, press continue!", `\n<:point:995372986179780758> **Code:** ${secret.base32}`, `\n> ⚠️ Keep your account safe! Phishing attacks will often use these codes to gain access to your account. If in doubt, enter the code above instead of scanning the QR code.`].join('\n'))
+				.setDescription(["<:point:995372986179780758> Install [Google Authenticator](https://support.google.com/accounts/answer/1066447?hl=en&co=GENIE.Platform%3DAndroid&oco=0), [Authy](https://authy.com), or an authenticator application", "<:point:995372986179780758> Scan the QR code or manually input the code", "<:point:995372986179780758> Once your 2FA application is setup, press continue!", `\n<:point:995372986179780758> **Code:** ${secret.base32}`, `\n> ⚠️ Keep your account safe! Sentry will never ask for you to scan a QR code using the discord app.`].join('\n'))
 				.setTitle(`Generated 2FA Code`);
 
 			const declined_id = `ignore-${nanoid()}-2fa-decline`;
@@ -177,7 +177,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 			}
 
 			try {
-				if (user.backup !== interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true) && !speakeasy.totp.verify({ secret: user.secret, token: interaction.options.getString("TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME", true), digits: interaction.options.getString("TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME", true).length, encoding: "base32" })) {
+				if (user.backup !== interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true) && !speakeasy.totp.verify({ secret: user.secret, token: interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true), digits: interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true).length, encoding: "base32" })) {
 					const embed = new EmbedBuilder()
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
