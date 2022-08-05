@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { DEPLOY_ON_START, DEVELOPMENT } from "../../common/config.js";
+import { DEPLOY_ON_START } from "../../common/config.js";
 import { redis } from "../../common/db.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { InteractionManager } from "../managers/InteractionManager.js";
@@ -28,9 +28,7 @@ const readyEvent: IListener = {
 			await InteractionManager.loadInteractions();
 			if (DEPLOY_ON_START) await InteractionManager.registerInteractions(client.application!.id);
 
-
-			// TODO: RE-ENABLE THIS IN PRODUCTION
-			if (DEVELOPMENT) await reloadDomains();
+			await reloadDomains();
 
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-misused-promises
 			setInterval(reloadDomains, 172800000);
