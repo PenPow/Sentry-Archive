@@ -58,4 +58,6 @@ model Guild {
 model User {
   id          String       @id @unique
   punishments Punishment[]
+  secret      String?
+  backup      String?
 }
