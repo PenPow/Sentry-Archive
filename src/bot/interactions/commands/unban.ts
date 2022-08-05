@@ -1,5 +1,5 @@
 import { PunishmentType } from "@prisma/client";
-import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ComponentType, EmbedBuilder, InteractionResponse, PermissionFlagsBits } from "discord.js";
+import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -65,6 +65,8 @@ const UnbanCommand: IFunction = {
 
 					return void await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Update);
 				}
+
+				interaction.channel && [ChannelType.GuildNews, ChannelType.GuildNewsThread, ChannelType.GuildPrivateThread, ChannelType.GuildPublicThread, ChannelType.GuildText].includes(interaction.channel.type) && await interaction.channel.send({ embeds: [punishment.unwrap()] });
 				return void await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [punishment.unwrap()], components: [] }, ResponseType.Update);
 			default:
 			case (row.components[1].toJSON() as APIButtonComponentWithCustomId).custom_id:

@@ -29,6 +29,8 @@ const SlowmodeCommand: IFunction = {
 			.setDescription([`<:point:995372986179780758> **Channel:** <#${interaction.channel?.id}>`, `<:point:995372986179780758> **Action:** Slowmode`, `<:point:995372986179780758> **Delay**: ${ms(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 1000)}`, `<:point:995372986179780758> **Reason:** ${interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON")}`].join("\n"))
 			.setFooter({ text: `Slowmode` });
 
+		interaction.channel && [ChannelType.GuildNews, ChannelType.GuildNewsThread, ChannelType.GuildPrivateThread, ChannelType.GuildPublicThread, ChannelType.GuildText].includes(interaction.channel.type) && await interaction.channel.send({ embeds: [embed] });
+
 		await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return;

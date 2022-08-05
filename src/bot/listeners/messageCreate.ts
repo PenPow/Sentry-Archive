@@ -48,12 +48,14 @@ interface IClamAVErrorResponse {
 const messageCreateEvent: IListener = {
 	execute: function(client) {
 		client.on("messageCreate", async message => {
-			const settings = await SettingsManager.getSettings(message.guildId!);
+			if (!message.inGuild()) return;
+
+			const settings = await SettingsManager.getSettings(message.guildId);
 
 			if (!settings.automod) return;
 			if (message.author.bot || message.member?.permissions.any([PermissionFlagsBits.Administrator, PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers, PermissionFlagsBits.ModerateMembers], true)) return;
 
-			const guildId = message.guildId!;
+			const guildId = message.guildId;
 			const userId = message.author.id;
 
 			let total = 6.25;
@@ -200,7 +202,7 @@ const messageCreateEvent: IListener = {
 				}
 			}
 
-			const userHeatResult = await PunishmentManager.setHeat(message.guildId!, message.author.id, total);
+			const userHeatResult = await PunishmentManager.setHeat(message.guildId, message.author.id, total);
 			let userHeat: number;
 
 			try {
@@ -215,7 +217,8 @@ const messageCreateEvent: IListener = {
 			if (userHeat < 100) return;
 
 			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-			await PunishmentManager.createPunishment(message.client, { userID: message.author.id, moderator: message.guild?.members.me?.id ?? message.client.user?.id!, guildID: message.guildId!, reason: translate("en-GB", "HEAT_SYSTEM_PUNISHMENT_REASON", reason.msg, userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: userHeat < 150 ? new Date(Date.now() + (30 * 60000)) : null, reference: null });
+			const ok = await PunishmentManager.createPunishment(message.client, { userID: message.author.id, moderator: message.guild.members.me?.id ?? message.client.user?.id!, guildID: message.guildId, reason: translate("en-GB", "HEAT_SYSTEM_PUNISHMENT_REASON", reason.msg, userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: userHeat < 150 ? new Date(Date.now() + (30 * 60000)) : null, reference: null });
+			if (ok.isOk()) await message.channel.send({ embeds: [ok.unwrap()] });
 		});
 	}
 };
