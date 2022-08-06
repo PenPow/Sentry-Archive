@@ -62,7 +62,30 @@ export const PunishmentManager = {
 
 		await prisma.guild.upsert({ create: { id: guild.id }, update: {}, where: { id: guild.id } });
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-		const result = await prisma.punishment.create({ data: { caseID, ...data } }).catch(e => new Error(e));
+		const result = await prisma.punishment.create({ data: { caseID, ...data, reason: data.reason.substring(0, 900) } }).catch(e => new Error(e));
+
+		if ((await SettingsManager.getSettings(data.guildID)).statistics) {
+			switch (data.type) {
+				case PunishmentType.Warn:
+					await redis.incr(`stats-warns`);
+					break;
+				case PunishmentType.Ban:
+					await redis.incr(`stats-bans`);
+					break;
+				case PunishmentType.Timeout:
+					await redis.incr(`stats-timeouts`);
+					break;
+				case PunishmentType.Softban:
+					await redis.incr(`stats-softbans`);
+					break;
+				case PunishmentType.Kick:
+					await redis.incr(`stats-kicks`);
+					break;
+				case PunishmentType.Unban:
+					await redis.incr(`stats-unbans`);
+					break;
+			}
+		}
 
 		const mod = await guild.members.fetch(data.moderator).catch(() => null);
 

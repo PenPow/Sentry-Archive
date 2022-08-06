@@ -7,7 +7,7 @@ export const SettingsManager = {
 		await prisma.guild.upsert({ create: { id: guildId, settings: {} }, update: {}, where: { id: guildId } });
 		await prisma.settings.upsert({ create: { id: guildId }, update: {}, where: { id: guildId } });
 
-		return (await prisma.guild.findUnique({ where: { id: guildId }, include: { settings: true } }))?.settings ?? { id: guildId, automod: true, phrase: true, username: true, invite: true, url: true, spam: true, clamav: true, enforce2fa: false };
+		return (await prisma.guild.findUnique({ where: { id: guildId }, include: { settings: true } }))?.settings ?? { id: guildId, automod: true, phrase: true, username: true, invite: true, url: true, spam: true, clamav: true, enforce2fa: false, statistics: true };
 	},
 	setSettings: async function(guildId: Snowflake, settings: Omit<Settings, 'id'>): Promise<Settings> {
 		await prisma.guild.upsert({ create: { id: guildId, settings: {} }, update: {}, where: { id: guildId } });

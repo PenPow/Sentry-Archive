@@ -47,6 +47,7 @@ model Settings {
   spam       Boolean? @default(true)
   clamav     Boolean? @default(true)
   enforce2fa Boolean? @default(false)
+  statistics Boolean? @default(true)
 }
 
 model Guild {
