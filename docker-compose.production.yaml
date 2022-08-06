@@ -5,6 +5,8 @@ services:
     image: ghcr.io/penpow/sentry:latest
     pull_policy: always
     tty: true
+    environment:
+      - SENTRY_VERSION
     env_file:
       - .env
     restart: always
