@@ -33,7 +33,7 @@ if [[ UPDATE ]] && [[ $VERSION != $NEW_VERSION ]]; then
 	docker compose -f docker-compose.production.yaml pull
 	docker-compose -f docker-compose.production.yaml start postgres
 	npx prisma db push --accept-data-loss
-	docker compose -f docker-compose.production.yaml up -d
+	SENTRY_VERSION=$VERSION docker compose -f docker-compose.production.yaml up -d
 
 	echo $NEW_VERSION > "$VERSION_FILE"
 else
