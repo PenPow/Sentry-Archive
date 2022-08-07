@@ -112,7 +112,7 @@ const english = {
 	// STATISTICS COMMAND
 	STATISTICS_COMMAND_NAME: "statistics",
 	STATISTICS_COMMAND_DESCRIPTION: "Some interesting statistics about Sentry!",
-  
+
 	// About Command
 	ABOUT_COMMAND_NAME: "about",
 	ABOUT_COMMAND_DESCRIPTION: "About Sentry",

@@ -110,8 +110,8 @@ const SettingsCommand: IFunction = {
 					name: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_STATS_OPTION_NAME",
 					description: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_STATS_OPTION_DESCRIPTION",
 					type: ApplicationCommandOptionType.Boolean
-        },
-        {
+				},
+				{
 					name: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LOGS_OPTION_NAME",
 					description: "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LOGS_OPTION_DESCRIPTION",
 					type: ApplicationCommandOptionType.Channel,
