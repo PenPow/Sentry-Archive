@@ -68,7 +68,8 @@ export const PunishmentManager = {
 
 		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.client.users.fetch(data.userID));
 
-		const logChannel = guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+		const logChannel = await guild.channels.fetch((await SettingsManager.getSettings(data.guildID)).logChannelId ?? '0').catch(() => null) ?? guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
 
 		const log = await logChannel.send({ embeds: [embed] }).catch();
