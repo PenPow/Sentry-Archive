@@ -1,7 +1,9 @@
 import speakeasy from "@levminer/speakeasy";
+import * as Sentry from "@sentry/node";
 import { ActionRowBuilder, APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, Message, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { nanoid } from "nanoid";
 import { toBuffer } from "qrcode";
+import { redis } from "../../../common/db.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { SettingsManager } from "../../managers/SettingsManager.js";
@@ -84,7 +86,10 @@ const TwoFactorAuthenticationCommand: IFunction = {
 
 			const response = await InteractionManager.sendInteractionResponse(user.secret ? modalSubmit! : interaction, { ephemeral: true, embeds: [embed], components: [row], files: [attachment], fetchReply: true }, ResponseType.Reply);
 
-			if (!response.isOk()) return;
+			if (response.isErr()) {
+				Sentry.captureException(response.unwrapErr());
+				return;
+			}
 
 			const unwrapped = response.unwrap() as InteractionResponse | Message;
 
@@ -161,6 +166,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 					.setTitle(`2FA Setup Complete`);
 
 				await SettingsManager.setUserSettings(interaction.user.id, { secret: secret.base32, backup });
+				await redis.incr(`users-2fa`);
 
 				void await InteractionManager.sendInteractionResponse(modalSubmit, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Update);
 			}
@@ -205,6 +211,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 				.setTitle(`✅ Disabled 2FA`);
 
 			await SettingsManager.setUserSettings(interaction.user.id, { secret: null, backup: null });
+			await redis.decr(`users-2fa`);
 			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 		}
 

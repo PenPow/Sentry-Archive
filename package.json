@@ -45,6 +45,8 @@
     "@levminer/speakeasy": "^1.4.0",
     "@prisma/client": "^4.1.1",
     "@sapphire/result": "^2.1.1",
+    "@sentry/node": "^7.9.0",
+    "@sentry/tracing": "^7.9.0",
     "bufferutil": "^4.0.6",
     "chalk": "^5.0.1",
     "ctph.js": "^0.0.5",
@@ -58,6 +60,7 @@
     "qrcode": "^1.5.1",
     "source-map-support": "^0.5.21",
     "sourcebin": "^4.3.5",
+    "tslib": "^2.4.0",
     "utf-8-validate": "^5.0.9",
     "zlib-sync": "^0.1.7"
   }

@@ -1,4 +1,5 @@
 import { PunishmentType } from "@prisma/client";
+import * as Sentry from "@sentry/node";
 import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, Message, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
@@ -30,6 +31,8 @@ const SoftbanCommand: IFunction = {
 		const res = await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [row], fetchReply: true }, ResponseType.Reply);
 
 		if (res.isErr()) {
+			Sentry.captureException(res.unwrapErr());
+
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
@@ -61,6 +64,8 @@ const SoftbanCommand: IFunction = {
 				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Softban, userID: interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: null, reference: interaction.options.getNumber(translate("en-GB", "MODERATION_REFERENCE_OPTION_NAME")) });
 
 				if (punishment.isErr()) {
+					Sentry.captureException(punishment.unwrapErr());
+
 					const embed = new EmbedBuilder()
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()

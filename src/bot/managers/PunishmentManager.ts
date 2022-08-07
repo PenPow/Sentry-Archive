@@ -1,6 +1,7 @@
 import speakeasy from "@levminer/speakeasy";
 import { Punishment, PunishmentType } from "@prisma/client";
 import { Result } from "@sapphire/result";
+import * as Sentry from "@sentry/node";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, EmbedBuilder, Guild, GuildMember, GuildMFALevel, ModalBuilder, ModalSubmitInteraction, PermissionsBitField, Snowflake, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { nanoid } from "nanoid";
 import { InteractionManager, ResponseType } from "./InteractionManager.js";
@@ -18,6 +19,7 @@ export const PunishmentManager = {
 
 			return Result.ok(userHeat + heat);
 		} catch (e) {
+			Sentry.captureException(e);
 			return Result.err(e as Error);
 		}
 	},
@@ -55,6 +57,7 @@ export const PunishmentManager = {
 					break;
 			}
 		} catch (e) {
+			Sentry.captureException(e);
 			return Result.err(e as Error);
 		}
 
@@ -62,9 +65,32 @@ export const PunishmentManager = {
 
 		await prisma.guild.upsert({ create: { id: guild.id }, update: {}, where: { id: guild.id } });
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-		const result = await prisma.punishment.create({ data: { caseID, ...data } }).catch(e => new Error(e));
+		const result = await prisma.punishment.create({ data: { caseID, ...data, reason: data.reason.substring(0, 900) } }).catch(e => new Error(e));
 
-		const mod = await guild.members.fetch(data.moderator).catch(() => null);
+		if ((await SettingsManager.getSettings(data.guildID)).statistics) {
+			switch (data.type) {
+				case PunishmentType.Warn:
+					await redis.incr(`stats-warns`);
+					break;
+				case PunishmentType.Ban:
+					await redis.incr(`stats-bans`);
+					break;
+				case PunishmentType.Timeout:
+					await redis.incr(`stats-timeouts`);
+					break;
+				case PunishmentType.Softban:
+					await redis.incr(`stats-softbans`);
+					break;
+				case PunishmentType.Kick:
+					await redis.incr(`stats-kicks`);
+					break;
+				case PunishmentType.Unban:
+					await redis.incr(`stats-unbans`);
+					break;
+			}
+		}
+
+		const mod = await guild.members.fetch(data.moderator).catch(e => void Sentry.captureException(e));
 
 		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.client.users.fetch(data.userID));
 
@@ -72,8 +98,8 @@ export const PunishmentManager = {
 		const logChannel = await guild.channels.fetch((await SettingsManager.getSettings(data.guildID)).logChannelId ?? '0').catch(() => null) ?? guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return result instanceof Error ? Result.err(result) : Result.ok(embed);
 
-		const log = await logChannel.send({ embeds: [embed] }).catch();
-		!(result instanceof Error) && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id, modLogChannelID: logChannel.id } });
+		const log = await logChannel.send({ embeds: [embed] }).catch(e => void Sentry.captureException(e));
+		!(result instanceof Error) && Sentry.captureException(result) && log && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id, modLogChannelID: logChannel.id } });
 		return result instanceof Error ? Result.err(result) : Result.ok(embed);
 	},
 	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: User): Promise<EmbedBuilder> {
@@ -101,7 +127,7 @@ export const PunishmentManager = {
 				break;
 		}
 
-		const mod = await guild.members.fetch(moderator).catch(() => null);
+		const mod = await guild.members.fetch(moderator).catch(e => void Sentry.captureException(e));
 
 		const arr = [`<:point:995372986179780758> **Member:** ${user.tag} (${user.id})`, `<:point:995372986179780758> **Action:** ${data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason.substring(0, 900)}`];
 
@@ -136,7 +162,7 @@ export const PunishmentManager = {
 		return (await prisma.guild.findUnique({ where: { id: guildId }, include: { punishments: true } }))?.punishments ?? [];
 	},
 	fetchPunishment: async function(caseID: number, guildID: Snowflake): Promise<Result<Punishment, Error>> {
-		const punishments = await this.fetchGuildPunishments(guildID).catch(() => null);
+		const punishments = await this.fetchGuildPunishments(guildID).catch(e => void Sentry.captureException(e));
 
 		if (!punishments) return Result.err(new Error("No Cases Found"));
 
@@ -166,7 +192,7 @@ export const PunishmentManager = {
 		const me = (await client.guilds.fetch(guildId)).members.me;
 
 		if (type === PunishmentType.Unban) {
-			const ban = await (await client.guilds.fetch(guildId)).bans.fetch(user).catch(() => undefined);
+			const ban = await (await client.guilds.fetch(guildId)).bans.fetch(user).catch(e => void Sentry.captureException(e));
 			if (!ban) return false;
 			if (!moderator.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;
 			if (!me?.permissions.has(PermissionsBitField.Flags.BanMembers, true)) return false;

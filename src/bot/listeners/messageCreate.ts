@@ -2,6 +2,7 @@
 import crypto from "node:crypto";
 import { Stream } from "node:stream";
 import { PunishmentType } from "@prisma/client";
+import * as Sentry from "@sentry/node";
 import pkg from 'ctph.js';
 import { PermissionFlagsBits } from "discord.js";
 import { redis } from "../../common/db.js";
@@ -208,6 +209,7 @@ const messageCreateEvent: IListener = {
 			try {
 				userHeat = userHeatResult.unwrap()!;
 			} catch (e) {
+				Sentry.captureException(e);
 				log({ level: LogLevel.Error, prefix: 'Punishment Manager' }, e as Error);
 				return;
 			}
