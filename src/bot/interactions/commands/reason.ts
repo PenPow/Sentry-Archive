@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { prisma } from "../../../common/db.js";
 import { translate } from "../../../common/translations/translate.js";
@@ -41,7 +42,7 @@ const ReasonCommand: IFunction = {
 			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 		}
 
-		const msg = await logChannel.messages.fetch(unwrapped.modLogID).catch(() => null);
+		const msg = await logChannel.messages.fetch(unwrapped.modLogID).catch(e => void Sentry.captureException(e));
 
 		if (!msg || msg.embeds.length === 0) {
 			const embed = new EmbedBuilder()
@@ -61,7 +62,7 @@ const ReasonCommand: IFunction = {
 		embed.setDescription(description.join('\n'));
 		await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 
-		return void await msg.edit({ embeds: [embed] }).catch();
+		return void await msg.edit({ embeds: [embed] }).catch(e => void Sentry.captureException(e));
 	},
 	toJSON() {
 		return {

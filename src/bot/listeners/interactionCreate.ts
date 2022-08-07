@@ -1,4 +1,5 @@
 import { Result } from "@sapphire/result";
+import * as Sentry from "@sentry/node";
 import { ApplicationCommandType, ComponentType, InteractionType, PermissionsBitField } from "discord.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { ResponseType, InteractionManager, store, generateNoPermissionsEmbed } from "../managers/InteractionManager.js";
@@ -28,6 +29,7 @@ const interactionCreateListener: IListener = {
 						output.unwrap();
 					}
 				} catch (e) {
+					Sentry.captureException(e);
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ApplicationCommand && [ApplicationCommandType.User, ApplicationCommandType.Message].includes(interaction.commandType)) {
@@ -47,6 +49,7 @@ const interactionCreateListener: IListener = {
 				try {
 					return void await command.execute(interaction);
 				} catch (e) {
+					Sentry.captureException(e);
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
@@ -66,6 +69,7 @@ const interactionCreateListener: IListener = {
 				try {
 					return void await InteractionManager.sendInteractionResponse(interaction, await command.handleAutocomplete(interaction));
 				} catch (e) {
+					Sentry.captureException(e);
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.MessageComponent && !interaction.customId.startsWith("ignore")) {
@@ -95,6 +99,7 @@ const interactionCreateListener: IListener = {
 
 					throw new Error("Unknown Component Type");
 				} catch (e) {
+					Sentry.captureException(e);
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			} else if (interaction.type === InteractionType.ModalSubmit && !interaction.customId.startsWith("ignore")) {
@@ -114,6 +119,7 @@ const interactionCreateListener: IListener = {
 				try {
 					return void await command.handleModal(interaction.customId.split('-')[1], interaction);
 				} catch (e) {
+					Sentry.captureException(e);
 					return void log({ level: LogLevel.Error, prefix: 'Interaction Listener' }, e as Error);
 				}
 			}

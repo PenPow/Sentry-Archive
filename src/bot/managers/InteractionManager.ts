@@ -2,6 +2,7 @@ import { readdir } from "fs/promises";
 import { join } from "path";
 import { REST } from "@discordjs/rest";
 import { Result } from "@sapphire/result";
+import * as Sentry from "@sentry/node";
 import { RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody, APIApplicationCommandOption, ApplicationCommandOptionType, APIApplicationCommandOptionChoice, APIApplicationCommandIntegerOption, APIApplicationCommandNumberOption, APIApplicationCommandStringOption, Routes, RESTPostAPIContextMenuApplicationCommandsJSONBody, InteractionReplyOptions, InteractionType, ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, AutocompleteInteraction, InteractionDeferReplyOptions, EmbedBuilder, Interaction, ContextMenuCommandInteraction, SelectMenuInteraction, ButtonInteraction, ModalSubmitInteraction, InteractionResponse, Message, InteractionUpdateOptions } from "discord.js";
 import { DEVELOPMENT, DEV_GUILD_ID } from "../../common/config.js";
 import { log, LogLevel } from "../../common/logger.js";
@@ -73,6 +74,7 @@ export const InteractionManager = {
 				}
 			}
 		} catch (e) {
+			Sentry.captureException(e);
 			log({ level: LogLevel.Error, prefix: 'Interaction Response' }, `Failed to send response: ${(e as Error).message}`);
 			return Result.err(e as Error);
 		}
@@ -103,6 +105,7 @@ export const InteractionManager = {
 			log({ level: LogLevel.Info, prefix: 'Interaction Manager' }, `Loaded ${store.commands.size + store.components.size + store.contexts.size} Interactions`);
 			store.loaded = true;
 		} catch (e) {
+			Sentry.captureException(e);
 			log({ level: LogLevel.Warn, prefix: 'Interaction Manager' }, `Failed to Load Interactions? Are there any to load?\n${(e as Error).message}`);
 		}
 	},
@@ -493,6 +496,7 @@ export const InteractionManager = {
 			await rest.put(DEVELOPMENT ? Routes.applicationGuildCommands(clientId, DEV_GUILD_ID) : Routes.applicationCommands(clientId), { body: toRegister });
 			log({ level: LogLevel.Success, prefix: 'REST Instance' }, `🚀 ${toRegister.length} Commands Shipped to Discord`);
 		} catch (e) {
+			Sentry.captureException(e);
 			log({ level: LogLevel.Error, prefix: 'REST Instance' }, `🔥 Failed to send commands: ${(e as Error).message}`);
 		}
 	}

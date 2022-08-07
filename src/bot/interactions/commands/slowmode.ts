@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import ms from "ms";
 import { translate } from "../../../common/translations/translate.js";
@@ -39,7 +40,7 @@ const SlowmodeCommand: IFunction = {
 		await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 
 		if (!logChannel || logChannel.type !== ChannelType.GuildText) return;
-		return void await logChannel.send({ embeds: [embed] }).catch();
+		return void await logChannel.send({ embeds: [embed] }).catch(e => void Sentry.captureException(e));
 	},
 	toJSON() {
 		return {

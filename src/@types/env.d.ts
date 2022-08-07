@@ -7,5 +7,7 @@ declare namespace NodeJS {
 		DEPLOY_ON_START: string;
 		DEVELOPMENT_DATABASE_URL: string;
 		DATABASE_URL: string;
+		SENTRY_DSN: string;
+		SENTRY_RELEASE: string?;
 	}
 }

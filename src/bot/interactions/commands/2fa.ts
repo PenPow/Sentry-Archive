@@ -1,4 +1,5 @@
 import speakeasy from "@levminer/speakeasy";
+import * as Sentry from "@sentry/node";
 import { ActionRowBuilder, APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, Message, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { nanoid } from "nanoid";
 import { toBuffer } from "qrcode";
@@ -85,7 +86,10 @@ const TwoFactorAuthenticationCommand: IFunction = {
 
 			const response = await InteractionManager.sendInteractionResponse(user.secret ? modalSubmit! : interaction, { ephemeral: true, embeds: [embed], components: [row], files: [attachment], fetchReply: true }, ResponseType.Reply);
 
-			if (!response.isOk()) return;
+			if (response.isErr()) {
+				Sentry.captureException(response.unwrapErr());
+				return;
+			}
 
 			const unwrapped = response.unwrap() as InteractionResponse | Message;
 
