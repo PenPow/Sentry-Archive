@@ -48,6 +48,7 @@ model Settings {
   clamav     Boolean? @default(true)
   enforce2fa Boolean? @default(false)
   statistics Boolean? @default(true)
+  logChannelId String?
 }
 
 model Guild {
