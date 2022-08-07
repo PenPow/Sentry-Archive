@@ -71,7 +71,7 @@ export interface RESTApplicationCommandOptionJSON<T extends ApplicationCommandOp
 	choices?: T extends ApplicationCommandOptionType.String | ApplicationCommandOptionType.Integer | ApplicationCommandOptionType.Number ? RESTApplicationCommandsOptionChoicesJSON<T>[] : never;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	options?: T extends ApplicationCommandOptionType.Subcommand | ApplicationCommandOptionType.SubcommandGroup ? RESTApplicationCommandOptionJSON<any>[] : never;
-	channel_types?: T extends ApplicationCommandOptionType.Channel ? ChannelType : never;
+	channel_types?: T extends ApplicationCommandOptionType.Channel ? ChannelType[] : never;
 	min_value?: T extends ApplicationCommandOptionType.Integer | ApplicationCommandOptionType.Number ? number : never;
 	max_value?: T extends ApplicationCommandOptionType.Integer | ApplicationCommandOptionType.Number ? number : never;
 	min_length?: T extends ApplicationCommandOptionType.String ? number : never;
