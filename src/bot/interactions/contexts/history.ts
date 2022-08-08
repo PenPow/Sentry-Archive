@@ -22,7 +22,8 @@ const HistoryCommand: IFunction = {
 			.setStyle(ButtonStyle.Secondary)
 			.setDisabled(true),
 		new ButtonBuilder().setCustomId(`user-r:${(interaction as UserContextMenuCommandInteraction).targetUser.id}-history-page-r:1-r:right`).setEmoji('➡️')
-			.setStyle(ButtonStyle.Secondary)]);
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(punishments.length === 0 ? true : false)]);
 
 		return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [row] }, ResponseType.Reply);
 	},
