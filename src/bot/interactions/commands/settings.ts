@@ -56,6 +56,7 @@ const SettingsCommand: IFunction = {
 			name: "SETTINGS_COMMAND_NAME",
 			description: "SETTINGS_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 			options: [{
 				name: "SETTINGS_COMMAND_VIEW_SUBCOMMAND_NAME",

@@ -93,6 +93,7 @@ const SoftbanCommand: IFunction = {
 			name: "SOFTBAN_COMMAND_NAME",
 			description: "SOFTBAN_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.BanMembers.toString(),
 			options: [{
 				name: "MODERATION_TARGET_OPTION_NAME",

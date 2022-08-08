@@ -29,6 +29,7 @@ const CaseCommand: IFunction = {
 			name: "CASE_COMMAND_NAME",
 			description: "CASE_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
 			options: [{
 				name: "REASON_CASE_OPTION_NAME",

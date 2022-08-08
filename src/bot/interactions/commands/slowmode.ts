@@ -47,6 +47,7 @@ const SlowmodeCommand: IFunction = {
 			name: "SLOWMODE_COMMAND_NAME",
 			description: "SLOWMODE_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.ManageChannels.toString(),
 			options: [{
 				name: "TIMEOUT_DURATION_OPTION_NAME",

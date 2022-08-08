@@ -93,6 +93,7 @@ const BanCommand: IFunction = {
 			name: "BAN_COMMAND_NAME",
 			description: "BAN_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.BanMembers.toString(),
 			options: [{
 				name: "MODERATION_TARGET_OPTION_NAME",

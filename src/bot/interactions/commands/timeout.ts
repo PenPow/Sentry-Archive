@@ -93,6 +93,7 @@ const TimeoutCommand: IFunction = {
 			name: "TIMEOUT_COMMAND_NAME",
 			description: "TIMEOUT_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
 			options: [{
 				name: "MODERATION_TARGET_OPTION_NAME",
