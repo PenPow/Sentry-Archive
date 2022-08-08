@@ -10,6 +10,8 @@ const SlowmodeCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
 
 		if (!success) return;
@@ -47,6 +49,7 @@ const SlowmodeCommand: IFunction = {
 			name: "SLOWMODE_COMMAND_NAME",
 			description: "SLOWMODE_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.ManageChannels.toString(),
 			options: [{
 				name: "TIMEOUT_DURATION_OPTION_NAME",

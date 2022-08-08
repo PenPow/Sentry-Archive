@@ -10,6 +10,8 @@ const SettingsCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.Admin,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
 
 		if (!success) return;
@@ -56,6 +58,7 @@ const SettingsCommand: IFunction = {
 			name: "SETTINGS_COMMAND_NAME",
 			description: "SETTINGS_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 			options: [{
 				name: "SETTINGS_COMMAND_VIEW_SUBCOMMAND_NAME",

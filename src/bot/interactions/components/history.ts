@@ -9,6 +9,8 @@ const HistoryComponent: IFunction = {
 	id: `user-r:*-history-page-r:*-r:*`,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		const splitID = interaction.customId.split('-');
 		const reconstructedID: string[] = [];
 

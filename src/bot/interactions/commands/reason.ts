@@ -10,6 +10,8 @@ const ReasonCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
 
 		if (!success) return;
@@ -69,6 +71,7 @@ const ReasonCommand: IFunction = {
 			name: "REASON_COMMAND_NAME",
 			description: "REASON_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
 			options: [{
 				name: "REASON_CASE_OPTION_NAME",

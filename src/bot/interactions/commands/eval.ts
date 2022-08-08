@@ -13,6 +13,8 @@ const EvalCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.Developer,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true }, ResponseType.Defer);
 
 		const bin = await get(interaction.options.getString(translate("en-GB", "EVAL_COMMAND_SOURCE_OPTION_NAME"), true).split('/').at(-1) ?? '0');

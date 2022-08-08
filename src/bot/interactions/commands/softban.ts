@@ -10,6 +10,8 @@ const SoftbanCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		// await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true }, ResponseType.Defer);
 
 		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
@@ -93,6 +95,7 @@ const SoftbanCommand: IFunction = {
 			name: "SOFTBAN_COMMAND_NAME",
 			description: "SOFTBAN_COMMAND_DESCRIPTION",
 			type: ApplicationCommandType.ChatInput,
+			dm_permission: false,
 			default_member_permissions: PermissionFlagsBits.BanMembers.toString(),
 			options: [{
 				name: "MODERATION_TARGET_OPTION_NAME",
