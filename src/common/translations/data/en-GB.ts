@@ -113,9 +113,11 @@ const english = {
 	STATISTICS_COMMAND_NAME: "statistics",
 	STATISTICS_COMMAND_DESCRIPTION: "Some interesting statistics about Sentry!",
 
-	// About Command
+	// ABOUT COMMAND
 	ABOUT_COMMAND_NAME: "about",
 	ABOUT_COMMAND_DESCRIPTION: "About Sentry",
+
+
 };
 
 export default english;
