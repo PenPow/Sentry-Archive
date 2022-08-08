@@ -8,6 +8,8 @@ const CaseCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+
 		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
 		if (punishment.isErr()) {

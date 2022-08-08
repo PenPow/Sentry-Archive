@@ -1,4 +1,4 @@
-import type { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, RESTPostAPIContextMenuApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody, SelectMenuInteraction, ApplicationCommandType, ApplicationCommandOptionType, ChannelType, ModalSubmitInteraction, ApplicationCommandOptionChoiceData } from 'discord.js';
+import type { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, RESTPostAPIContextMenuApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody, SelectMenuInteraction, ApplicationCommandType, ApplicationCommandOptionType, ChannelType, ApplicationCommandOptionChoiceData } from 'discord.js';
 import type { translationKeys } from '../../common/translations/translate.js';
 
 export enum PermissionTier {
@@ -21,16 +21,15 @@ export type IComponentFunction = ISelectMenuFunction | IButtonFunction;
 export interface ICommandFunction {
 	type: FunctionType.ChatInput;
 	permissions: PermissionTier;
-	execute: (interaction: ChatInputCommandInteraction<"cached">) => unknown;
-	handleAutocomplete?: (interaction: AutocompleteInteraction<"cached">) => ApplicationCommandOptionChoiceData[] | Promise<ApplicationCommandOptionChoiceData[]>;
-	handleModal?: (customId: string, interaction: ModalSubmitInteraction<"cached">) => unknown;
+	execute: (interaction: ChatInputCommandInteraction) => unknown;
+	handleAutocomplete?: (interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData[] | Promise<ApplicationCommandOptionChoiceData[]>;
 	toJSON: () => RESTApplicationCommandJSON;
 }
 
 export interface IContextMenuFunction {
 	type: FunctionType.ContextMenu;
 	permissions: PermissionTier;
-	execute: (interaction: ContextMenuCommandInteraction<"cached">) => unknown;
+	execute: (interaction: ContextMenuCommandInteraction) => unknown;
 	toJSON: () => RESTContextMenuJSON;
 }
 
@@ -38,14 +37,14 @@ export interface ISelectMenuFunction {
 	type: FunctionType.SelectMenu;
 	id: string;
 	permissions: PermissionTier;
-	execute: (interaction: SelectMenuInteraction<"cached">) => unknown;
+	execute: (interaction: SelectMenuInteraction) => unknown;
 }
 
 export interface IButtonFunction {
 	type: FunctionType.Button;
 	id: string;
 	permissions: PermissionTier;
-	execute: (interaction: ButtonInteraction<"cached">) => unknown;
+	execute: (interaction: ButtonInteraction) => unknown;
 }
 
 export type RESTCommandJSON = RESTApplicationCommandJSON | RESTContextMenuJSON;

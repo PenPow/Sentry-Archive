@@ -16,7 +16,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 		const user = await SettingsManager.getUserSettings(interaction.user.id);
 
 		if (interaction.options.getSubcommand(true) === translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_CONFIGURE_SUBCOMMAND_NAME")) {
-			let modalSubmit: ModalSubmitInteraction<"cached"> | void;
+			let modalSubmit: ModalSubmitInteraction | void;
 			if (user.secret) {
 				const customId = `ignore-${nanoid()}-modal`;
 				const textId = `${nanoid()}-text`;
