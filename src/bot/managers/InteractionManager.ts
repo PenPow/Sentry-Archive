@@ -424,6 +424,9 @@ export const InteractionManager = {
 										},
 										value: choi.value
 									});
+
+									// @ts-expect-error ik it works get me out of this hell of a function
+									transformedSubOption.choices = subTransformedChoices;
 								}
 							}
 
