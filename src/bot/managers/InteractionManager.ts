@@ -387,8 +387,7 @@ export const InteractionManager = {
 							if ([ApplicationCommandOptionType.String, ApplicationCommandOptionType.Number, ApplicationCommandOptionType.Integer].includes(opt.type as ApplicationCommandOptionType.String | ApplicationCommandOptionType.Number | ApplicationCommandOptionType.Integer) && opt.choices) {
 								const subTransformedChoices: APIApplicationCommandOptionChoice[] = [];
 
-								// @ts-expect-error its not undefined bruv i checked it 2 lines above
-								for (const choi of option.choices) {
+								for (const choi of opt.choices) {
 									subTransformedChoices.push({
 										name: translate("en-GB", choi.name),
 										name_localizations: {
@@ -502,12 +501,12 @@ export const InteractionManager = {
 	}
 };
 
-export function generateNoPermissionsEmbed(interaction: Interaction, userPerms: PermissionTier, needed: PermissionTier): EmbedBuilder {
+export function generateNoPermissionsEmbed(interaction: Interaction): EmbedBuilder {
 	return new EmbedBuilder()
 		.setTimestamp()
 		.setColor(0xFF5C5C)
-		.setTitle("Invalid Permissions")
-		.setDescription(['You cannot use this command', '', `**Your Permission Level**: ${PermissionTier[userPerms]}`, `**You Require**: ${PermissionTier[needed]}`].join('\n'))
+		.setTitle(translate(interaction.locale, "NO_PERMISSIONS_TITLE"))
+		.setDescription(translate(interaction.locale, "NO_PERMISSIONS_DESCRIPTION"))
 		.setFooter({ text: 'Sentry', iconURL: interaction.client.user?.displayAvatarURL() ?? '' })
 		.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() });
 }

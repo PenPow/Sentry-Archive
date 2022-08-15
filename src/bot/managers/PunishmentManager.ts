@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 import { InteractionManager, ResponseType } from "./InteractionManager.js";
 import { SettingsManager } from "./SettingsManager.js";
 import { prisma, redis } from "../../common/db.js";
-import { translate } from "../../common/translations/translate.js";
+import { Locale, translate } from "../../common/translations/translate.js";
 
 export const PunishmentManager = {
 	getHeat: async function(guildId: Snowflake, userId: Snowflake): Promise<number> { return parseInt(await redis.get(`${guildId}-${userId}-heat`) ?? '0', 10); },
@@ -23,7 +23,7 @@ export const PunishmentManager = {
 			return Result.err(e as Error);
 		}
 	},
-	createPunishment: async function(client: Client, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'caseID' | 'modLogChannelID'>): Promise<Result<EmbedBuilder, Error>> {
+	createPunishment: async function(client: Client, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'caseID' | 'modLogChannelID'>, locale: Locale): Promise<Result<EmbedBuilder, Error>> {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		if (!(await this.canPunish(client, data.type, data.userID, data.moderator, data.guildID))) return Result.err(new Error("Cannot Moderate"));
 
@@ -46,7 +46,7 @@ export const PunishmentManager = {
 				case PunishmentType.Softban:
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					await guild.bans.create(data.userID, { deleteMessageDays: 7, reason: data.reason });
-					await guild.bans.remove(data.userID, translate("en-GB", "SOFTBAN_UNBAN_REASON"));
+					await guild.bans.remove(data.userID, translate(locale, "SOFTBAN_UNBAN_REASON"));
 					break;
 				case PunishmentType.Kick:
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -64,6 +64,7 @@ export const PunishmentManager = {
 		const caseID = await this.fetchPunishmentId(data.guildID);
 
 		await prisma.guild.upsert({ create: { id: guild.id }, update: {}, where: { id: guild.id } });
+		await prisma.user.upsert({ create: { id: data.userID }, update: {}, where: { id: data.userID } });
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		const result = await prisma.punishment.create({ data: { caseID, ...data, reason: data.reason.substring(0, 900) } }).catch(e => new Error(e));
 
@@ -92,7 +93,7 @@ export const PunishmentManager = {
 
 		const mod = await guild.members.fetch(data.moderator).catch(e => void Sentry.captureException(e));
 
-		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.client.users.fetch(data.userID));
+		const embed = await this.createPunishmentEmbed(guild, { caseID, ...data }, mod!, await guild.client.users.fetch(data.userID), locale);
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		const logChannel = await guild.channels.fetch((await SettingsManager.getSettings(data.guildID)).logChannelId ?? '0').catch(() => null) ?? guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
@@ -102,7 +103,7 @@ export const PunishmentManager = {
 		!(result instanceof Error) && Sentry.captureException(result) && log && await prisma.punishment.update({ where: { id: result.id }, data: { modLogID: log.id, modLogChannelID: logChannel.id } });
 		return result instanceof Error ? Result.err(result) : Result.ok(embed);
 	},
-	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: User): Promise<EmbedBuilder> {
+	createPunishmentEmbed: async function(guild: Guild, data: Omit<Punishment, 'id' | 'createdAt' | 'modLogID' | 'modLogChannelID'>, moderator: GuildMember, user: User, locale: Locale): Promise<EmbedBuilder> {
 		let color = 0x000000;
 
 		switch (data.type) {
@@ -129,12 +130,13 @@ export const PunishmentManager = {
 
 		const mod = await guild.members.fetch(moderator).catch(e => void Sentry.captureException(e));
 
-		const arr = [`<:point:995372986179780758> **Member:** ${user.tag} (${user.id})`, `<:point:995372986179780758> **Action:** ${data.type} ${data.type === PunishmentType.Timeout && data.expires ? `(<t:${Math.round(data.expires.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data.reason.substring(0, 900)}`];
-
-		if (data.reference !== null) {
+		let description = "";
+		if (data.reference === null) {
+			description = translate(locale, "SENTRY_MODERATION_DESCRIPTION", user, data);
+		} else {
 			const ref = await this.fetchPunishment(data.reference, data.guildID);
 
-			if (ref.isOkAnd(val => val.modLogID !== null && val.modLogChannelID !== null)) arr.push(`<:point:995372986179780758> **Reference:** [#${ref.unwrap().caseID}](https://discord.com/channels/${ref.unwrap().guildID}/${ref.unwrap().modLogChannelID!}/${ref.unwrap().modLogID!})`);
+			if (ref.isOkAnd(val => val.modLogID !== null && val.modLogChannelID !== null)) description = translate(locale, "SENTRY_MODERATION_DESCRIPTION", user, data, ref.unwrap());
 		}
 
 		return new EmbedBuilder()
@@ -142,7 +144,7 @@ export const PunishmentManager = {
 			.setTimestamp()
 			.setColor(color)
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-			.setDescription(arr.join("\n"))
+			.setDescription(description)
 			.setFooter({ text: `Case #${data.caseID}` });
 	},
 	fetchPunishmentId: async function(guildId: Snowflake): Promise<number> {
@@ -227,19 +229,19 @@ export const PunishmentManager = {
 
 		return true;
 	},
-	createPunishmentPrompt: async function(user: User, guildId: Snowflake): Promise<[EmbedBuilder, ActionRowBuilder<ButtonBuilder>]> {
+	createPunishmentPrompt: async function(user: User, guildId: Snowflake, locale: Locale): Promise<[EmbedBuilder, ActionRowBuilder<ButtonBuilder>]> {
 		const punishments = await this.fetchUserPunishments(user.id, guildId);
 
 		return [new EmbedBuilder()
 			.setAuthor({ iconURL: user.displayAvatarURL(), name: `${user.tag} (${user.id})` })
 			.setTimestamp()
 			.setColor(0xF79454)
-			.setTitle(`Are you sure you want to punish ${user.tag}`)
-			.setDescription([`<:point:995372986179780758> **${punishments.filter(punishment => punishment.type === PunishmentType.Ban).length}** Ban${punishments.filter(punishment => punishment.type === PunishmentType.Ban).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Softban).length}** Softban${punishments.filter(punishment => punishment.type === PunishmentType.Softban).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Kick).length}** Kick${punishments.filter(punishment => punishment.type === PunishmentType.Kick).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Timeout).length}** Timeout${punishments.filter(punishment => punishment.type === PunishmentType.Timeout).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Warn).length}** Warn${punishments.filter(punishment => punishment.type === PunishmentType.Warn).length === 1 ? '' : 's'}`].join('\n <:point:995372986179780758> ')), new ActionRowBuilder<ButtonBuilder>().addComponents(...[new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-accept`).setEmoji('🔨')
+			.setTitle(translate(locale, "PUNISHMENT_PROMPT_TITLE", user.tag))
+			.setDescription(translate(locale, "PUNISHMENT_PROMPT_DESCRIPTION", punishments)), new ActionRowBuilder<ButtonBuilder>().addComponents(...[new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-accept`).setEmoji('🔨')
 			.setStyle(ButtonStyle.Primary)
-			.setLabel('Punish'), new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-decline`).setEmoji('❌')
+			.setLabel(translate(locale, "PUNISHMENT_PROMPT_BUTTON_YES")), new ButtonBuilder().setCustomId(`ignore-${nanoid()}-punishment-prompt-decline`).setEmoji('❌')
 			.setStyle(ButtonStyle.Secondary)
-			.setLabel('Cancel')])];
+			.setLabel(translate(locale, "PUNISHMENT_PROMPT_BUTTON_NO"))])];
 	},
 	handleUser2FA: async function(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction, userId: Snowflake): Promise<[boolean, ModalSubmitInteraction | null]> {
 		const user = await SettingsManager.getUserSettings(userId);
@@ -250,8 +252,8 @@ export const PunishmentManager = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0xFF5C5C)
-					.setDescription("<:point:995372986179780758> This guild requires 2FA for moderation access, please setup 2FA to run this command.\n\n> Dont want this enabled? Modify it with /settings, and make sure 2FA requirement for moderation is disabled in Server Settings > Safety Setup")
-					.setTitle("Please Enable 2FA");
+					.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_PROMPT_EMBED_DESCRIPTION"))
+					.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_PROMPT_EMBED_TITLE"));
 
 				await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 
@@ -275,8 +277,8 @@ export const PunishmentManager = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-				.setTitle(`Failed to Verify 2FA Token`);
+				.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+				.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 		});
@@ -289,8 +291,8 @@ export const PunishmentManager = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0xFF5C5C)
-					.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-					.setTitle(`Failed to Verify 2FA Token`);
+					.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+					.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 				await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 
@@ -301,8 +303,8 @@ export const PunishmentManager = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-				.setTitle(`Failed to Verify 2FA Token`);
+				.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+				.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 			await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 			return [false, null];

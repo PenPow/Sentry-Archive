@@ -10,7 +10,7 @@ const SettingsCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.Admin,
 	async execute(interaction) {
-		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
 		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
 
@@ -45,11 +45,10 @@ const SettingsCommand: IFunction = {
 
 		const embed = new EmbedBuilder()
 			.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
+			.setDescription(translate(interaction.locale, "SETTINGS_EMBED_DESCRIPTION", settings, interaction.guild.mfaLevel))
 			.setTimestamp()
-			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-			.setDescription([`${settings.automod ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Auto Moderator\n`, `${settings.automod && settings.phrase ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Phrase Detection`, `${settings.automod && settings.username ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious Username Detection`, `${settings.automod && settings.invite ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Invite Detection and Blocking`, `${settings.automod && settings.url ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Malicious URL Detection`, `${settings.automod && settings.spam ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Spam Protection`, `${settings.automod && settings.clamav ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} Anti Virus for Attachments\n`, `${interaction.guild.mfaLevel === GuildMFALevel.Elevated || settings.enforce2fa ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} **Enforce 2FA for Moderators**`, `${settings.statistics ? "<:toggleon:1004668097476689950>" : "<:toggleoff:1004668148018069515>"} **Statistic Collection**`, `<:point:995372986179780758> **Log Channel**: ${settings.logChannelId ? `<#${settings.logChannelId}>` : 'Not Set'}`].join('\n'))
 			.setColor(0x202225)
-			.setTitle(`Settings`);
+			.setTitle(translate(interaction.locale, "SETTINGS_EMBED_TITLE"));
 
 		return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 	},

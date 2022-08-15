@@ -9,15 +9,15 @@ const HistoryCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
-		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
 		const punishments = await PunishmentManager.fetchUserPunishments(interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.guildId);
 
 		const embed = new EmbedBuilder().setDescription([`<:point:995372986179780758> **${punishments.filter(punishment => punishment.type === PunishmentType.Ban).length}** Ban${punishments.filter(punishment => punishment.type === PunishmentType.Ban).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Softban).length}** Softban${punishments.filter(punishment => punishment.type === PunishmentType.Softban).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Kick).length}** Kick${punishments.filter(punishment => punishment.type === PunishmentType.Kick).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Timeout).length}** Timeout${punishments.filter(punishment => punishment.type === PunishmentType.Timeout).length === 1 ? '' : 's'}`, `**${punishments.filter(punishment => punishment.type === PunishmentType.Warn).length}** Warn${punishments.filter(punishment => punishment.type === PunishmentType.Warn).length === 1 ? '' : 's'}`].join('\n <:point:995372986179780758> '))
 			.setTimestamp()
 			.setColor(0xF79454)
-			.setFooter({ text: `Page 1/${punishments.length + 1}` })
-			.setTitle(`User History for ${interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).tag}`);
+			.setFooter({ text: translate(interaction.locale, "HISTORY_PAGE_NUMBER", 1, punishments.length + 1) })
+			.setTitle(translate(interaction.locale, "HISTORY_EMBED_TITLE_1", interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).tag));
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...[new ButtonBuilder().setCustomId(`user-r:${interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id}-history-page-r:1-r:left`).setEmoji('⬅️')
 			.setStyle(ButtonStyle.Secondary)

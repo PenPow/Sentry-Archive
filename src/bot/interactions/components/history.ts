@@ -1,5 +1,6 @@
 import { PunishmentType } from "@prisma/client";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
 import { FunctionType, IFunction, PermissionTier } from "../../structures/Interaction.js";
@@ -9,7 +10,7 @@ const HistoryComponent: IFunction = {
 	id: `user-r:*-history-page-r:*-r:*`,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
-		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
 		const splitID = interaction.customId.split('-');
 		const reconstructedID: string[] = [];
@@ -23,11 +24,11 @@ const HistoryComponent: IFunction = {
 		const data = await PunishmentManager.fetchUserPunishments(customId.split('-')[1], interaction.guildId);
 
 		if (parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 1 === 0 && customId.split('-')[5] === "left") {
-			const embed = new EmbedBuilder().setDescription([`<:point:995372986179780758> **${data.filter(punishment => punishment.type === PunishmentType.Ban).length}** Ban${data.filter(punishment => punishment.type === PunishmentType.Ban).length === 1 ? '' : 's'}`, `**${data.filter(punishment => punishment.type === PunishmentType.Softban).length}** Softban${data.filter(punishment => punishment.type === PunishmentType.Softban).length === 1 ? '' : 's'}`, `**${data.filter(punishment => punishment.type === PunishmentType.Kick).length}** Kick${data.filter(punishment => punishment.type === PunishmentType.Kick).length === 1 ? '' : 's'}`, `**${data.filter(punishment => punishment.type === PunishmentType.Timeout).length}** Timeout${data.filter(punishment => punishment.type === PunishmentType.Timeout).length === 1 ? '' : 's'}`, `**${data.filter(punishment => punishment.type === PunishmentType.Warn).length}** Warn${data.filter(punishment => punishment.type === PunishmentType.Warn).length === 1 ? '' : 's'}`].join('\n <:point:995372986179780758> '))
+			const embed = new EmbedBuilder().setDescription(translate(interaction.locale, "PUNISHMENT_PROMPT_DESCRIPTION", data))
 				.setTimestamp()
 				.setColor(0xF79454)
-				.setFooter({ text: `Page 1/${data.length + 1}` })
-				.setTitle(`User History`);
+				.setFooter({ text: translate(interaction.locale, "HISTORY_PAGE_NUMBER", 1, data.length + 1) })
+				.setTitle(translate(interaction.locale, "HISTORY_CONTEXT_NAME"));
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...[new ButtonBuilder().setCustomId(`user-r:${customId.split('-')[1]}-history-page-r:1-r:left`).setEmoji('⬅️')
 				.setStyle(ButtonStyle.Secondary)
@@ -59,11 +60,11 @@ const HistoryComponent: IFunction = {
 		}
 
 		const embed = new EmbedBuilder()
-			.setDescription([`<:point:995372986179780758> **Member:** ${(await interaction.guild.members.fetch(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID)).user.tag} (${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID})`, `<:point:995372986179780758> **Action:** ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type} ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type === PunishmentType.Timeout && data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires ? `(<t:${Math.round(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires!.getTime() / 1000)}:R>)` : ""}`, `<:point:995372986179780758> **Reason:** ${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].reason}`].join("\n"))
+			.setDescription(translate(interaction.locale, "HISTORY_EMBED_DESCRIPTION", (await interaction.guild.members.fetch(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID)).user.tag, data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].userID, data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type, data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].reason, data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].type === PunishmentType.Timeout && data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires ? `(<t:${Math.round(data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].expires!.getTime() / 1000)}:R>)` : ""))
 			.setTimestamp()
 			.setColor(color)
-			.setFooter({ text: `Page ${parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1)}/${data.length + 1}` })
-			.setTitle(`Case #${data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].caseID}`);
+			.setFooter({ text: translate(interaction.locale, "HISTORY_PAGE_NUMBER", parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1), data.length + 1) })
+			.setTitle(translate(interaction.locale, "HISTORY_EMBED_TITLE_OTHER", data[parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1) - 2].caseID));
 
 		let newID: string | string[] = customId.split('-');
 		newID = `${newID[0]}-r:${newID[1]}-history-page-r:${parseInt(customId.split('-')[4], 10) - (customId.split('-')[5] === "right" ? -1 : 1)}`;

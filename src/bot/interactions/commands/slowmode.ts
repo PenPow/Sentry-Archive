@@ -4,13 +4,14 @@ import ms from "ms";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
+import { SettingsManager } from "../../managers/SettingsManager.js";
 import { FunctionType, IFunction, PermissionTier } from "../../structures/Interaction.js";
 
 const SlowmodeCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
-		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
 		const [success, modal] = await PunishmentManager.handleUser2FA(interaction, interaction.user.id);
 
@@ -21,21 +22,21 @@ const SlowmodeCommand: IFunction = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setTitle(`❌ Cannot Modify Slowmode`);
+				.setTitle(translate(interaction.locale, "CANNOT_MODIFY_SLOWMODE"));
 
 			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
 		}
 
 		await interaction.channel?.setRateLimitPerUser(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true), interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"));
 
-		const logChannel = interaction.guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
+		const logChannel = (await SettingsManager.getSettings(interaction.guildId)).logChannelId ? await interaction.guild.channels.fetch((await SettingsManager.getSettings(interaction.guildId)).logChannelId!) : interaction.guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		const embed = new EmbedBuilder()
 			.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 			.setTimestamp()
 			.setColor(0x5C6CFF)
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-call
-			.setDescription([`<:point:995372986179780758> **Channel:** <#${interaction.channel?.id}>`, `<:point:995372986179780758> **Action:** Slowmode`, `<:point:995372986179780758> **Delay**: ${ms(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 1000)}`, `<:point:995372986179780758> **Reason:** ${interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON")}`].join("\n"))
-			.setFooter({ text: `Slowmode` });
+			.setDescription(translate(interaction.guildLocale, "SLOWMODE_LOG_EMBED_DESCRIPTION", ms(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 1000), interaction.channel!.id, interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON")))
+			.setFooter({ text: translate(interaction.guildLocale, "SLOWMODE_FOOTER") });
 
 		interaction.channel && [ChannelType.GuildNews, ChannelType.GuildNewsThread, ChannelType.GuildPrivateThread, ChannelType.GuildPublicThread, ChannelType.GuildText].includes(interaction.channel.type) && await interaction.channel.send({ embeds: [embed] });
 

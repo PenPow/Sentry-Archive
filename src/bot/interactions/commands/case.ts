@@ -8,7 +8,7 @@ const CaseCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
-		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
 		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
@@ -17,14 +17,14 @@ const CaseCommand: IFunction = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setTitle(`❌ Cannot Find Case`);
+				.setTitle(translate(interaction.locale, "CASE_EMBED_TITLE"));
 
 			return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);
 		}
 
 		const unwrapped = punishment.unwrap();
 
-		return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [await PunishmentManager.createPunishmentEmbed(interaction.guild, unwrapped, await interaction.guild.members.fetch(unwrapped.moderator)!, await interaction.client.users.fetch(unwrapped.userID)!)] }, ResponseType.Reply);
+		return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [await PunishmentManager.createPunishmentEmbed(interaction.guild, unwrapped, await interaction.guild.members.fetch(unwrapped.moderator)!, await interaction.client.users.fetch(unwrapped.userID)!, interaction.locale)] }, ResponseType.Reply);
 	},
 	toJSON() {
 		return {
