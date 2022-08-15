@@ -49,6 +49,7 @@ model Settings {
   enforce2fa Boolean? @default(false)
   statistics Boolean? @default(true)
   logChannelId String?
+  language String? @default("en-GB")
 }
 
 model Guild {
