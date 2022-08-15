@@ -21,6 +21,8 @@ export function getLang(locale: Locale): Language {
 	}
 }
 
+export const keys = Object.keys(languages.english).length;
+
 export function translate<K extends translationKeys>(
 	lang: Locale,
 	key: K,
