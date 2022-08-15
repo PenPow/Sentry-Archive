@@ -1,6 +1,6 @@
 import { PunishmentType } from "@prisma/client";
 import * as Sentry from "@sentry/node";
-import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, Message, PermissionFlagsBits } from "discord.js";
+import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, Locale, Message, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -10,7 +10,7 @@ const TimeoutCommand: IFunction = {
 	type: FunctionType.ChatInput,
 	permissions: PermissionTier.User,
 	async execute(interaction) {
-		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: "Please run these commands in a guild!" }, ResponseType.Reply);
+		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
 		// await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true }, ResponseType.Defer);
 
@@ -18,17 +18,17 @@ const TimeoutCommand: IFunction = {
 
 		if (!success) return;
 
-		if (!(await PunishmentManager.canPunish(interaction.client, PunishmentType.Timeout, interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.user.id, interaction.guildId))) {
+		if (!(await PunishmentManager.canPunish(interaction.client, PunishmentType.Timeout, interaction.options.getUser(translate(Locale.EnglishGB, "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.user.id, interaction.guildId))) {
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setTitle(`❌ Cannot Punish User`);
+				.setTitle(translate(interaction.locale, "CANNOT_PUNISH_USER"));
 
 			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
 		}
 
-		const [embed, row] = await PunishmentManager.createPunishmentPrompt(interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true), interaction.guildId);
+		const [embed, row] = await PunishmentManager.createPunishmentPrompt(interaction.options.getUser(translate(Locale.EnglishGB, "MODERATION_TARGET_OPTION_NAME"), true), interaction.guildId, interaction.locale);
 
 		const res = await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [row], fetchReply: true }, ResponseType.Reply);
 
@@ -39,7 +39,7 @@ const TimeoutCommand: IFunction = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setTitle(`❌ An Error Occurred`);
+				.setTitle(translate(interaction.locale, "AN_ERROR_OCCURRED"));
 
 			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
 		}
@@ -53,7 +53,7 @@ const TimeoutCommand: IFunction = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0xFF5C5C)
-				.setTitle(`❌ Cancelled`);
+				.setTitle(translate(interaction.locale, "CANCELLED"));
 
 			void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.FollowUp);
 		});
@@ -63,7 +63,7 @@ const TimeoutCommand: IFunction = {
 		switch (response.customId) {
 			case (row.components[0].toJSON() as APIButtonComponentWithCustomId).custom_id:
 				// eslint-disable-next-line no-case-declarations
-				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Timeout, userID: interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: new Date(new Date().setTime(new Date(Date.now()).getTime() + (interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 60 * 60 * 1000))), reference: interaction.options.getNumber(translate("en-GB", "MODERATION_REFERENCE_OPTION_NAME")) });
+				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Timeout, userID: interaction.options.getUser(translate(Locale.EnglishGB, "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate(Locale.EnglishGB, "MODERATION_REASON_OPTION_NAME")) ?? translate(Locale.EnglishGB, "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: new Date(new Date().setTime(new Date(Date.now()).getTime() + (interaction.options.getNumber(translate(Locale.EnglishGB, "TIMEOUT_DURATION_OPTION_NAME"), true) * 60 * 60 * 1000))), reference: interaction.options.getNumber(translate(Locale.EnglishGB, "MODERATION_REFERENCE_OPTION_NAME")) }, interaction.guildLocale);
 
 				if (punishment.isErr()) {
 					Sentry.captureException(punishment.unwrapErr());
@@ -72,7 +72,7 @@ const TimeoutCommand: IFunction = {
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setTitle(`❌ An Error Occurred`);
+						.setTitle(translate(interaction.locale, "AN_ERROR_OCCURRED"));
 
 					return void await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Update);
 				}
@@ -86,7 +86,7 @@ const TimeoutCommand: IFunction = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0xFF5C5C)
-					.setTitle(`❌ Cancelled`);
+					.setTitle(translate(interaction.locale, "CANCELLED"));
 				return void await InteractionManager.sendInteractionResponse(response, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Update);
 		}
 	},

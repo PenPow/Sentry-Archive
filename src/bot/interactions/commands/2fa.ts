@@ -1,6 +1,6 @@
 import speakeasy from "@levminer/speakeasy";
 import * as Sentry from "@sentry/node";
-import { ActionRowBuilder, APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, Message, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, Locale, Message, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { nanoid } from "nanoid";
 import { toBuffer } from "qrcode";
 import { redis } from "../../../common/db.js";
@@ -15,14 +15,14 @@ const TwoFactorAuthenticationCommand: IFunction = {
 	async execute(interaction) {
 		const user = await SettingsManager.getUserSettings(interaction.user.id);
 
-		if (interaction.options.getSubcommand(true) === translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_CONFIGURE_SUBCOMMAND_NAME")) {
+		if (interaction.options.getSubcommand(true) === translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_CONFIGURE_SUBCOMMAND_NAME")) {
 			let modalSubmit: ModalSubmitInteraction | void;
 			if (user.secret) {
 				const customId = `ignore-${nanoid()}-modal`;
 				const textId = `${nanoid()}-text`;
 
-				await interaction.showModal(new ModalBuilder().setTitle('Verify Identity').setCustomId(customId)
-					.addComponents(...[new ActionRowBuilder<TextInputBuilder>().addComponents(...[new TextInputBuilder().setCustomId(textId).setLabel('2FA Code or Backup Code')
+				await interaction.showModal(new ModalBuilder().setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_VERIFICATION_MODAL_TITLE")).setCustomId(customId)
+					.addComponents(...[new ActionRowBuilder<TextInputBuilder>().addComponents(...[new TextInputBuilder().setCustomId(textId).setLabel(translate(interaction.locale, "TWOFACTORAUTHENTICATION_VERIFICATION_MODAL_FIELD"))
 						.setMinLength(6)
 						.setRequired(true)
 						.setStyle(TextInputStyle.Short)])]));
@@ -32,7 +32,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setTitle(`❌ Cancelled`);
+						.setTitle(translate(interaction.locale, "CANCELLED"));
 
 					void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [cancelled], components: [], files: [] }, ResponseType.Reply);
 				});
@@ -45,8 +45,8 @@ const TwoFactorAuthenticationCommand: IFunction = {
 							.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 							.setTimestamp()
 							.setColor(0xFF5C5C)
-							.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-							.setTitle(`Failed to Verify 2FA Token`);
+							.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+							.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 						return void await InteractionManager.sendInteractionResponse(modalSubmit, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 					}
@@ -55,8 +55,8 @@ const TwoFactorAuthenticationCommand: IFunction = {
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-						.setTitle(`Failed to Verify 2FA Token`);
+						.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+						.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 					return void await InteractionManager.sendInteractionResponse(modalSubmit, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 				}
@@ -71,17 +71,17 @@ const TwoFactorAuthenticationCommand: IFunction = {
 				.setTimestamp()
 				.setColor(0x202225)
 				.setImage("attachment://qrcode.png")
-				.setDescription(["<:point:995372986179780758> Install [Google Authenticator](https://support.google.com/accounts/answer/1066447?hl=en&co=GENIE.Platform%3DAndroid&oco=0), [Authy](https://authy.com), or an authenticator application", "<:point:995372986179780758> Scan the QR code or manually input the code", "<:point:995372986179780758> Once your 2FA application is setup, press continue!", `\n<:point:995372986179780758> **Code:** ${secret.base32}`, `\n> ⚠️ Keep your account safe! Be on the lookout for scams, never scan a QR code with your discord app.`].join('\n'))
-				.setTitle(`Generated 2FA Code`);
+				.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_SETUP_EMBED_DESCRIPTION", secret.base32))
+				.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_SETUP_EMBED_TITLE"));
 
 			const declined_id = `ignore-${nanoid()}-2fa-decline`;
 			const row =	new ActionRowBuilder<ButtonBuilder>().addComponents(...[
 				new ButtonBuilder().setCustomId(`ignore-${nanoid()}-2fa-accept`)
 					.setStyle(ButtonStyle.Primary)
-					.setLabel('Continue'),
+					.setLabel(translate(interaction.locale, "CONTINUE")),
 				new ButtonBuilder().setCustomId(declined_id).setEmoji('❌')
 					.setStyle(ButtonStyle.Secondary)
-					.setLabel('Cancel')
+					.setLabel(translate(interaction.locale, "CANCEL"))
 			]);
 
 			const response = await InteractionManager.sendInteractionResponse(user.secret ? modalSubmit! : interaction, { ephemeral: true, embeds: [embed], components: [row], files: [attachment], fetchReply: true }, ResponseType.Reply);
@@ -98,7 +98,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0xFF5C5C)
-					.setTitle(`❌ Cancelled`);
+					.setTitle(translate(interaction.locale, "CANCELLED"));
 
 				void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [cancelled], components: [], files: [] }, ResponseType.FollowUp);
 			});
@@ -109,14 +109,14 @@ const TwoFactorAuthenticationCommand: IFunction = {
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setTitle(`❌ Cancelled`);
+						.setTitle(translate(interaction.locale, "CANCELLED"));
 
 					return void await InteractionManager.sendInteractionResponse(int, { ephemeral: true, embeds: [cancelled], components: [], files: [] }, ResponseType.Update);
 				}
 				const customId = `ignore-${nanoid()}-modal`;
 				const textId = `${nanoid()}-text`;
-				await int.showModal(new ModalBuilder().setTitle('2FA Setup').setCustomId(customId)
-					.addComponents(...[new ActionRowBuilder<TextInputBuilder>().addComponents(...[new TextInputBuilder().setCustomId(textId).setLabel('Enter 2FA Token from your Authenticator App')
+				await int.showModal(new ModalBuilder().setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_VERIFICATION_MODAL_TITLE")).setCustomId(customId)
+					.addComponents(...[new ActionRowBuilder<TextInputBuilder>().addComponents(...[new TextInputBuilder().setCustomId(textId).setLabel(translate(interaction.locale, "TWOFACTORAUTHENTICATION_SETUP_MODAL_FIELD"))
 						.setMinLength(6)
 						.setMaxLength(8)
 						.setRequired(true)
@@ -127,7 +127,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setTitle(`❌ Cancelled`);
+						.setTitle(translate(interaction.locale, "CANCELLED"));
 
 					void await InteractionManager.sendInteractionResponse(int, { ephemeral: true, embeds: [cancelled], components: [], files: [] }, ResponseType.Update);
 				});
@@ -140,8 +140,8 @@ const TwoFactorAuthenticationCommand: IFunction = {
 							.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 							.setTimestamp()
 							.setColor(0xFF5C5C)
-							.setDescription("<:point:995372986179780758> Run this command again! A common issue is the code expiring, make sure that you send the code before the timer reaches 0.")
-							.setTitle(`Failed to Verify 2FA Token`);
+							.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_SETUP_FAILED_VERIFICATION_EMBED_DESCRIPTION"))
+							.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 						return void await InteractionManager.sendInteractionResponse(modalSubmit, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Update);
 					}
@@ -150,8 +150,8 @@ const TwoFactorAuthenticationCommand: IFunction = {
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setDescription("<:point:995372986179780758> Run this command again! A common issue is the code expiring, make sure that you send the code before the timer reaches 0.")
-						.setTitle(`Failed to Verify 2FA Token`);
+						.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_SETUP_FAILED_VERIFICATION_EMBED_DESCRIPTION"))
+						.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 					return void await InteractionManager.sendInteractionResponse(modalSubmit, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Update);
 				}
@@ -162,7 +162,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0x202225)
-					.setDescription(["<:point:995372986179780758> 2FA is now enabled globally on your account!", "<:point:995372986179780758> You will be prompted to enter this code upon a protected action", "\n> ⚠️ Please keep this backup code safe, it can be used to access your account and reconfigure 2FA. If you lose access to your authenticator, run /2fa again, and when prompted, enter a backup code, it will walk you through reconfiguring 2FA with your new authenticator.\n", `<:point:995372986179780758> ${backup}`].join('\n'))
+					.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_SETUP_COMPLETE_EMBED_DESCRIPTION", backup))
 					.setTitle(`2FA Setup Complete`);
 
 				await SettingsManager.setUserSettings(interaction.user.id, { secret: secret.base32, backup });
@@ -176,20 +176,20 @@ const TwoFactorAuthenticationCommand: IFunction = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0xFF5C5C)
-					.setDescription("<:point:995372986179780758> You do not have 2FA enabled on your account, set it up with /2fa configure")
-					.setTitle(`2FA Not Configured`);
+					.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_NOT_CONFIGURED_EMBED_DESCRIPTION"))
+					.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_NOT_CONFIGURED_EMBED_TITLE"));
 
 				return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 			}
 
 			try {
-				if (user.backup !== interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true) && !speakeasy.totp.verify({ secret: user.secret, token: interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true), digits: interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true).length, encoding: "base32" })) {
+				if (user.backup !== interaction.options.getString(translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true) && !speakeasy.totp.verify({ secret: user.secret, token: interaction.options.getString(translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true), digits: interaction.options.getString(translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true).length, encoding: "base32" })) {
 					const embed = new EmbedBuilder()
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()
 						.setColor(0xFF5C5C)
-						.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-						.setTitle(`Failed to Verify 2FA Token`);
+						.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+						.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 					return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 				}
@@ -198,8 +198,8 @@ const TwoFactorAuthenticationCommand: IFunction = {
 					.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 					.setTimestamp()
 					.setColor(0xFF5C5C)
-					.setDescription("<:point:995372986179780758> Make sure the code hasn't expired!")
-					.setTitle(`Failed to Verify 2FA Token`);
+					.setDescription(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_DESCRIPTION"))
+					.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_FAILED_TO_VERIFY_TITLE"));
 
 				return void await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true, embeds: [embed], components: [], files: [] }, ResponseType.Reply);
 			}
@@ -208,7 +208,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
 				.setColor(0x202225)
-				.setTitle(`✅ Disabled 2FA`);
+				.setTitle(translate(interaction.locale, "TWOFACTORAUTHENTICATION_DISABLED_EMBED_TITLE"));
 
 			await SettingsManager.setUserSettings(interaction.user.id, { secret: null, backup: null });
 			await redis.decr(`users-2fa`);

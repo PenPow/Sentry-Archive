@@ -1,3 +1,4 @@
+import type { Locale } from "discord.js";
 import english from "./data/en-GB.js";
 
 const languages: Record<string, Language> = {
@@ -20,6 +21,8 @@ export function getLang(locale: Locale): Language {
 			return languages.english;
 	}
 }
+
+export const keys = Object.keys(languages.english).length;
 
 export function translate<K extends translationKeys>(
 	lang: Locale,
@@ -50,35 +53,3 @@ type getArgs<K extends translationKeys> = typeof english[K] extends
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (...any: any[]) => unknown ? Parameters<typeof english[K]>
 	: [];
-
-export type Locale =
-  | "da"
-  | "de"
-  | "en-GB"
-  | "en-US"
-  | "es-ES"
-  | "fr"
-  | "hr"
-  | "it"
-  | "lt"
-  | "hu"
-  | "nl"
-  | "no"
-  | "pl"
-  | "pt-BR"
-  | "ro"
-  | "fi"
-  | "sv-SE"
-  | "vi"
-  | "tr"
-  | "cs"
-  | "el"
-  | "bg"
-  | "ru"
-  | "uk"
-  | "hi"
-  | "th"
-  | "zh-CN"
-  | "ja"
-  | "zh-TW"
-  | "ko"; // REF: https://discord.com/developers/docs/reference#locales

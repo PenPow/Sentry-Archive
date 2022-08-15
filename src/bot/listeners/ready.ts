@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { DEPLOY_ON_START } from "../../common/config.js";
 import { redis } from "../../common/db.js";
 import { log, LogLevel } from "../../common/logger.js";
+import { keys } from "../../common/translations/translate.js";
 import { InteractionManager } from "../managers/InteractionManager.js";
 import type { IListener } from "../structures/Listener.js";
 
@@ -24,6 +25,7 @@ const readyEvent: IListener = {
 	execute: function(client) {
 		client.once("ready", async () => {
 			log({ prefix: 'Ready Listener', level: LogLevel.Success }, "Client is Ready!");
+			log({ prefix: 'Languages', level: LogLevel.Info }, `Loaded ${keys} translations`);
 
 			await InteractionManager.loadInteractions();
 			if (DEPLOY_ON_START) await InteractionManager.registerInteractions(client.application!.id);

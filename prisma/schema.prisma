@@ -42,13 +42,14 @@ model Settings {
   automod    Boolean? @default(true)
   phrase     Boolean? @default(true)
   username   Boolean? @default(true)
-  invite     Boolean? @default(true)
+  invite     Boolean? @default(false)
   url        Boolean? @default(true)
   spam       Boolean? @default(true)
   clamav     Boolean? @default(true)
   enforce2fa Boolean? @default(false)
   statistics Boolean? @default(true)
   logChannelId String?
+  language String? @default("en-GB")
 }
 
 model Guild {
