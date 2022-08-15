@@ -4,7 +4,7 @@ import { Stream } from "node:stream";
 import { PunishmentType } from "@prisma/client";
 import * as Sentry from "@sentry/node";
 import pkg from 'ctph.js';
-import { PermissionFlagsBits } from "discord.js";
+import { Locale, PermissionFlagsBits } from "discord.js";
 import { redis } from "../../common/db.js";
 import { log, LogLevel } from "../../common/logger.js";
 import { translate, translationKeys } from "../../common/translations/translate.js";
@@ -219,7 +219,7 @@ const messageCreateEvent: IListener = {
 			if (userHeat < 100) return;
 
 			// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-			const ok = await PunishmentManager.createPunishment(message.client, { userID: message.author.id, moderator: message.guild.members.me?.id ?? message.client.user?.id!, guildID: message.guildId, reason: translate("en-GB", "HEAT_SYSTEM_PUNISHMENT_REASON", translate(message.guild.preferredLocale, reason.msg), userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: userHeat < 150 ? new Date(Date.now() + (30 * 60000)) : null, reference: null }, message.guild.preferredLocale);
+			const ok = await PunishmentManager.createPunishment(message.client, { userID: message.author.id, moderator: message.guild.members.me?.id ?? message.client.user?.id!, guildID: message.guildId, reason: translate(Locale.EnglishGB, "HEAT_SYSTEM_PUNISHMENT_REASON", translate(message.guild.preferredLocale, reason.msg), userHeat), type: userHeat >= 300 ? PunishmentType.Ban : userHeat >= 225 ? PunishmentType.Softban : userHeat >= 150 ? PunishmentType.Kick : PunishmentType.Timeout, expires: userHeat < 150 ? new Date(Date.now() + (30 * 60000)) : null, reference: null }, message.guild.preferredLocale);
 			if (ok.isOk()) await message.channel.send({ embeds: [ok.unwrap()] });
 		});
 	}

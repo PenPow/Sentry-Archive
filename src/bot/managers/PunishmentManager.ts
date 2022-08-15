@@ -2,12 +2,12 @@ import speakeasy from "@levminer/speakeasy";
 import { Punishment, PunishmentType } from "@prisma/client";
 import { Result } from "@sapphire/result";
 import * as Sentry from "@sentry/node";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, EmbedBuilder, Guild, GuildMember, GuildMFALevel, ModalBuilder, ModalSubmitInteraction, PermissionsBitField, Snowflake, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, EmbedBuilder, Guild, GuildMember, GuildMFALevel, Locale, ModalBuilder, ModalSubmitInteraction, PermissionsBitField, Snowflake, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { nanoid } from "nanoid";
 import { InteractionManager, ResponseType } from "./InteractionManager.js";
 import { SettingsManager } from "./SettingsManager.js";
 import { prisma, redis } from "../../common/db.js";
-import { Locale, translate } from "../../common/translations/translate.js";
+import { translate } from "../../common/translations/translate.js";
 
 export const PunishmentManager = {
 	getHeat: async function(guildId: Snowflake, userId: Snowflake): Promise<number> { return parseInt(await redis.get(`${guildId}-${userId}-heat`) ?? '0', 10); },

@@ -16,7 +16,7 @@ const SettingsCommand: IFunction = {
 
 		if (!success) return;
 
-		if (interaction.options.getSubcommand(true) === translate("en-GB", "SETTINGS_COMMAND_VIEW_SUBCOMMAND_NAME")) {
+		if (interaction.options.getSubcommand(true) === translate(Locale.EnglishGB, "SETTINGS_COMMAND_VIEW_SUBCOMMAND_NAME")) {
 			const settings = await SettingsManager.getSettings(interaction.guildId);
 
 			let prettyLanguage: translationKeys = "SETTINGS_COMMAND_EMBED_LANGUAGE_UNKNOWN_NAME";
@@ -113,17 +113,17 @@ const SettingsCommand: IFunction = {
 		}
 		const settings = await SettingsManager.getSettings(interaction.guildId);
 
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_AUTOMOD_OPTION_NAME"), false) !== null) { settings.automod = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_AUTOMOD_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_PHRASES_OPTION_NAME"), false) !== null) { settings.phrase = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_PHRASES_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_USERNAME_OPTION_NAME"), false) !== null) { settings.username = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_USERNAME_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_INVITE_OPTION_NAME"), false) !== null) { settings.invite = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_INVITE_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_URL_OPTION_NAME"), false) !== null) { settings.url = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_URL_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_SPAM_OPTION_NAME"), false) !== null) { settings.spam = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_SPAM_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME"), false) !== null) { settings.clamav = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME"), false) !== null) { settings.enforce2fa = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME"), true); }
-		if (interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_STATS_OPTION_NAME"), false) !== null) { settings.statistics = interaction.options.getBoolean(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_STATS_OPTION_NAME"), true); }
-		if (interaction.options.getChannel(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LOGS_OPTION_NAME"), false) !== null) { settings.logChannelId = interaction.options.getChannel(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LOGS_OPTION_NAME"), true).id; }
-		if (interaction.options.getString(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LANGUAGE_OPTION_NAME"), false) !== null) { settings.language = interaction.options.getString(translate("en-GB", "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LANGUAGE_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_AUTOMOD_OPTION_NAME"), false) !== null) { settings.automod = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_AUTOMOD_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_PHRASES_OPTION_NAME"), false) !== null) { settings.phrase = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_PHRASES_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_USERNAME_OPTION_NAME"), false) !== null) { settings.username = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_USERNAME_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_INVITE_OPTION_NAME"), false) !== null) { settings.invite = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_INVITE_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_URL_OPTION_NAME"), false) !== null) { settings.url = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_URL_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_SPAM_OPTION_NAME"), false) !== null) { settings.spam = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_SPAM_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME"), false) !== null) { settings.clamav = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_ATTACHMENT_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME"), false) !== null) { settings.enforce2fa = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_2FA_OPTION_NAME"), true); }
+		if (interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_STATS_OPTION_NAME"), false) !== null) { settings.statistics = interaction.options.getBoolean(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_STATS_OPTION_NAME"), true); }
+		if (interaction.options.getChannel(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LOGS_OPTION_NAME"), false) !== null) { settings.logChannelId = interaction.options.getChannel(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LOGS_OPTION_NAME"), true).id; }
+		if (interaction.options.getString(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LANGUAGE_OPTION_NAME"), false) !== null) { settings.language = interaction.options.getString(translate(Locale.EnglishGB, "SETTINGS_COMMAND_SET_SUBCOMMAND_SETTING_OPTION_LANGUAGE_OPTION_NAME"), true); }
 
 		let prettyLanguage: translationKeys = "SETTINGS_COMMAND_EMBED_LANGUAGE_UNKNOWN_NAME";
 

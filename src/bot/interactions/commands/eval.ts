@@ -1,5 +1,5 @@
 import { inspect } from "util";
-import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, codeBlock, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, codeBlock, EmbedBuilder, Locale } from "discord.js";
 import { nanoid } from "nanoid";
 import { get, create, SourceBin } from 'sourcebin';
 import pkg from "typescript";
@@ -17,7 +17,7 @@ const EvalCommand: IFunction = {
 
 		await InteractionManager.sendInteractionResponse(interaction, { ephemeral: true }, ResponseType.Defer);
 
-		const bin = await get(interaction.options.getString(translate("en-GB", "EVAL_COMMAND_SOURCE_OPTION_NAME"), true).split('/').at(-1) ?? '0');
+		const bin = await get(interaction.options.getString(translate(Locale.EnglishGB, "EVAL_COMMAND_SOURCE_OPTION_NAME"), true).split('/').at(-1) ?? '0');
 
 		let code = bin.files[0].content.replaceAll(/[“”]/gim, '"');
 

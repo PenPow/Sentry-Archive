@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder, Locale, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -10,7 +10,7 @@ const CaseCommand: IFunction = {
 	async execute(interaction) {
 		if (!interaction.inCachedGuild()) return void await InteractionManager.sendInteractionResponse(interaction, { content: translate(interaction.locale, "GUILD_ONLY") }, ResponseType.Reply);
 
-		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
+		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate(Locale.EnglishGB, "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
 		if (punishment.isErr()) {
 			const embed = new EmbedBuilder()

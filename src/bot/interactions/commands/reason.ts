@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, EmbedBuilder, Locale, PermissionFlagsBits } from "discord.js";
 import { prisma } from "../../../common/db.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
@@ -17,7 +17,7 @@ const ReasonCommand: IFunction = {
 
 		if (!success) return;
 
-		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate("en-GB", "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
+		const punishment = await PunishmentManager.fetchPunishment(interaction.options.getNumber(translate(Locale.EnglishGB, "REASON_CASE_OPTION_NAME"), true), interaction.guildId);
 
 		if (punishment.isErr()) {
 			const embed = new EmbedBuilder()
@@ -31,7 +31,7 @@ const ReasonCommand: IFunction = {
 
 		const unwrapped = punishment.unwrap();
 
-		await prisma.punishment.update({ data: { reason: interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true).substring(0, 900) }, where: { id: unwrapped.id } });
+		await prisma.punishment.update({ data: { reason: interaction.options.getString(translate(Locale.EnglishGB, "REASON_NEWREASON_OPTION_NAME"), true).substring(0, 900) }, where: { id: unwrapped.id } });
 
 		const logChannel = (await SettingsManager.getSettings(interaction.guildId)).logChannelId ? await interaction.guild.channels.fetch((await SettingsManager.getSettings(interaction.guildId)).logChannelId!) : interaction.guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 
@@ -60,7 +60,7 @@ const ReasonCommand: IFunction = {
 		const embed = EmbedBuilder.from(msg.embeds[0]);
 
 		const description = embed.data.description?.split('\n') ?? [];
-		description[2] = translate(interaction.guildLocale, "REASON_EMBED_NEW_REASON", interaction.options.getString(translate("en-GB", "REASON_NEWREASON_OPTION_NAME"), true).substring(0, 900));
+		description[2] = translate(interaction.guildLocale, "REASON_EMBED_NEW_REASON", interaction.options.getString(translate(Locale.EnglishGB, "REASON_NEWREASON_OPTION_NAME"), true).substring(0, 900));
 
 		embed.setDescription(description.join('\n'));
 		await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed] }, ResponseType.Reply);

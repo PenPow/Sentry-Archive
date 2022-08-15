@@ -1,6 +1,6 @@
 import { PunishmentType } from "@prisma/client";
 import * as Sentry from "@sentry/node";
-import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, Message, PermissionFlagsBits } from "discord.js";
+import { APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ComponentType, EmbedBuilder, InteractionResponse, Locale, Message, PermissionFlagsBits } from "discord.js";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
 import { PunishmentManager } from "../../managers/PunishmentManager.js";
@@ -18,7 +18,7 @@ const BanCommand: IFunction = {
 
 		if (!success) return;
 
-		if (!(await PunishmentManager.canPunish(interaction.client, PunishmentType.Ban, interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.user.id, interaction.guildId))) {
+		if (!(await PunishmentManager.canPunish(interaction.client, PunishmentType.Ban, interaction.options.getUser(translate(Locale.EnglishGB, "MODERATION_TARGET_OPTION_NAME"), true).id, interaction.user.id, interaction.guildId))) {
 			const embed = new EmbedBuilder()
 				.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 				.setTimestamp()
@@ -28,7 +28,7 @@ const BanCommand: IFunction = {
 			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
 		}
 
-		const [embed, row] = await PunishmentManager.createPunishmentPrompt(interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true), interaction.guildId, interaction.locale);
+		const [embed, row] = await PunishmentManager.createPunishmentPrompt(interaction.options.getUser(translate(Locale.EnglishGB, "MODERATION_TARGET_OPTION_NAME"), true), interaction.guildId, interaction.locale);
 
 		const res = await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [row], fetchReply: true }, ResponseType.Reply);
 
@@ -63,7 +63,7 @@ const BanCommand: IFunction = {
 		switch (response.customId) {
 			case (row.components[0].toJSON() as APIButtonComponentWithCustomId).custom_id:
 				// eslint-disable-next-line no-case-declarations
-				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Ban, userID: interaction.options.getUser(translate("en-GB", "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: null, reference: interaction.options.getNumber(translate("en-GB", "MODERATION_REFERENCE_OPTION_NAME")) }, interaction.guildLocale);
+				const punishment = await PunishmentManager.createPunishment(interaction.client, { type: PunishmentType.Ban, userID: interaction.options.getUser(translate(Locale.EnglishGB, "MODERATION_TARGET_OPTION_NAME"), true).id, guildID: interaction.guildId, reason: interaction.options.getString(translate(Locale.EnglishGB, "MODERATION_REASON_OPTION_NAME")) ?? translate(Locale.EnglishGB, "MODERATION_DEFAULT_REASON"), moderator: interaction.user.id, expires: null, reference: interaction.options.getNumber(translate(Locale.EnglishGB, "MODERATION_REFERENCE_OPTION_NAME")) }, interaction.guildLocale);
 
 				if (punishment.isErr()) {
 					Sentry.captureException(punishment.unwrapErr());

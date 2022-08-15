@@ -1,6 +1,6 @@
 import speakeasy from "@levminer/speakeasy";
 import * as Sentry from "@sentry/node";
-import { ActionRowBuilder, APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, Message, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, APIButtonComponentWithCustomId, ApplicationCommandOptionType, ApplicationCommandType, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, Locale, Message, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { nanoid } from "nanoid";
 import { toBuffer } from "qrcode";
 import { redis } from "../../../common/db.js";
@@ -15,7 +15,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 	async execute(interaction) {
 		const user = await SettingsManager.getUserSettings(interaction.user.id);
 
-		if (interaction.options.getSubcommand(true) === translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_CONFIGURE_SUBCOMMAND_NAME")) {
+		if (interaction.options.getSubcommand(true) === translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_CONFIGURE_SUBCOMMAND_NAME")) {
 			let modalSubmit: ModalSubmitInteraction | void;
 			if (user.secret) {
 				const customId = `ignore-${nanoid()}-modal`;
@@ -183,7 +183,7 @@ const TwoFactorAuthenticationCommand: IFunction = {
 			}
 
 			try {
-				if (user.backup !== interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true) && !speakeasy.totp.verify({ secret: user.secret, token: interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true), digits: interaction.options.getString(translate("en-GB", "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true).length, encoding: "base32" })) {
+				if (user.backup !== interaction.options.getString(translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true) && !speakeasy.totp.verify({ secret: user.secret, token: interaction.options.getString(translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true), digits: interaction.options.getString(translate(Locale.EnglishGB, "TWOFACTORAUTHENTICATION_COMMAND_DISABLE_SUBCOMMAND_TOKEN_OPTION_NAME"), true).length, encoding: "base32" })) {
 					const embed = new EmbedBuilder()
 						.setAuthor({ iconURL: interaction.user.displayAvatarURL(), name: `${interaction.user.tag} (${interaction.user.id})` })
 						.setTimestamp()

@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, EmbedBuilder, Locale, PermissionFlagsBits } from "discord.js";
 import ms from "ms";
 import { translate } from "../../../common/translations/translate.js";
 import { InteractionManager, ResponseType } from "../../managers/InteractionManager.js";
@@ -27,7 +27,7 @@ const SlowmodeCommand: IFunction = {
 			return void await InteractionManager.sendInteractionResponse(modal ?? interaction, { ephemeral: true, embeds: [embed], components: [] }, ResponseType.Reply);
 		}
 
-		await interaction.channel?.setRateLimitPerUser(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true), interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON"));
+		await interaction.channel?.setRateLimitPerUser(interaction.options.getNumber(translate(Locale.EnglishGB, "TIMEOUT_DURATION_OPTION_NAME"), true), interaction.options.getString(translate(Locale.EnglishGB, "MODERATION_REASON_OPTION_NAME")) ?? translate(Locale.EnglishGB, "MODERATION_DEFAULT_REASON"));
 
 		const logChannel = (await SettingsManager.getSettings(interaction.guildId)).logChannelId ? await interaction.guild.channels.fetch((await SettingsManager.getSettings(interaction.guildId)).logChannelId!) : interaction.guild.channels.cache.find(val => ["logs", "audit-logs", "server-logs", "sentry-logs", "guild-logs", "mod-logs", "modlogs"].includes(val.name));
 		const embed = new EmbedBuilder()
@@ -35,7 +35,7 @@ const SlowmodeCommand: IFunction = {
 			.setTimestamp()
 			.setColor(0x5C6CFF)
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-call
-			.setDescription(translate(interaction.guildLocale, "SLOWMODE_LOG_EMBED_DESCRIPTION", ms(interaction.options.getNumber(translate("en-GB", "TIMEOUT_DURATION_OPTION_NAME"), true) * 1000), interaction.channel!.id, interaction.options.getString(translate("en-GB", "MODERATION_REASON_OPTION_NAME")) ?? translate("en-GB", "MODERATION_DEFAULT_REASON")))
+			.setDescription(translate(interaction.guildLocale, "SLOWMODE_LOG_EMBED_DESCRIPTION", ms(interaction.options.getNumber(translate(Locale.EnglishGB, "TIMEOUT_DURATION_OPTION_NAME"), true) * 1000), interaction.channel!.id, interaction.options.getString(translate(Locale.EnglishGB, "MODERATION_REASON_OPTION_NAME")) ?? translate(Locale.EnglishGB, "MODERATION_DEFAULT_REASON")))
 			.setFooter({ text: translate(interaction.guildLocale, "SLOWMODE_FOOTER") });
 
 		interaction.channel && [ChannelType.GuildNews, ChannelType.GuildNewsThread, ChannelType.GuildPrivateThread, ChannelType.GuildPublicThread, ChannelType.GuildText].includes(interaction.channel.type) && await interaction.channel.send({ embeds: [embed] });
