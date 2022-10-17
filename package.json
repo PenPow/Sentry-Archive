@@ -44,7 +44,7 @@
     "@discordjs/rest": "^1.0.1",
     "@levminer/speakeasy": "^1.4.0",
     "@prisma/client": "^4.2.1",
-    "@sapphire/result": "^2.3.3",
+    "@sapphire/result": "^2.6.0",
     "@sentry/node": "^7.10.0",
     "@sentry/tracing": "^7.10.0",
     "bufferutil": "^4.0.6",
