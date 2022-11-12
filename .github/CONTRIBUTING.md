@@ -1,38 +1,35 @@
-## Contributing
+# Welcome!
 
-[fork]: /fork
-[pr]: /compare
-[style]: https://standardjs.com/
-[code-of-conduct]: CODE_OF_CONDUCT.md
+To begin with, thanks for considering to contribute to Sentry. We actively encourage engagments, and we hope that you continue to contribute in the future!
 
-Hi there! We're thrilled that you'd like to contribute to this project. Your help is essential for keeping it great.
+By following our contribution guidelines, you help us manage and develop Sentry, and we can make contributing as easy as possible.
 
-Please note that this project is released with a [Contributor Code of Conduct][code-of-conduct]. By participating in this project you agree to abide by its terms.
+We accept all kind of contributions, from documentation, to feature requests and bug fixes. If you can improve the project, we will accept it!
 
-## Issues and PRs
+# Our Expectations
 
-If you have suggestions for how this project could be improved, or want to report a bug, open an issue! We'd love all and any contributions. If you have questions, too, we'd love to hear them.
+* If you spot an issue, or wish to implement a new feature, please open an issue first! This allows us to track the changes, and gives us time to provide feedback on whether we feel that this is something we want to add into Sentry. We would hate for time to be spent developing a feature that we feel does not fit into the project.
+* Ensure that the code meets our style guide, and does not contain any bugs or other vulnerabilities.
+* Keep PR's limited to one feature each. You can always open multiple pull requests if needed 😅
 
-We'd also love PRs. If you're thinking of a large PR, we advise opening up an issue first to talk about it, though! Look at the links below if you're not sure how to open a PR.
+# Your First Contribution
 
-## Submitting a pull request
+If you want suggestions for where to contribute, look through the issues tagged with "help wanted"!
 
-1. [Fork][fork] and clone the repository.
-1. Create a new branch: `git checkout -b my-branch-name`.
-1. Make your change
-1. Push to your fork and [submit a pull request][pr].
-1. Pat your self on the back and wait for your pull request to be reviewed and merged.
+> If this is your first time creating a pull request, take a look at [this website](https://makeapullrequest.com/). Feel free to reach out to a maintainer if you need support, as we are always able to help!
 
-Here are a few things you can do that will increase the likelihood of your pull request being accepted:
+# Getting started
 
-- Follow the [style guide][style] which is using standard.
-- Keep your changes as focused as possible. If there are multiple changes you would like to make that are not dependent upon each other, consider submitting them as separate pull requests.
-- Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+To ensure that our code is maintainable, please follow these steps when working on Sentry:
 
-Work in Progress pull requests are also welcome to get feedback early on, or if there is something blocked you.
+1. Fork the project
+2. Develop your code.
+   1. We use [devcontainers](https://code.visualstudio.com/docs/devcontainers/containers#_create-a-devcontainerjson-file) as our preferred way of standardising the development environment. If you haven't used containers before, please follow the advice [here](https://code.visualstudio.com/docs/devcontainers/containers#_getting-started) to setup your system
+   2. Ensure that your code meets our style guide. Please run `eslint` before committing.
+   3. Our code is deployed using Docker & Docker Compose. Please ensure that your code works on these images.
+3. Create a pull request!
 
-## Resources
+# Security Vulnerabilities
 
-- [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
-- [Using Pull Requests](https://help.github.com/articles/about-pull-requests/)
-- [GitHub Help](https://help.github.com)
+If you find a security vulnerability, do NOT open an issue. Email <josh@penpow.dev> instead.
+

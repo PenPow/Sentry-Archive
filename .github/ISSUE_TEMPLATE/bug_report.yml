@@ -1,0 +1,49 @@
+name: 🪲 Bug Report
+description: Report issues with Sentry 
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue description
+      description: |
+        Describe the issue in as much detail as possible.
+      placeholder: |
+        Steps to reproduce with below code sample:
+        1. type this
+        2. do that
+        3. look
+        4. here is the error
+    validations:
+      required: true
+  - type: dropdown
+    id: docker
+    attributes:
+      label: Are you using the Docker Container?
+      options:
+        - Yes
+        - No
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority this issue should have
+      description: Please be realistic. If you need to elaborate on your reasoning, please use the Issue description field above.
+      options:
+        - Low (slightly annoying)
+        - Medium (should be fixed soon)
+        - High (immediate attention needed)
+    validations:
+      required: true
+
+  - type: input
+    id: dev-release
+    attributes:
+      label: I have tested this issue on the latest development release
+      placeholder: Latest Dev Version (release ending in -dev) or commit sha
+      description: |
+        The issue might already be fixed in a development release or main. This is not required, but helps us greatly.
+        [discord.js only] To install the latest development release run `npm i discord.js@dev` in your project directory.
+        Run `npm list discord.js` and use the last part of the printed information (`d23280c` for `discord.js@xx.x.x-dev.1530234593.d23280c`)
