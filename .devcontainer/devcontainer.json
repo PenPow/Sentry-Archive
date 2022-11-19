@@ -21,7 +21,8 @@
 				"bungcip.better-toml",
 				"mikestead.dotenv",
 				"dbaeumer.vscode-eslint",
-				"Prisma.prisma"
+				"Prisma.prisma",
+				"ms-vscode.vscode-typescript-next"
 			]
 		}
 	}
