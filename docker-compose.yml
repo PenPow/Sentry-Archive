@@ -13,6 +13,19 @@ services:
       redis:
         condition: service_healthy
 
+  ws-proxy:
+    container_name: proxy
+    build:
+      context: .
+      dockerfile: ./docker/Websocket.Dockerfile
+    tty: true
+    restart: always
+    links:
+      - redis:redis
+    depends_on:
+      redis:
+        condition: service_healthy
+
   redis:
     image: redis:7.0.5-alpine
     restart: always
