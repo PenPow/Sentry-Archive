@@ -56,8 +56,9 @@ fastify.post("/", async (req: FastifyRequest<{
 			if(!command) return res.code(404).send("No Command Found")
 
 			const execute = await command.execute({ 
-				interaction, 
-				data: command.data, 
+				interaction,
+				logger,
+				data: command.data,
 				getArgs: async (name) => {
 					if(interaction.type != InteractionType.ApplicationCommand) throw new TypeError("Getting Args of Non Application Command")
 					if([ApplicationCommandType.Message, ApplicationCommandType.User].includes(interaction.data.type)) throw new TypeError("Getting Args of Chat Input Command") 

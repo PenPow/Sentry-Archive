@@ -1,5 +1,6 @@
 import type { APIApplicationCommandOption, APIAttachment, APIChannel, APIChatInputApplicationCommandInteraction, APIMessageApplicationCommandInteraction, APIRole, APIUser, APIUserApplicationCommandInteraction, ApplicationCommandOptionType, ApplicationCommandType, InteractionResponseType, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, RESTPostAPIWebhookWithTokenJSONBody, Snowflake } from "discord-api-types/v10";
 import glob from "glob";
+import type { Logger } from "tslog";
 
 export const Commands: Map<string, Handler<ApplicationCommandType>> = new Map()
 
@@ -66,7 +67,8 @@ T extends ApplicationCommandOptionType.Attachment  ? APIAttachment :
 never
 
 export interface RunContext<Command extends Handler<ApplicationCommandType>> {
-	data: Command["data"]
+	data: Command["data"],
+	logger: Logger
 	getArgs: <Name extends keyof Command["options"]>(interaction: Name) => Awaitable<ApplicationCommandFetchedOptionType<Command["options"][Name]["type"]> | null> ,
 	respond: (interaction: Command["type"] extends ApplicationCommandType.ChatInput ? APIChatInputApplicationCommandInteraction : Command["type"] extends ApplicationCommandType.Message ? APIMessageApplicationCommandInteraction : APIUserApplicationCommandInteraction, responseType: InteractionResponseType, data: RESTPostAPIWebhookWithTokenJSONBody) => Promise<void>,
 	interaction: Command["type"] extends ApplicationCommandType.ChatInput ? APIChatInputApplicationCommandInteraction : Command["type"] extends ApplicationCommandType.Message ? APIMessageApplicationCommandInteraction : APIUserApplicationCommandInteraction 
