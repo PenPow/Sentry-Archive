@@ -1,6 +1,6 @@
 import type { Action } from "../interval.js";
 import { ctx, io } from "@interval/sdk";
-import { Commands } from "../structures/Command.js";
+import { Commands, loadCommands } from "../structures/Command.js";
 import { REST } from "../server.js";
 import { Routes } from "discord-api-types/v10";
 import { config } from "../../common/utils.js";
@@ -8,6 +8,8 @@ import { config } from "../../common/utils.js";
 export default {
 	name: 'Deploy',
 	execute: async () => {
+		await loadCommands()
+
 		const [table, registerToGuild] = await io.group([
 			io.select.table("Commands", {
 				data: [...Commands.values()].map((data, index) => { return { id: index, name: data.data.name } })
