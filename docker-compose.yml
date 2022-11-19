@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  sentry:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: ./docker/Bot.Dockerfile
+    tty: true
+    restart: always
+    links:
+      - redis:redis
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7.0.5-alpine
+    restart: always
+    expose:
+      - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 5s
