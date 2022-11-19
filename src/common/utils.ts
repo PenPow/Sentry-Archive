@@ -6,7 +6,7 @@ interface Config {
 	// [ key: string ]: string | number | Config,
 	discord: {
 		PUBLIC_KEY: string,
-		TOKEN: string
+		TOKEN: `${string}.${string}.${string}`
 	},
 	fastify: {
 		PORT: number
@@ -20,4 +20,4 @@ interface Config {
 
 export const config: Config = parse(await readFile('config.toml', 'utf-8'))
 
-export const log: Logger = new Logger();
+export const logger: Logger = new Logger();
