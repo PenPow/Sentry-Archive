@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npx rimraf ./dist && npx swc ./src/** -d dist",
+    "build": "npx rimraf ./dist && npx tsc",
     "start": "node --no-warnings ./dist/server.js"
   },
   "repository": {
