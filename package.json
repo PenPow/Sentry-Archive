@@ -27,7 +27,7 @@
     "discord-api-types": "^0.37.17",
     "discord-verify": "^1.0.0",
     "discord.js": "^14.6.0",
-    "fastify": "^4.9.2",
+    "fastify": "^4.10.0",
     "glob": "^8.0.3",
     "ioredis": "^5.2.4",
     "source-map-support": "^0.5.21",

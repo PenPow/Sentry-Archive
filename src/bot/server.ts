@@ -2,7 +2,7 @@ import "source-map-support/register.js";
 import { init as intervalInit } from "./interval.js";
 import { init as proxyInit } from "./ws.js"
 
-import { type FastifyReply, type FastifyRequest, fastify as FastifyServer } from 'fastify'; // ts being weird forcing me to imp
+import { type FastifyReply, type FastifyRequest, fastify as FastifyServer } from 'fastify';
 import { verify, PlatformAlgorithm } from "discord-verify/node";
 import { type APIInteraction, InteractionResponseType, InteractionType } from "discord-api-types/v10";
 import { webcrypto } from "node:crypto";
@@ -47,7 +47,7 @@ fastify.post("/", async (req: FastifyRequest<{
 	});
 });
 
-fastify.listen({ port: config.fastify.PORT }, (err, address) => {
+fastify.listen({ port: config.fastify.PORT, host: '::' }, (err, address) => {
 	if(err) return logger.fatal(err);
 
 	return logger.info(`Listening on ${address}`)
