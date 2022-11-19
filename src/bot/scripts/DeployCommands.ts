@@ -1,7 +1,7 @@
 import type { Action } from "../interval.js";
 import { ctx, io } from "@interval/sdk";
 import { Commands, loadCommands } from "../structures/Command.js";
-import { REST } from "../server.js";
+import { REST } from "../index.js";
 import { Routes } from "discord-api-types/v10";
 import { config } from "../../common/utils.js";
 

@@ -11,12 +11,15 @@ services:
       - 8080:8080
     links:
       - redis:redis
+      - rest:rest
     depends_on:
       redis:
         condition: service_healthy
+      rest:
+        condition: service_started
 
   ws-proxy:
-    container_name: proxy
+    container_name: ws-proxy
     build:
       context: .
       dockerfile: ./docker/Websocket.Dockerfile
@@ -27,6 +30,18 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      rest:
+        condition: service_started
+
+  rest:
+    container_name: rest-proxy
+    expose:
+      - "3000:3000"
+    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Rest.Dockerfile
+    tty: true
 
   redis:
     image: redis:7.0.5-alpine

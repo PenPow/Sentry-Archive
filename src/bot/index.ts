@@ -116,4 +116,4 @@ fastify.listen({ port: config.fastify.PORT, host: '::' }, (err, address) => {
 	return logger.info(`Listening on ${address}`)
 });
 
-export const REST = new RestClient({ version: "10" }).setToken(config.discord.TOKEN)
+export const REST = new RestClient({ version: "10", api: "http://rest:3000/api" }).setToken(config.discord.TOKEN)

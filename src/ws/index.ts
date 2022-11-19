@@ -30,7 +30,10 @@ const client = new Client({
 		"ThreadMemberManager": 0,
 		"UserManager": 0,
 		"VoiceStateManager": 0
-	})
+	}),
+	rest: {
+		api: "http://rest:3000/api"
+	}
 })
 
 await client.login(config.discord.TOKEN)

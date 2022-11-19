@@ -15,6 +15,9 @@ interface Config {
 		DEV_API_KEY: string,
 		PRODUCTION_API_KEY: string
 	},
+	proxy: {
+		PORT: string
+	}
 	sentry: {}
 };
 
