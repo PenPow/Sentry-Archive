@@ -9,13 +9,15 @@ export interface Action {
 
 export async function init() {
 	const scripts: string[] = await new Promise(((resolve) => { 
-		glob(`src/scripts/**/*`, (_err, files) => resolve(files));
+		glob(`src/bot/scripts/**/*`, (_err, files) => resolve(files));
 	}))
-	
+
 	const actions: Record<string, IntervalActionDefinition> = {}
 	
 	for(const action of scripts) {
-		const exports: Action = (await import(`./${action.replace('.ts', '.js').replace('src/', '')}`)).default
+		if(!action.endsWith(".ts")) continue;
+
+		const exports: Action = (await import(`./${action.replace('.ts', '.js').replace('src/bot', '')}`)).default
 	
 		actions[exports.name] = exports.execute
 	}
