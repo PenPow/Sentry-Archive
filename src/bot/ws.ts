@@ -13,11 +13,9 @@ export async function init() {
 
 	logger.info('Connected Brokers to Redis')
 
-	broker.on('message', ({ data, ack }) => {
-		logger.debug('Recieved Message')
-		
+	broker.on('message', ({ data, ack }) => {		
 		const message: APIMessage = data
-		logger.info(message.id)
+		logger.debug(`Recieved Message ${message.id}`)
 
 		void ack();
 	})
