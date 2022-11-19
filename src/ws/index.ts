@@ -1,3 +1,5 @@
+import "source-map-support/register.js";
+
 import { GatewayIntentBits } from 'discord-api-types/v10'
 import { Client, Options } from 'discord.js'
 import { config, logger } from '../common/utils.js'
@@ -46,6 +48,8 @@ const broker = new PubSubRedisBroker({ redisClient: redis });
 logger.info('Connected Brokers to Redis')
 
 client.on('messageCreate', async (message) => {
+	if(message.author.bot) return;
+
 	logger.info(`Recieved Message ${message.id}`)
 	logger.debug(`Sending Message ${message.id} to Broker`)
 	await broker.publish('messages', message.toJSON())
