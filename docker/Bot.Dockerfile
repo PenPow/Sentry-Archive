@@ -7,8 +7,6 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
 
-EXPOSE 8080
-
 COPY tsconfig.json ./
 COPY package*.json ./
 
