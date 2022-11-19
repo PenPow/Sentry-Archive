@@ -1,0 +1,12 @@
+[discord]
+PUBLIC_KEY = ""
+TOKEN = ""
+
+[fastify]
+PORT = 8080
+
+[interval]
+DEV_API_KEY = ""
+PRODUCTION_API_KEY = ""
+
+[sentry]
