@@ -9,4 +9,5 @@ PORT = 8080
 DEV_API_KEY = ""
 PRODUCTION_API_KEY = ""
 
-[sentry]
+[proxy]
+PORT = 3000
