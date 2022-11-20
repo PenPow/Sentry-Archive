@@ -4,7 +4,7 @@ import { init as proxyInit } from "./ws.js"
 
 import { type FastifyReply, type FastifyRequest, fastify as FastifyServer } from 'fastify';
 import { verify, PlatformAlgorithm } from "discord-verify/node";
-import { type APIInteraction, InteractionResponseType, InteractionType, MessageFlags, ApplicationCommandOptionType, APIApplicationCommandInteractionDataBasicOption, ApplicationCommandType, Routes, APIChannel, APIRole, APIGroupDMChannel, APIDMChannel } from "discord-api-types/v10";
+import { type APIInteraction, InteractionResponseType, InteractionType, MessageFlags, ApplicationCommandOptionType, APIApplicationCommandInteractionDataBasicOption, ApplicationCommandType, Routes, APIChannel, APIRole, APIGroupDMChannel, APIDMChannel, APIUser, APIAttachment } from "discord-api-types/v10";
 import { webcrypto } from "node:crypto";
 import { config, logger } from '../common/utils.js';
 import { REST as RestClient } from "@discordjs/rest";
@@ -66,29 +66,26 @@ fastify.post("/", async (req: FastifyRequest<{
 						const option = (interaction.data.options!.filter((val) => ![ApplicationCommandOptionType.Subcommand, ApplicationCommandOptionType.SubcommandGroup].includes(val.type)).find((val) => val.name === name) as APIApplicationCommandInteractionDataBasicOption)
 
 						if([ApplicationCommandOptionType.String, ApplicationCommandOptionType.Number, ApplicationCommandOptionType.Integer, ApplicationCommandOptionType.Boolean].includes(option.type)) return option.value;
-						else if(option.type === ApplicationCommandOptionType.Attachment) return option.value // TODO: Implement Attachment Options
+						else if(option.type === ApplicationCommandOptionType.Attachment) return interaction.data.resolved?.attachments ? interaction.data.resolved.attachments[option.value] as APIAttachment : null
 						else if([ApplicationCommandOptionType.Channel, ApplicationCommandOptionType.Role, ApplicationCommandOptionType.User].includes(option.type)) {
-							if(!fetch) return option.value
-							else {
-								if(option.type === ApplicationCommandOptionType.Channel) {
-									const fetched = await REST.get(Routes.channel(option.value)) as Exclude<APIChannel, APIGroupDMChannel | APIDMChannel>;
+							if(option.type === ApplicationCommandOptionType.Channel) {
+								const fetched: Exclude<APIChannel, APIGroupDMChannel | APIDMChannel> = (interaction.data.resolved?.channels && interaction.data.resolved?.channels[option.value] as Exclude<APIChannel, APIGroupDMChannel | APIDMChannel>) ?? await REST.get(Routes.channel(option.value)) as Exclude<APIChannel, APIGroupDMChannel | APIDMChannel>;
 
-									return fetched
-								} else if(option.type === ApplicationCommandOptionType.Role) {
-									const fetched = await REST.get(Routes.guildRole(interaction.guild_id!, option.value)) as APIRole;
+								return fetched
+							} else if(option.type === ApplicationCommandOptionType.Role) {
+								const fetched = (interaction.data.resolved?.roles && interaction.data.resolved?.roles[option.value]) ?? await REST.get(Routes.guildRole(interaction.guild_id!, option.value)) as APIRole;
 
-									return fetched
-								} else if(option.type === ApplicationCommandOptionType.User) {
-									const fetched = await REST.get(Routes.user(option.value)) as APIRole;
+								return fetched
+							} else if(option.type === ApplicationCommandOptionType.User) {
+								const fetched = (interaction.data.resolved?.users && interaction.data.resolved?.users[option.value]) ?? await REST.get(Routes.user(option.value)) as APIUser;
 
-									return fetched
-								}
+								return fetched
 							}
 						}
 					}
 
 					return null
-				}, 
+				},
 				respond: async (int, type, data) => {
 					if(responded) {
 						return void await REST.post(Routes.interactionCallback(int.id, int.token), { body: data })
