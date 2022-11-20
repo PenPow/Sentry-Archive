@@ -16,6 +16,7 @@ enum PunishmentType {
 	Kick
 	Softban
 	Ban
+	Unban
 }
 
 model Punishment {
@@ -29,7 +30,9 @@ model Punishment {
 	reason String /// @encrypted
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
+	moderatorId String
 	references Int?
+	modLogId String?
 }
 
 model Guild {
