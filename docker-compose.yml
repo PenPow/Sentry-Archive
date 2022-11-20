@@ -12,10 +12,13 @@ services:
     links:
       - redis:redis
       - rest:rest
+      - postgres:postgres
     depends_on:
       redis:
         condition: service_healthy
       rest:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "nc -vz 127.0.0.1 8080 || exit 1"]
@@ -55,7 +58,7 @@ services:
     container_name: clamd
     restart: always
     expose:
-      - 3310
+      - "3310:3310"
     build:
       context: .
       dockerfile: ./docker/Clamd.Dockerfile
@@ -83,8 +86,31 @@ services:
     image: redis:7.0.5-alpine
     restart: always
     expose:
-      - 6379
+      - "6379:6379"
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: 10s
       timeout: 5s
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=sentry
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432:5432"
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sentry']
+      interval: 10s
+      timeout: 5s
+
+volumes:
+  postgres:
+    driver: local

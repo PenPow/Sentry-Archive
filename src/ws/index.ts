@@ -4,7 +4,7 @@ import { GatewayIntentBits } from 'discord-api-types/v10'
 import { Client, Options } from 'discord.js'
 import { config, logger } from '../common/utils.js'
 import { PubSubRedisBroker } from '@discordjs/brokers';
-import { default as Redis } from 'ioredis';
+import { Redis } from './db.js'
 
 logger.debug('Connecting WS Proxy to Gateway')
 
@@ -43,10 +43,9 @@ logger.info('Connected to Gateway')
 
 logger.debug('Preparing Brokers')
 
-const redis = new Redis.default("redis://redis:6379")
-await redis.config('SET', "replica-read-only", "no")
+await Redis.config('SET', "replica-read-only", "no")
 
-const broker = new PubSubRedisBroker({ redisClient: redis });
+const broker = new PubSubRedisBroker({ redisClient: Redis });
 
 logger.info('Connected Brokers to Redis')
 

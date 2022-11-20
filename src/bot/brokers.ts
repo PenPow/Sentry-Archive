@@ -1,5 +1,7 @@
 import { PubSubRedisBroker, RPCRedisBroker  } from '@discordjs/brokers';
-import { logger, Redis } from '../common/utils.js'
+import { logger } from '../common/utils.js';
+import { Redis } from './db.js'
+
 import type { APIMessage } from 'discord-api-types/v10';
 
 logger.debug('Preparing Brokers')
@@ -11,11 +13,11 @@ export const AntiVirusBroker = new RPCRedisBroker({ redisClient: Redis })
 
 logger.info('Connected Brokers to Redis')
 
-WebSocketBroker.on('message', ({ data, ack }) => {	
+WebSocketBroker.on('messages', ({ data, ack }) => {	
 	void ack();
 	
 	const message: APIMessage = data
 	logger.debug(`Recieved Message ${message.id}`)
 })
 
-await WebSocketBroker.subscribe('subscribers', ['message'])
+await WebSocketBroker.subscribe('subscribers', ['messages'])

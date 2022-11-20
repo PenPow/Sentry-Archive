@@ -1,10 +1,11 @@
 import "source-map-support/register.js";
 
-import { logger, Redis } from '../common/utils.js';
+import { logger } from '../common/utils.js';
 import { RPCRedisBroker } from '@discordjs/brokers';
 import type { IClamAVResponse } from '../common/clamav.js'
 import NodeClam from 'clamscan';
 import { Readable } from 'stream';
+import { Redis } from "./db.js";
 
 logger.debug("Creating RPC Broker")
 

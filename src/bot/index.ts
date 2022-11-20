@@ -3,7 +3,6 @@ import "source-map-support/register.js";
 import "./brokers.js";
 
 import { init as intervalInit } from "./interval.js";
-
 import { type FastifyReply, type FastifyRequest, fastify as FastifyServer } from 'fastify';
 import { verify, PlatformAlgorithm } from "discord-verify/node";
 import { type APIInteraction, InteractionResponseType, InteractionType, MessageFlags, ApplicationCommandOptionType, APIApplicationCommandInteractionDataBasicOption, ApplicationCommandType, Routes, APIChannel, APIRole, APIGroupDMChannel, APIDMChannel, APIUser, APIAttachment } from "discord-api-types/v10";
@@ -92,13 +91,13 @@ fastify.post("/", async (req: FastifyRequest<{
 						return void await REST.post(Routes.interactionCallback(int.id, int.token), { body: data })
 					}
 
-					responded = type == InteractionResponseType.DeferredChannelMessageWithSource ? "defer" : true
+					responded = true
 
 					return void await res.send({ type: type, data })
 				}
 			})
 
-			if(execute && (responded as boolean | "defer") == "defer") {
+			if(execute && responded) {
 				return void await REST.patch(Routes.webhookMessage(interaction.application_id, interaction.token), { body: execute })
 			}
 			else if(execute && !responded) {

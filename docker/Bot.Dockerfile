@@ -12,6 +12,10 @@ COPY package*.json ./
 
 RUN npm i
 
+COPY ./prisma ./prisma
+
+RUN npx prisma generate
+
 COPY ./src/bot ./src/bot
 COPY ./src/common ./src/common
 COPY config.toml ./config.toml

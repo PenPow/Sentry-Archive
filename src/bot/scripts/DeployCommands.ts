@@ -6,7 +6,7 @@ import { Routes } from "discord-api-types/v10";
 import { config } from "../../common/utils.js";
 
 export default {
-	name: 'Deploy',
+	name: 'DeployCommands',
 	execute: async () => {
 		await loadCommands()
 

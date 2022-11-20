@@ -14,3 +14,7 @@ PORT = 3000
 
 [clamav]
 MIRROR = "https://mirror.penpow.dev"
+
+[sentry]
+DATABASE_URL = "postgresql://sentry:postgres@postgres:5432/mydb?schema=public"
+ENCRYPTION_KEY = ""
