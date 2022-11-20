@@ -51,6 +51,34 @@ services:
       interval: 10s
       timeout: 5s
 
+  clamd:
+    container_name: clamd
+    restart: always
+    expose:
+      - 3310
+    build:
+      context: .
+      dockerfile: ./docker/Clamd.Dockerfile
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 3310 || exit 1"]
+      interval: 10s
+      timeout: 5s
+    logging:
+      driver: none
+
+  clamav:
+    container_name: clamav
+    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/ClamAV.Dockerfile
+    depends_on:
+      clamd:
+        condition: service_healthy
+    links:
+      - clamd:clamd
+    tty: true
+
   redis:
     image: redis:7.0.5-alpine
     restart: always

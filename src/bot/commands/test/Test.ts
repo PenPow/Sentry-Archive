@@ -1,24 +1,30 @@
-import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, InteractionResponseType, MessageFlags } from "discord-api-types/v10"
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, InteractionResponseType } from "discord-api-types/v10"
+import { inspect } from "util"
+import type { IClamAVResponse } from "../../../common/clamav.js"
+import { AntiVirusBroker } from "../../brokers.js"
 import * as SlashCommand from "../../structures/Command.js"
 
 export default class TestCommand extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
 	public override data = {
-		name: 'hello',
-		description: 'world',
+		name: 'test',
+		description: 'Testing Attachments and ClamAV Brokers',
 	}
 
 	public override options = {
-		"name": {
-			description: 'test',
-			type: ApplicationCommandOptionType.String
+		"attachment": {
+			description: 'Attachment to Scan',
+			type: ApplicationCommandOptionType.Attachment,
+			required: true
 		},
-		"test": {
-			description: 'test',
-			type: ApplicationCommandOptionType.User
-		}
 	} satisfies Record<string, Omit<APIApplicationCommandOption, 'name'>>
 
 	public override async execute({ getArgs, respond, interaction }: SlashCommand.RunContext<TestCommand>): SlashCommand.Returnable {
-		await respond(interaction, InteractionResponseType.ChannelMessageWithSource, { flags: MessageFlags.Ephemeral, content: (await getArgs("test"))!.username })
+		respond(interaction, InteractionResponseType.DeferredChannelMessageWithSource, { flags: 64 })
+
+		const attachment = await getArgs("attachment");
+
+		const response: IClamAVResponse = await AntiVirusBroker.call('scan', Buffer.from(await (await fetch(attachment.url)).arrayBuffer()))
+
+		return { content: `\`\`\`json\n${inspect(response)}\`\`\`` }
 	}
 }

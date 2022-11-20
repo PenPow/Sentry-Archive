@@ -1,6 +1,7 @@
 import { parse } from 'toml';
 import { readFile } from 'node:fs/promises';
 import { Logger } from "tslog";
+import { default as IORedis } from 'ioredis';
 
 interface Config {
 	// [ key: string ]: string | number | Config,
@@ -18,9 +19,13 @@ interface Config {
 	proxy: {
 		PORT: string
 	}
-	sentry: {}
+	clamav: {
+		MIRROR: string
+	}
 };
 
 export const config: Config = parse(await readFile('config.toml', 'utf-8'))
 
-export const logger: Logger = new Logger();
+export const logger = new Logger();
+
+export const Redis = new IORedis.default("redis://redis:6379")

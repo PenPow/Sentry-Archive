@@ -1,6 +1,8 @@
 import "source-map-support/register.js";
+
+import "./brokers.js";
+
 import { init as intervalInit } from "./interval.js";
-import { init as proxyInit } from "./ws.js"
 
 import { type FastifyReply, type FastifyRequest, fastify as FastifyServer } from 'fastify';
 import { verify, PlatformAlgorithm } from "discord-verify/node";
@@ -11,7 +13,6 @@ import { REST as RestClient } from "@discordjs/rest";
 import { Commands, loadCommands } from "./structures/Command.js";
 
 intervalInit()
-proxyInit()
 
 const fastify = FastifyServer({
   logger: false
