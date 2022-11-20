@@ -8,6 +8,7 @@ import { Redis } from './db.js'
 
 logger.debug('Connecting WS Proxy to Gateway')
 
+// TODO: Replace with Websocket Manager
 const client = new Client({
 	intents: [GatewayIntentBits.AutoModerationExecution, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.Guilds],
 	makeCache: Options.cacheWithLimits({
