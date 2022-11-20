@@ -16,7 +16,11 @@ services:
       redis:
         condition: service_healthy
       rest:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
 
   ws-proxy:
     container_name: ws-proxy
@@ -31,7 +35,7 @@ services:
       redis:
         condition: service_healthy
       rest:
-        condition: service_started
+        condition: service_healthy
 
   rest:
     container_name: rest-proxy
@@ -42,6 +46,10 @@ services:
       context: .
       dockerfile: ./docker/Rest.Dockerfile
     tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 3000 || exit 1"]
+      interval: 10s
+      timeout: 5s
 
   redis:
     image: redis:7.0.5-alpine
