@@ -5,6 +5,7 @@ import { proxyRequests } from '@discordjs/proxy';
 import { REST } from '@discordjs/rest';
 import { config, logger } from '../common/utils.js';
 
+// TODO: Implement Shared Cache
 const api = new REST({ rejectOnRateLimit: () => true, retries: 0 }).setToken(config.discord.TOKEN);
 const server = createServer(proxyRequests(api));
 
