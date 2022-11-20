@@ -69,7 +69,7 @@ never
 export interface RunContext<Command extends Handler<ApplicationCommandType>> {
 	data: Command["data"],
 	logger: Logger
-	getArgs: <Name extends keyof Command["options"]>(interaction: Name) => Awaitable<ApplicationCommandFetchedOptionType<Command["options"][Name]["type"]> | null> ,
+	getArgs: <Name extends keyof Command["options"]>(interaction: Name) => Awaitable<Command["options"][Name]["required"] extends true ? ApplicationCommandFetchedOptionType<Command["options"][Name]["type"]> : (ApplicationCommandFetchedOptionType<Command["options"][Name]["type"]> | null)>
 	respond: (interaction: Command["type"] extends ApplicationCommandType.ChatInput ? APIChatInputApplicationCommandInteraction : Command["type"] extends ApplicationCommandType.Message ? APIMessageApplicationCommandInteraction : APIUserApplicationCommandInteraction, responseType: InteractionResponseType, data: RESTPostAPIWebhookWithTokenJSONBody) => Promise<void>,
 	interaction: Command["type"] extends ApplicationCommandType.ChatInput ? APIChatInputApplicationCommandInteraction : Command["type"] extends ApplicationCommandType.Message ? APIMessageApplicationCommandInteraction : APIUserApplicationCommandInteraction 
 }
