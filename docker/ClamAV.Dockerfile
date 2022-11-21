@@ -1,22 +1,45 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 LABEL org.opencontainers.image.source="https://github.com/penpow/sentry"
 LABEL org.opencontainers.image.description="Sentry ClamAV Broker"
 
+RUN apk add --no-cache libc6-compat python3 make g++
+RUN apk update
+
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++
+RUN npm i turbo -g
+COPY . .
+RUN turbo prune --scope=clamav --docker
 
-COPY tsconfig.json ./
-COPY package*.json ./
+FROM node:18-alpine AS installer
 
+RUN apk add --no-cache libc6-compat python3 make g++
+RUN apk update
+
+WORKDIR /app
+
+COPY .gitignore .gitignore
+COPY --from=builder /app/out/json .
+COPY --from=builder /app/out/package-lock.json ./package-lock.json
 RUN npm i
 
-COPY ./src/antivirus ./src/antivirus
-COPY ./src/common ./src/common
-COPY config.toml ./config.toml
+COPY --from=builder /app/out/full .
+COPY turbo.json turbo.json
+RUN npx turbo run build --filter=clamav
 
-RUN npm run build
+FROM node:18-alpine as runner
 
-ENTRYPOINT [ "npm" ]
-CMD [ "run", "start:antivirus" ]
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 sentry
+USER sentry
+
+COPY --from=installer /app/apps/antivirus/package.json .
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer --chown=sentry:nodejs /app/apps/antivirus/dist ./dist
+COPY config.toml .
+
+ENTRYPOINT [ "node" ]
+CMD [ "--no-warnings", "--experimental-specifier-resolution=node", "dist/index.js" ]

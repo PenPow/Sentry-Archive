@@ -1,0 +1,42 @@
+{
+	"name": "sentry",
+	"version": "1.0.0",
+	"description": "Sentry Bot Instace",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"build": "npx tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PenPow/Sentry.git"
+	},
+	"author": "PenPow <josh@penpow.dev>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/PenPow/Sentry/issues"
+	},
+	"homepage": "https://github.com/PenPow/Sentry#readme",
+	"dependencies": {
+		"@47ng/cloak": "^1.1.0",
+		"@discordjs/brokers": "^0.2.0-dev.1668859443-ff85481.0",
+		"@discordjs/rest": "^1.3.0",
+		"@interval/sdk": "^0.32.0",
+		"database": "*",
+		"discord-api-types": "^0.37.19",
+		"discord-verify": "^1.0.0",
+		"fastify": "^4.10.2",
+		"glob": "^8.0.3",
+		"ioredis": "^5.2.4",
+		"prisma-field-encryption": "^1.4.0",
+		"shared": "*",
+		"source-map-support": "^0.5.21",
+		"tslog": "^4.2.0"
+	},
+	"devDependencies": {
+		"@types/glob": "^8.0.0",
+		"@types/node": "^18.11.9",
+		"@types/source-map-support": "^0.5.6",
+		"typescript": "^4.9.3"
+	}
+}
