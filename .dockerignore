@@ -1,9 +1,2 @@
 node_modules/
-dist/
 .turbo
-config.toml.example
-LICENSE
-.vscode/
-.github/
-.git/
-.devcontainer/

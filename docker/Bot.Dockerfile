@@ -43,4 +43,3 @@ COPY config.toml .
 
 ENTRYPOINT [ "node" ]
 CMD [ "--no-warnings", "--experimental-specifier-resolution=node", "dist/index.js" ]
-# CMD ["tail", "-f", "/dev/null"]

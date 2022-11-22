@@ -30,7 +30,7 @@
 		// Language and Environment
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"target": "ES2021",
+		"target": "ES2022",
 		"module": "node16",
 		"moduleResolution": "node16",
 		"useDefineForClassFields": true,
