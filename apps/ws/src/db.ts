@@ -1,3 +1,3 @@
-import { default as IORedis } from 'ioredis';
+import { default as IORedis } from "ioredis";
 
-export const Redis = new IORedis.default("redis://redis:6379")
+export const Redis = new IORedis.default("redis://redis:6379");

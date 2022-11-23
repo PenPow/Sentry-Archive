@@ -9,7 +9,8 @@
 		"outputs": ["dist/**"]
 	  },
 	  "lint": {
-		"outputs": []
+		"outputs": [],
+		"inputs": ["src/**/*"]
 	  },
 	  "db:push": {
 		"cache": false

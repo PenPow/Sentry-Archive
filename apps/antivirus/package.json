@@ -1,36 +1,40 @@
 {
-	"name": "clamav",
-	"version": "1.0.0",
-	"description": "Sentry ClamAV Broker",
-	"main": "index.js",
-	"type": "module",
-	"scripts": {
-		"build": "npx tsup --no-splitting ./src/* ./src/**/*"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/PenPow/Sentry.git"
-	},
-	"author": "PenPow <josh@penpow.dev>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/PenPow/Sentry/issues"
-	},
-	"homepage": "https://github.com/PenPow/Sentry#readme",
-	"dependencies": {
-		"@discordjs/brokers": "^0.2.0-dev.1668859443-ff85481.0",
-		"clamscan": "^2.1.2",
-		"ioredis": "^5.2.4",
-		"shared": "*",
-		"source-map-support": "^0.5.21",
-		"tslog": "^4.2.0"
-	},
-	"devDependencies": {
-		"@swc/core": "^1.3.19",
-		"@types/clamscan": "^2.0.2",
-		"@types/node": "^18.11.9",
-		"@types/source-map-support": "^0.5.6",
-		"tsup": "^6.5.0",
-		"typescript": "^4.9.3"
-	}
+  "name": "clamav",
+  "version": "1.0.0",
+  "description": "Sentry ClamAV Broker",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npx tsup --no-splitting ./src/* ./src/**/*",
+    "lint": "npx eslint --ext .js,.ts . && npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PenPow/Sentry.git"
+  },
+  "author": "PenPow <josh@penpow.dev>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PenPow/Sentry/issues"
+  },
+  "homepage": "https://github.com/PenPow/Sentry#readme",
+  "dependencies": {
+    "@discordjs/brokers": "^0.2.0-dev.1668859443-ff85481.0",
+    "clamscan": "^2.1.2",
+    "ioredis": "^5.2.4",
+    "shared": "*",
+    "source-map-support": "^0.5.21",
+    "tslog": "^4.2.0"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.3.19",
+    "@types/clamscan": "^2.0.2",
+    "@types/node": "^18.11.9",
+    "@types/source-map-support": "^0.5.6",
+    "eslint": "^8.28.0",
+    "eslint-config-neon": "^0.1.40",
+    "prettier": "^2.7.1",
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.3"
+  }
 }

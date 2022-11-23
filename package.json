@@ -5,11 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npx rimraf ./dist && npx tsc",
-    "start:bot": "node ./dist/bot/index.js",
-    "start:ws": "node ./dist/ws/index.js",
-    "start:proxy": "node ./dist/proxy/index.js",
-    "start:antivirus": "node ./dist/antivirus/index.js"
+    "build": "npx turbo run build",
+    "lint": "npx turbo run lint --continue",
+    "db:push": "npx turbo run db:push",
+    "db:generate": "npx turbo run db:generate"
   },
   "repository": {
     "type": "git",

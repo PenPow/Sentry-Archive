@@ -1,0 +1,11 @@
+{
+	"root": true,
+	"extends": ["neon/common", "neon/node", "neon/typescript", "neon/module", "neon/no-deprecated", "neon/prettier"],
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	},
+	"rules": {
+		"semi": "error"
+	},
+	"ignorePatterns": ["**/dist/*"]
+}

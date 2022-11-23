@@ -1,15 +1,15 @@
-interface ISuccessfulResponse {
-	success: true,
-	data: {
-		name: string,
-		infected: boolean,
-		viruses: string[]
-	}
-}
+type ISuccessfulResponse = {
+  data: {
+    infected: boolean;
+    name: string;
+    viruses: string[];
+  };
+  success: true;
+};
 
-interface IErrorResponse {
-	success: false,
-	error: string
-}
+type IErrorResponse = {
+  error: string;
+  success: false;
+};
 
-export type IClamAVResponse = ISuccessfulResponse | IErrorResponse
+export type IClamAVResponse = IErrorResponse | ISuccessfulResponse;
