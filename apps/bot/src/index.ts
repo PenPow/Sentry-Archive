@@ -43,9 +43,9 @@ const fastify = FastifyServer({
   logger: false,
 });
 
-// @ts-expect-error all code paths return a value
 fastify.post(
   "/",
+  // @ts-expect-error all code paths return a value
   async (
     req: FastifyRequest<{
       Body: APIInteraction;
