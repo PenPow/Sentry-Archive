@@ -1,0 +1,15 @@
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, type ApplicationCommandType } from "discord-api-types/v10";
+import * as SlashCommand from "../../structures/Command.js";
+
+export default class {{ titleCase name }}Command extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
+	public override data = {
+		name: '{{ lowerCase name }}',
+		description: '{{ description }}',
+	};
+
+	public override options = {
+	// eslint-disable-next-line semi
+	} satisfies Record<string, Omit<APIApplicationCommandOption, 'name'>>
+
+	public override async execute({}: SlashCommand.RunContext<TestCommand>): SlashCommand.Returnable {}
+}
