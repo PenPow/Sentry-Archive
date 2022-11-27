@@ -57,12 +57,14 @@ export default function (
 				}
 			)
 
-			if(data.docker && data.type === 'package') {
+			if(data.docker && data.type === 'app') {
 				actions.push({
 					type: 'add',
 					path: 'docker/{{ name}}.Dockerfile',
 					templateFile: 'templates/package/dockerfile.hbs'
 				})
+
+				actions.push("NOTICE: Please Manually Update the Docker-Compose.yml file to include this package")
 			}
 
 			actions.push("Created! Please run npm install to prepare the package")
