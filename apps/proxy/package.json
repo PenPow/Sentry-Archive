@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npx tsup --no-splitting ./src/* ./src/**/*",
+    "build": "npx tsup --no-splitting src/",
     "lint": "npx eslint --ext .js,.ts . && npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
   },
   "repository": {
