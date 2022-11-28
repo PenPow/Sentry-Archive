@@ -1,14 +1,15 @@
 // import { PunishmentType } from "database"
 import { inspect } from "node:util";
-import { type APIApplicationCommandOption, ApplicationCommandOptionType, type ApplicationCommandType, InteractionResponseType } from "discord-api-types/v10";
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, InteractionResponseType, type RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v10";
 import * as SlashCommand from "../../structures/Command.js";
 // import { Punishment } from "../../structures/Punishment.js"
 
 export default class TestCommand extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
 	public override data = {
 		name: 'test',
-		description: 'punishment time',
-	};
+		description: 'punishment time he he',
+		type: ApplicationCommandType.ChatInput
+	} satisfies RESTPostAPIChatInputApplicationCommandsJSONBody & { type: ApplicationCommandType.ChatInput };
 
 	public override options = {
 		"user": {
