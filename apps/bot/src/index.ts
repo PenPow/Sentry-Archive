@@ -29,10 +29,7 @@ import {
   fastify as FastifyServer,
 } from "fastify";
 import { config, logger } from "./config.js";
-import { init as intervalInit } from "./interval.js";
 import { Commands, loadCommands } from "./structures/Command.js";
-
-void intervalInit();
 
 export const REST = new RestClient({
   version: "10",

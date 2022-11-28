@@ -40,6 +40,23 @@ services:
       rest:
         condition: service_healthy
 
+  actions:
+    container_name: actions
+    build:
+      context: .
+      dockerfile: ./docker/Actions.Dockerfile
+    tty: true
+    restart: always
+    links:
+      - redis:redis
+    depends_on:
+      redis:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+      sentry:
+        condition: service_healthy
+
   rest:
     container_name: rest-proxy
     expose:
