@@ -54,8 +54,6 @@ services:
         condition: service_healthy
       rest:
         condition: service_healthy
-      sentry:
-        condition: service_healthy
 
   rest:
     container_name: rest-proxy
