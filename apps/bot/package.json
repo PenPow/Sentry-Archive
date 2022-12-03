@@ -21,6 +21,7 @@
   "dependencies": {
     "@47ng/cloak": "^1.1.0",
     "@discordjs/brokers": "^0.2.0-dev.1668859443-ff85481.0",
+    "@discordjs/core": "^0.1.0",
     "@discordjs/rest": "^1.3.0",
     "@interval/sdk": "^0.32.0",
     "@prisma/client": "^4.6.1",

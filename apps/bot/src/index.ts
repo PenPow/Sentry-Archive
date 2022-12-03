@@ -1,9 +1,7 @@
 import "source-map-support/register.js";
-
 import "./brokers.js";
 
 import { webcrypto } from "node:crypto";
-import { REST as RestClient } from "@discordjs/rest";
 import type {
   APIApplicationCommandInteractionDataBasicOption,
   APIChannel,
@@ -28,13 +26,9 @@ import {
   type FastifyRequest,
   fastify as FastifyServer,
 } from "fastify";
+import { api } from "./REST.js";
 import { config, logger } from "./config.js";
 import { Commands, loadCommands } from "./structures/Command.js";
-
-export const REST = new RestClient({
-  version: "10",
-  api: "http://rest:3000/api",
-}).setToken(config.discord.TOKEN);
 
 const fastify = FastifyServer({
   logger: false,
@@ -150,7 +144,7 @@ fastify.post(
                   return (
                     (interaction.data.resolved?.channels &&
                       interaction.data.resolved?.channels[option.value]) ??
-                    ((await REST.get(Routes.channel(option.value))) as Exclude<
+                    ((await api.channels.get(option.value)) as Exclude<
                       APIChannel,
                       APIDMChannel | APIGroupDMChannel
                     >)
@@ -159,7 +153,7 @@ fastify.post(
                   return (
                     (interaction.data.resolved?.roles &&
                       interaction.data.resolved?.roles[option.value]) ??
-                    ((await REST.get(
+                    ((await api.rest.get(
                       Routes.guildRole(interaction.guild_id!, option.value)
                     )) as APIRole)
                   );
@@ -167,7 +161,7 @@ fastify.post(
                   return (
                     (interaction.data.resolved?.users &&
                       interaction.data.resolved?.users[option.value]) ??
-                    ((await REST.get(Routes.user(option.value))) as APIUser)
+                    ((await api.users.get(option.value)) as APIUser)
                   );
                 }
               }
@@ -177,7 +171,7 @@ fastify.post(
           },
           respond: async (int, type, data) => {
             if (responded) {
-              return void (await REST.post(
+              return void (await api.rest.post(
                 Routes.interactionCallback(int.id, int.token),
                 { body: data }
               ));
@@ -190,7 +184,7 @@ fastify.post(
         });
 
         if (execute && responded) {
-          return void (await REST.patch(
+          return void (await api.rest.patch(
             Routes.webhookMessage(
               interaction.application_id,
               interaction.token

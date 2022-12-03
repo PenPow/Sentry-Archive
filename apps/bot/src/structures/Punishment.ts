@@ -6,7 +6,6 @@ import type {
   APIEmbed,
   APIGroupDMChannel,
   APIMessage,
-  APIThreadChannel,
   APIUser,
   ComponentType,
   Snowflake,
@@ -18,9 +17,9 @@ import {
   ImageFormat,
   Routes,
 } from "discord-api-types/v10";
+import { api } from "../REST.js";
 import { logger } from "../config.js";
 import { Prisma, Redis } from "../db.js";
-import { REST } from "../index.js";
 
 // TODO: Custom Audit Log Channel Finding
 export class Punishment<T extends PunishmentType> {
@@ -63,12 +62,9 @@ export class Punishment<T extends PunishmentType> {
   }
 
   private async createAuditLogMessage() {
-    const channels = (await REST.get(
-      Routes.guildChannels(this.data.guildId)
-    )) as Exclude<
-      APIChannel,
-      APIDMChannel | APIGroupDMChannel | APIThreadChannel
-    >[];
+    const channels = (await api.guilds.getChannels(
+      this.data.guildId
+    )) as Exclude<APIChannel, APIDMChannel | APIGroupDMChannel>[];
 
     const channel = channels
       .filter(
@@ -90,10 +86,10 @@ export class Punishment<T extends PunishmentType> {
       .at(0);
     if (!channel) return;
 
-    const member = (await REST.get(Routes.user(this.data.userId))) as
+    const member = (await api.users.get(this.data.userId)) as
       | APIUser
       | undefined;
-    const moderator = (await REST.get(Routes.user(this.data.moderatorId))) as
+    const moderator = (await api.users.get(this.data.moderatorId)) as
       | APIUser
       | undefined;
 
@@ -177,8 +173,9 @@ export class Punishment<T extends PunishmentType> {
       type: ComponentType.ActionRow;
     } = { type: 1, components };
 
-    return (await REST.post(Routes.channelMessages(channel.id), {
-      body: { embeds: [embed], components: [row] },
+    return (await api.channels.createMessage(channel.id, {
+      embeds: [embed],
+      components: [row],
     })) as APIMessage;
   }
 
@@ -199,40 +196,53 @@ export class Punishment<T extends PunishmentType> {
     try {
       switch (this.type) {
         case PunishmentType.Ban:
-          await REST.put(Routes.guildBan(this.data.guildId, this.data.userId), {
-            reason: this.data.reason,
-            body: { delete_message_seconds: 604_800 },
-          });
+          await api.guilds.banUser(
+            this.data.guildId,
+            this.data.userId,
+            { delete_message_seconds: 604_800 },
+            this.data.reason
+          );
+
           break;
         case PunishmentType.Softban:
-          await REST.put(Routes.guildBan(this.data.guildId, this.data.userId), {
-            reason: this.data.reason,
-            body: { delete_message_seconds: 604_800 },
-          });
-          await REST.delete(
-            Routes.guildBan(this.data.guildId, this.data.userId),
-            { reason: "Removing Softban" }
+          await api.guilds.banUser(
+            this.data.guildId,
+            this.data.userId,
+            { delete_message_seconds: 604_800 },
+            this.data.reason
           );
+          await api.guilds.unbanUser(
+            this.data.guildId,
+            this.data.userId,
+            "Removing Softban"
+          );
+
           break;
         case PunishmentType.Kick:
-          await REST.delete(
+          await api.rest.delete(
             Routes.guildMember(this.data.guildId, this.data.userId),
             { reason: this.data.reason }
           );
+
           break;
         case PunishmentType.Timeout:
           if (!this.expiration) throw new Error("No Expiration Provided");
-          await REST.patch(
-            Routes.guildMember(this.data.guildId, this.data.userId),
-            {
-              reason: this.data.reason,
-              body: {
-                communication_disabled_until: this.expiration.toISOString(),
-              },
-            }
+
+          await api.guilds.editMember(
+            this.data.guildId,
+            this.data.userId,
+            { communication_disabled_until: this.expiration.toISOString() },
+            this.data.reason
           );
+
           break;
         case PunishmentType.Unban:
+          await api.guilds.unbanUser(
+            this.data.guildId,
+            this.data.userId,
+            this.data.reason
+          );
+
           break;
         case PunishmentType.Warn:
           break;

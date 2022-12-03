@@ -1,20 +1,39 @@
 import { Buffer } from "node:buffer";
 import { ctx, io } from "@interval/sdk";
-import { Routes, ApplicationCommandType, type RESTPostAPIChatInputApplicationCommandsJSONBody, type RESTPostAPIContextMenuApplicationCommandsJSONBody} from "discord-api-types/v10";
+import {
+  Routes,
+  ApplicationCommandType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type RESTPostAPIContextMenuApplicationCommandsJSONBody,
+} from "discord-api-types/v10";
 import { Broker, config, REST } from "../config.js";
 import type { Action } from "../types.js";
 
 export default {
   name: "DeployCommands",
   execute: async () => {
-    const Commands: (RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody)[] = await Broker.call('getCommands', null);
+    const Commands: (
+      | RESTPostAPIChatInputApplicationCommandsJSONBody
+      | RESTPostAPIContextMenuApplicationCommandsJSONBody
+    )[] = await Broker.call("getCommands", null);
 
-    if(!Commands) throw new Error("No Commands Loaded!");
+    if (!Commands) throw new Error("No Commands Loaded!");
 
     const [table, registerToGuild] = await io.group([
       io.select.table("Commands", {
         data: [...Commands.values()].map((data, index) => {
-          return { id: index, name: data.name, description: data.type === ApplicationCommandType.ChatInput ? data.description : '-', type: data.type === ApplicationCommandType.ChatInput ? 'Chat Input' : 'Context Menu' };
+          return {
+            id: index,
+            name: data.name,
+            description:
+              data.type === ApplicationCommandType.ChatInput
+                ? data.description
+                : "-",
+            type:
+              data.type === ApplicationCommandType.ChatInput
+                ? "Chat Input"
+                : "Context Menu",
+          };
         }),
       }),
       io.input.boolean("Register Guild Commands?").optional(),

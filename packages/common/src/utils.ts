@@ -15,7 +15,7 @@ export type Config = {
   };
   proxy: {
     API_VERSION: 6 | 7 | 8 | 9 | 10;
-	PORT: string;
+    PORT: string;
   };
   sentry: {
     DATABASE_URL: `postgresql://${string}:${string}@${string}:${number}/${string}`;

@@ -13,15 +13,15 @@ export const RPCBroker = new RPCRedisBroker({ redisClient: Redis });
 
 logger.info("Connected Brokers to Redis");
 
-RPCBroker.on('getCommands', async ({ ack, reply }) => {
-	void ack();
+RPCBroker.on("getCommands", async ({ ack, reply }) => {
+  void ack();
 
-	await loadCommands();
+  await loadCommands();
 
-	return void reply([...Commands.values()].map((val) => val.toJSON()));
+  return void reply([...Commands.values()].map((val) => val.toJSON()));
 });
 
-await RPCBroker.subscribe('responders', ['getCommands']);
+await RPCBroker.subscribe("responders", ["getCommands"]);
 
 PubSubBroker.on("messages", ({ data, ack }) => {
   void ack();
