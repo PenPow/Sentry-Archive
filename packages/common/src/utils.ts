@@ -14,7 +14,8 @@ export type Config = {
     PRODUCTION_API_KEY: string;
   };
   proxy: {
-    PORT: string;
+    API_VERSION: 6 | 7 | 8 | 9 | 10;
+	PORT: string;
   };
   sentry: {
     DATABASE_URL: `postgresql://${string}:${string}@${string}:${number}/${string}`;

@@ -11,6 +11,7 @@ PRODUCTION_API_KEY = ""
 
 [proxy]
 PORT = 3000
+API_VERSION = 10
 
 [clamav]
 MIRROR = "https://mirror.penpow.dev"

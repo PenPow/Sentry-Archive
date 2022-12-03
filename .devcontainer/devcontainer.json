@@ -22,7 +22,6 @@
 				"mikestead.dotenv",
 				"dbaeumer.vscode-eslint",
 				"Prisma.prisma",
-				"ms-vscode.vscode-typescript-next",
 				"Gruntfuggly.todo-tree"
 			]
 		}

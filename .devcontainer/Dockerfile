@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:bullseye
 
 # [Option] Install zsh
-ARG INSTALL_ZSH="true"
+ARG INSTALL_ZSH="false"
 # [Option] Upgrade OS packages to their latest versions
 ARG UPGRADE_PACKAGES="true"
 # [Option] Enable non-root Docker access in container
@@ -43,3 +43,8 @@ RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && bash n l
 RUN n "${NODE_VERSION}"
 
 RUN apt-get install build-essential python3
+
+SHELL ["/bin/bash", "-c"]
+
+RUN curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
+ENV PATH="${PATH}:/root/.nimble/bin"
