@@ -32,12 +32,14 @@ model Punishment {
 	updatedAt DateTime @updatedAt
 	moderatorId String
 	references Int?
+	expires DateTime?
 	modLogId String?
 }
 
 model Guild {
 	id String @id @unique
 	punishments Punishment[]
+	modLogChannelId String? @unique
 }
 
 model User {

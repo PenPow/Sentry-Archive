@@ -1,16 +1,13 @@
 import { PunishmentType, type Punishment as PunishmentModel } from "database";
 import type {
-  APIButtonComponent,
-  APIChannel,
-  APIDMChannel,
-  APIEmbed,
-  APIGroupDMChannel,
-  APIMessage,
-  APIUser,
-  ComponentType,
-  Snowflake,
+	APIActionRowComponent,
+    APIButtonComponent,
+    APIEmbed,
+    APIMessageActionRowComponent,
+    Snowflake
 } from "discord-api-types/v10";
 import {
+  ComponentType,
   ButtonStyle,
   CDNRoutes,
   ChannelType,
@@ -18,248 +15,222 @@ import {
   Routes,
 } from "discord-api-types/v10";
 import { api } from "../REST.js";
-import { logger } from "../config.js";
 import { Prisma, Redis } from "../db.js";
 
-// TODO: Custom Audit Log Channel Finding
-export class Punishment<T extends PunishmentType> {
-  public type: T;
+abstract class Punishment {
+	public static async fetch(data: { caseId: number, guildId: Snowflake } | { id: number }) {
+		return Prisma.punishment.findFirst({ where: data });
+	}
 
-  private data: Omit<
-    PunishmentModel,
-    "createdAt" | "id" | "modLogId" | "updatedAt"
-  >;
+	public static async fetchUserPunishments(userId: Snowflake, guildId: Snowflake): Promise<(ExpiringPunishment | GenericPunishment)[]> {
+		await this.createUserAndGuild(userId, guildId);
 
-  private readonly expiration?: Date;
+		const user = await Prisma.user.findUnique({ where: { id: userId }, select: { punishments: true }});
+		if(!user) return [];
 
-  public constructor(
-    data: Omit<
-      PunishmentModel,
-      "caseId" | "createdAt" | "id" | "modLogId" | "updatedAt"
-    > & { expiration?: Date; type: T }
-  ) {
-    this.type = data.type as T;
+		// @ts-expect-error this works and im too lazy to fix the type error
+		// eslint-disable-next-line @typescript-eslint/no-use-before-define
+		return user.punishments.filter((punishment) => punishment.guildId === guildId).map((punishment) => punishment.type === "Timeout" ? new ExpiringPunishment(punishment) : new GenericPunishment(punishment));
+	}
 
-    if ("expiration" in data && this.type === PunishmentType.Timeout)
-      this.expiration = data.expiration;
+	protected async getCaseId(guildId: Snowflake) {
+		const caseNoHashExists = await Redis.hexists("case_numbers", guildId);
 
-    this.data = { ...data, caseId: -1 };
-  }
+		if(!caseNoHashExists) {
+			await Redis.hset("case_numbers", guildId, 1);
 
-  public static async fetch(
-    data: { caseId: number; guildId: Snowflake } | { id: number }
-  ) {
-    return Prisma.punishment.findFirst({ where: data });
-  }
+			return 1;
+		}
+		
+		const caseNo = await Redis.hget('case_numbers', guildId);
+		if(!caseNo) return 1;
 
-  private static async getCaseId(guildId: Snowflake) {
-    if (!(await Redis.hexists(`case_numbers`, guildId)))
-      await Redis.hset(`case_numbers`, guildId, 0);
-    return (
-      Number.parseInt((await Redis.hget(`case_numbers`, guildId)) ?? "0", 10) +
-      1
-    );
-  }
+		await Redis.hincrby("case_numbers", guildId, 1);
 
-  private async createAuditLogMessage() {
-    const channels = (await api.guilds.getChannels(
-      this.data.guildId
-    )) as Exclude<APIChannel, APIDMChannel | APIGroupDMChannel>[];
+		return Number.parseInt(caseNo, 10) + 1;
+	}
 
-    const channel = channels
-      .filter(
-        (channel) =>
-          channel.type === ChannelType.GuildText &&
-          channel.name &&
-          [
-            "audit-logs",
-            "sentry-logs",
-            "server-logs",
-            "logs",
-            "mod-logs",
-            "modlog",
-            "modlogs",
-            "auditlogs",
-            "auditlog",
-          ].includes(channel.name)
-      )
-      .at(0);
-    if (!channel) return;
+	protected async createAuditLogMessage(id: number, guildId: Snowflake) {
+		const guildDatabase = await Prisma.guild.findUnique({ where: { id: guildId }});
 
-    const member = (await api.users.get(this.data.userId)) as
-      | APIUser
-      | undefined;
-    const moderator = (await api.users.get(this.data.moderatorId)) as
-      | APIUser
-      | undefined;
+		if(guildDatabase?.modLogChannelId) {
+			const channel = await api.channels.get(guildDatabase.modLogChannelId).catch(() => undefined);
 
-    if (!member || !moderator) return;
+			if(channel) {
+				const data = await this.createEmbed(id, channel.id);
+				const msg = await api.channels.createMessage(channel.id, { components: [data[1]], embeds: [data[0]] }).catch(() => undefined);
 
-    const description: (string | [string, string])[] = [
-      [
-        "Member",
-        `\`${member.username}#${member.discriminator}\` (${member.id})`,
-      ],
-      ["Action", this.type],
-      ["Reason", this.data.reason],
-    ];
-    const components: APIButtonComponent[] = [
-      {
-        type: 2,
-        style: ButtonStyle.Primary,
-        label: `Case #${this.data.caseId}`,
-        custom_id: `case_${this.data.caseId}`,
-        disabled: true,
-      },
-    ];
+				if(msg) await Prisma.punishment.update({ where: { id }, data: { modLogId: msg.id }});
+			}
+		} else {
+			const channels = await api.guilds.getChannels(guildId);
+			const channel = channels.filter((chnl) => chnl.type === ChannelType.GuildText && ["audit-logs", "sentry-logs", "server-logs", "mod-logs", "audit-log", "auditlogs", "auditlog", "logs"].includes(chnl?.name ?? "")).at(0);
 
-    if (this.expiration && this.type === "Timeout")
-      description.push([
-        "Expiration",
-        `<t:${Math.round(this.expiration.getTime() / 1_000)}:R>`,
-      ]);
-    if (this.data.references) {
-      const referenced = await Punishment.fetch({
-        guildId: this.data.guildId,
-        caseId: this.data.references,
-      });
+			if(!channel) return;
 
-      if (!referenced) return;
+			const data = await this.createEmbed(id, channel.id);
+			const msg = await api.channels.createMessage(channel.id, { components: [data[1]], embeds: [data[0]] }).catch(() => undefined);
 
-      if (referenced.modLogId) {
-        description.push([
-          "Case Reference",
-          `[#${referenced.caseId}](https://discord.com/channels/${this.data.guildId}/${channel.id}/${referenced.modLogId})`,
-        ]);
-        components.push({
-          type: 2,
-          style: ButtonStyle.Link,
-          label: `Open Case Reference`,
-          url: `https://discord.com/channels/${this.data.guildId}/${channel.id}/${referenced.modLogId}`,
-        });
-      } else {
-        description.push(["Case Reference", `${referenced.caseId}`]);
-      }
-    }
+			if(msg) await Prisma.punishment.update({ where: { id }, data: { modLogId: msg.id }});
+		}
+	}
 
-    for (const [index, val] of description.entries())
-      description[index] = `**${val[0]}**: ${val[1]}`;
+	private async createEmbed(id: number, channel: Snowflake): Promise<[APIEmbed, APIActionRowComponent<APIMessageActionRowComponent>]> {
+		const modCase = await Punishment.fetch({ id });
+		if(!modCase) throw new Error("No Case Found");
 
-    let color = 0x171d2e;
-    if (this.type === "Ban") color = 0xff5c5c;
-    else if (this.type === "Kick") color = 0xf79554;
-    else if (this.type === "Softban") color = 0xf77f54;
-    else if (this.type === "Warn") color = 0xffdc5c;
-    else if (this.type === "Timeout") color = 0x1d1d21;
-    else if (this.type === "Unban") color = 0x5cff9d;
+		const { userId, caseId, moderatorId, reason, references, createdAt, type, expires, guildId } = modCase;
 
-    const embed: APIEmbed = {
-      description: description.join("\n"),
-      color,
-      author: {
-        name: `${moderator.username}#${moderator.discriminator} (${moderator.id})`,
-        icon_url: moderator.avatar
-          ? `https://cdn.discordapp.com${CDNRoutes.userAvatar(
-              moderator.id,
-              moderator.avatar,
-              ImageFormat.WebP
-            )}`
-          : "https://cdn.discordapp.com/embed/avatars/0.png",
-      },
-    };
+		const member = await api.users.get(userId);
+		const moderator = await api.users.get(moderatorId);
 
-    const row: {
-      components: APIButtonComponent[];
-      type: ComponentType.ActionRow;
-    } = { type: 1, components };
+		const description: [string, string][] = [
+			["Member", `<@${member.id}> (${member.id})` ],
+			["Moderator", `<@${moderator.id}> (${moderator.id})`, ],
+			["Action", type],
+			["Reason", reason],
+		];
 
-    return (await api.channels.createMessage(channel.id, {
-      embeds: [embed],
-      components: [row],
-    })) as APIMessage;
-  }
+		const components: APIButtonComponent[] = [{
+			type: ComponentType.Button,
+			style: ButtonStyle.Primary,
+			label: `Case #${caseId}`,
+			custom_id: "case_button_placeholder",
+			disabled: true
+		}];
 
-  public async run(): Promise<Error | PunishmentModel> {
-    this.data.caseId = await Punishment.getCaseId(this.data.guildId);
+		if(expires) description.push(["Expiration", `<t:${Math.round(expires.getTime() / 1_000)}:R>`]);
+		if(references) {
+			const referencesCase = await Punishment.fetch({ caseId: references, guildId });
 
-    await Prisma.user.upsert({
-      create: { id: this.data.userId },
-      update: {},
-      where: { id: this.data.userId },
-    });
-    await Prisma.guild.upsert({
-      create: { id: this.data.guildId },
-      update: {},
-      where: { id: this.data.guildId },
-    });
+			if(referencesCase) {
+				if(referencesCase.modLogId) {
+					components.push({ type: ComponentType.Button, style: ButtonStyle.Link, label: 'Open Case Reference', url: `https://discord.com/channels/${guildId}/${channel}/${referencesCase.modLogId})` });
+					description.push(["Reference", `[#${referencesCase.caseId}](https://discord.com/channels/${guildId}/${channel}/${referencesCase.modLogId})`]);
+				} else {
+					description.push(["Reference", `#${referencesCase.caseId}`]);
+				}
+			}
+		}
+		
+		return [
+			{
+				description: description.map((val) => `**${val[0]}**: ${val[1]}`).join('\n'),
+				color: this.selectColor(type),
+				author: {
+					name: `${moderator.username}#${moderator.discriminator} (${moderator.id})`,
+					icon_url: moderator.avatar ? `https://cdn.discordapp.com${CDNRoutes.userAvatar(moderator.id, moderator.avatar, ImageFormat.WebP)}` : "https://cdn.discordapp.com/embed/avatars/0.png"
+				},
+				timestamp: createdAt.toISOString()
+			}, 
+			{ 
+				components, 
+				type: ComponentType.ActionRow
+			}
+		];
+	}
 
-    try {
-      switch (this.type) {
-        case PunishmentType.Ban:
-          await api.guilds.banUser(
-            this.data.guildId,
-            this.data.userId,
-            { delete_message_seconds: 604_800 },
-            this.data.reason
-          );
+	private selectColor(type: PunishmentType): number {
+		switch(type) {
+			case "Ban":
+				return 0xFF5C5C;
+			case "Kick":
+				return 0xF79554;
+			case "Softban":
+				return 0xF77F54;
+			case "Timeout":
+				return 0x1D1D21;
+			case "Unban":
+				return 0x5CFF9D;
+			case "Warn":
+				return 0xFFDC5C;
+			default:
+				return 0x171D2E;
+		}
+	}
 
-          break;
-        case PunishmentType.Softban:
-          await api.guilds.banUser(
-            this.data.guildId,
-            this.data.userId,
-            { delete_message_seconds: 604_800 },
-            this.data.reason
-          );
-          await api.guilds.unbanUser(
-            this.data.guildId,
-            this.data.userId,
-            "Removing Softban"
-          );
+	protected static async createUserAndGuild(userId: Snowflake, guildId: Snowflake): Promise<void> {
+		await Prisma.user.upsert({
+			create: { id: userId },
+			update: {},
+			where: { id: userId },
+		});
 
-          break;
-        case PunishmentType.Kick:
-          await api.rest.delete(
-            Routes.guildMember(this.data.guildId, this.data.userId),
-            { reason: this.data.reason }
-          );
+		await Prisma.guild.upsert({
+			create: { id: guildId },
+			update: {},
+			where: { id: guildId },
+		});
+	}
+}
 
-          break;
-        case PunishmentType.Timeout:
-          if (!this.expiration) throw new Error("No Expiration Provided");
+export class GenericPunishment extends Punishment {
+	private readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId">  & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" };
 
-          await api.guilds.editMember(
-            this.data.guildId,
-            this.data.userId,
-            { communication_disabled_until: this.expiration.toISOString() },
-            this.data.reason
-          );
+	public constructor(data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" }) {
+		super();
 
-          break;
-        case PunishmentType.Unban:
-          await api.guilds.unbanUser(
-            this.data.guildId,
-            this.data.userId,
-            this.data.reason
-          );
+		this.data = data;
+		void this.build();
+	}
 
-          break;
-        case PunishmentType.Warn:
-          break;
-      }
-    } catch (error) {
-      logger.error(error);
-      return error as Error;
-    }
+	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+	private async build(): Promise<null | void> {
+		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
-    await Redis.hincrby(`case_numbers`, this.data.guildId, 1);
+		const caseId = await this.getCaseId(this.data.guildId);
 
-    const modLog = await this.createAuditLogMessage();
+		try {
+			switch(this.data.type) {
+				case "Ban":
+					await api.guilds.banUser(this.data.guildId, this.data.userId, { delete_message_seconds: 604_800 }, this.data.reason);
+					break;
+				case "Kick":
+					await api.rest.delete(Routes.guildMember(this.data.guildId, this.data.userId), { reason: this.data.reason });
+					break;
+				case "Softban":
+					await api.guilds.banUser(this.data.guildId, this.data.userId, { delete_message_seconds: 604_800 }, this.data.reason);
+					await api.guilds.unbanUser(this.data.guildId, this.data.userId, `Case #${caseId} - Removing Softban`);
+					break;
+				case "Unban":
+					await api.guilds.unbanUser(this.data.guildId, this.data.userId, this.data.reason);
+					break;
+				case "Warn":
+					break;
+			}
+		} catch {
+			return null;
+		}
 
-    if ("expiration" in this.data) delete this.data.expiration;
+		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: PunishmentType.Ban }});
+		await this.createAuditLogMessage(id, this.data.guildId);
+	}
+}
 
-    return Prisma.punishment.create({
-      data: { ...this.data, modLogId: modLog?.id },
-    });
-  }
+export class ExpiringPunishment extends Punishment {
+	private readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date };
+
+	// eslint-disable-next-line sonarjs/no-identical-functions
+	public constructor(data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date }) {
+		super();
+
+		this.data = data;
+		void this.build();
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+	private async build(): Promise<null | void> {
+		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
+
+		try {
+			await api.guilds.editMember(this.data.guildId, this.data.userId, { communication_disabled_until: this.data.expires.toISOString() }, this.data.reason);
+		} catch {
+			return null;
+		}
+
+		const caseId = await this.getCaseId(this.data.guildId);
+
+		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: PunishmentType.Ban }});
+		await this.createAuditLogMessage(id, this.data.guildId);
+	}
 }

@@ -40,7 +40,7 @@ export abstract class Handler<T extends ApplicationCommandType> {
     ? RESTPostAPIChatInputApplicationCommandsJSONBody
     : RESTPostAPIContextMenuApplicationCommandsJSONBody;
 
-  public options!: Record<string, Omit<APIApplicationCommandOption, "name">>;
+  public options!: { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
 
   public type!: T; // Note: This doesnt exist at runtime, and is a hack to get RunContext to work, DO NOT ACCESS
 
