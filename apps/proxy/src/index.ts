@@ -33,8 +33,8 @@ function proxyRequests(
     if (!method || !url) throw new TypeError("Missing Method or URL");
 
     const parsedUrl = new URL(url, "http://noop");
-    // eslint-disable-next-line prefer-named-capture-group, unicorn/no-unsafe-regex
     const route = parsedUrl.pathname.replace(
+	  // eslint-disable-next-line prefer-named-capture-group, unicorn/no-unsafe-regex
       /^\/api(\/v\d+)?/,
       ""
     ) as RouteLike;
