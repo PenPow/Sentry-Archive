@@ -1,23 +1,17 @@
+import type { API } from "@discordjs/core";
 import type {
-  APIApplicationCommandOption,
-  APIAttachment,
-  APIChannel,
-  APIChatInputApplicationCommandInteraction,
-  APIInteractionDataResolvedChannel,
-  APIMessageApplicationCommandInteraction,
-  APIRole,
-  APIUser,
-  APIUserApplicationCommandInteraction,
-  ApplicationCommandOptionType,
-  ApplicationCommandType,
-  InteractionResponseType,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-  RESTPostAPIContextMenuApplicationCommandsJSONBody,
-  RESTPostAPIWebhookWithTokenJSONBody,
-  Snowflake,
+    APIApplicationCommandOption,
+    APIChatInputApplicationCommandInteraction,
+    APIMessageApplicationCommandInteraction,
+    APIUserApplicationCommandInteraction,
+    ApplicationCommandType,
+    RESTPostAPIChatInputApplicationCommandsJSONBody,
+    RESTPostAPIContextMenuApplicationCommandsJSONBody,
+    RESTPostAPIWebhookWithTokenJSONBody,
 } from "discord-api-types/v10";
 import glob from "glob";
 import type { Logger } from "tslog";
+import type { ApplicationCommandFetchedOptionType, CommandInteractionsUnion, DataType, ValidDataTypes } from "../utils/helpers.js";
 
 export const Commands: Map<string, Handler<ApplicationCommandType>> = new Map();
 
@@ -77,32 +71,11 @@ export abstract class Handler<T extends ApplicationCommandType> {
   // }
 }
 
-type ApplicationCommandFetchedOptionType<
-  T extends ApplicationCommandOptionType
-> = T extends ApplicationCommandOptionType.String
-  ? string
-  : T extends ApplicationCommandOptionType.Number
-  ? number
-  : T extends ApplicationCommandOptionType.Integer
-  ? number
-  : T extends ApplicationCommandOptionType.Boolean
-  ? boolean
-  : T extends ApplicationCommandOptionType.Channel
-  ? APIChannel | APIInteractionDataResolvedChannel
-  : T extends ApplicationCommandOptionType.Role
-  ? APIRole
-  : T extends ApplicationCommandOptionType.User
-  ? APIUser
-  : T extends ApplicationCommandOptionType.Mentionable
-  ? Snowflake
-  : T extends ApplicationCommandOptionType.Attachment
-  ? APIAttachment
-  : never;
-
 export type RunContext<Command extends Handler<ApplicationCommandType>> = {
-  data: Command["data"];
+  api: API;
   getArgs<Name extends keyof Command["options"]>(
-    interaction: Name
+	interaction: CommandInteractionsUnion,
+    argument: Name
   ): Awaitable<
     Command["options"][Name]["required"] extends true
       ? ApplicationCommandFetchedOptionType<Command["options"][Name]["type"]>
@@ -116,14 +89,10 @@ export type RunContext<Command extends Handler<ApplicationCommandType>> = {
     ? APIMessageApplicationCommandInteraction
     : APIUserApplicationCommandInteraction;
   logger: Logger<unknown>;
-  respond(
-    interaction: Command["type"] extends ApplicationCommandType.ChatInput
-      ? APIChatInputApplicationCommandInteraction
-      : Command["type"] extends ApplicationCommandType.Message
-      ? APIMessageApplicationCommandInteraction
-      : APIUserApplicationCommandInteraction,
-    responseType: InteractionResponseType,
-    data: RESTPostAPIWebhookWithTokenJSONBody
+  respond<Interaction extends Command["type"] extends ApplicationCommandType.ChatInput ? APIChatInputApplicationCommandInteraction : Command["type"] extends ApplicationCommandType.Message ? APIMessageApplicationCommandInteraction : APIUserApplicationCommandInteraction, Type extends ValidDataTypes<Interaction>>(
+    interaction: Interaction,
+    responseType: Type,
+    data: DataType<Type>
   ): Promise<void>;
 };
 

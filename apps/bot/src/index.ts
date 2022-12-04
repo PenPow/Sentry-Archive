@@ -2,206 +2,64 @@ import "source-map-support/register.js";
 import "./brokers.js";
 
 import { webcrypto } from "node:crypto";
-import type {
-  APIApplicationCommandInteractionDataBasicOption,
-  APIChannel,
-  APIRole,
-  APIGroupDMChannel,
-  APIDMChannel,
-  APIUser,
-  APIAttachment,
-} from "discord-api-types/v10";
 import {
   type APIInteraction,
   InteractionResponseType,
   InteractionType,
-  MessageFlags,
-  ApplicationCommandOptionType,
-  ApplicationCommandType,
-  Routes,
 } from "discord-api-types/v10";
 import { verify, PlatformAlgorithm } from "discord-verify/node";
 import {
-  type FastifyReply,
   type FastifyRequest,
   fastify as FastifyServer,
 } from "fastify";
-import { api } from "./REST.js";
 import { config, logger } from "./config.js";
 import { Commands, loadCommands } from "./structures/Command.js";
+import { CommandResponseType, getArgs, hasResponded, respond } from "./utils/helpers.js";
 
 const fastify = FastifyServer({
   logger: false,
 });
 
-fastify.post(
-  "/",
-  // @ts-expect-error all code paths return a value
-  async (
-    req: FastifyRequest<{
-      Body: APIInteraction;
-      Headers: {
-        "x-signature-ed25519": string;
-        "x-signature-timestamp": string;
-      };
-    }>,
-    res: FastifyReply
-  ) => {
-    logger.debug("Recived Interaction: ", req.body.token);
+fastify.post("/", async (req: FastifyRequest<{ Body: APIInteraction, Headers: {"x-signature-ed25519": string; "x-signature-timestamp": string; }}>, res) => {
+	const signature = req.headers["x-signature-ed25519"];
+	const timestamp = req.headers["x-signature-timestamp"];
+	const body = JSON.stringify(req.body);
 
-    const signature = req.headers["x-signature-ed25519"];
-    const timestamp = req.headers["x-signature-timestamp"];
-    const body = JSON.stringify(req.body);
+	const signatureVerified = await verify(body, signature, timestamp, config.discord.PUBLIC_KEY, webcrypto.subtle, PlatformAlgorithm.NewNode);
+	if(!signatureVerified) return res.code(401);
 
-    if (
-      !(await verify(
-        body,
-        signature,
-        timestamp,
-        config.discord.PUBLIC_KEY,
-        webcrypto.subtle,
-        PlatformAlgorithm.NewNode
-      ))
-    ) {
-      logger.error("Failed to validate signature: ", req.body.token);
-      return res.code(401).send("Invalid Signature");
-    }
+	await loadCommands();
 
-    await loadCommands();
+	if(req.body.type === InteractionType.Ping) {
+		return void res.send({ type: InteractionResponseType.Pong });
+	} else if([InteractionType.ModalSubmit, InteractionType.ApplicationCommandAutocomplete, InteractionType.MessageComponent].includes(req.body.type)) { // TODO: Implement these interaction types
+		return void logger.fatal("Attempted to handle an invalid interaction type");
+	} else if(req.body.type === InteractionType.ApplicationCommand) {
+		const command = Commands.get(req.body.data.name);
+		if(!command) return void res.code(404);
 
-    const interaction = req.body;
+		const result = await command.execute({ 
+			interaction: req.body, 
+			logger,
+			// @ts-expect-error it works trust me
+			getArgs,
+			respond
+		});
 
-    let responded = false;
+		const responded = hasResponded(req.body);
 
-    switch (interaction.type) {
-      case InteractionType.Ping:
-        logger.debug("Sending Pong");
-        return res.send({ type: InteractionResponseType.Pong });
-      case InteractionType.ModalSubmit:
-      case InteractionType.MessageComponent:
-      case InteractionType.ApplicationCommandAutocomplete:
-        return res.send({
-          type: InteractionResponseType.ChannelMessageWithSource,
-          data: { content: "Not Implemented", flags: MessageFlags.Ephemeral },
-        });
-      case InteractionType.ApplicationCommand:
-        // eslint-disable-next-line no-case-declarations
-        const command = Commands.get(interaction.data.name);
+		if(responded && result) {
+			await respond(req.body, CommandResponseType.FollowUp, result);
+		} else if(!responded && result) {
+			await respond(req.body, CommandResponseType.Reply, result);
+		}
 
-        if (!command) return res.code(404).send("No Command Found");
-
-        // eslint-disable-next-line no-case-declarations
-        const execute = await command.execute({
-          interaction,
-          logger,
-          data: command.data,
-          getArgs: async (name) => {
-            if (interaction.type !== InteractionType.ApplicationCommand)
-              throw new TypeError("Getting Args of Non Application Command");
-            if (
-              [
-                ApplicationCommandType.Message,
-                ApplicationCommandType.User,
-              ].includes(interaction.data.type)
-            )
-              throw new TypeError("Getting Args of Chat Input Command");
-            if ("options" in interaction.data) {
-              const option = interaction.data
-                .options!.filter(
-                  (val) =>
-                    ![
-                      ApplicationCommandOptionType.Subcommand,
-                      ApplicationCommandOptionType.SubcommandGroup,
-                    ].includes(val.type)
-                )
-                .find(
-                  (val) => val.name === name
-                ) as APIApplicationCommandInteractionDataBasicOption;
-
-              if (
-                [
-                  ApplicationCommandOptionType.String,
-                  ApplicationCommandOptionType.Number,
-                  ApplicationCommandOptionType.Integer,
-                  ApplicationCommandOptionType.Boolean,
-                ].includes(option.type)
-              )
-                return option.value;
-              else if (option.type === ApplicationCommandOptionType.Attachment)
-                return interaction.data.resolved?.attachments
-                  ? (interaction.data.resolved.attachments[
-                      option.value
-                    ] as APIAttachment)
-                  : null;
-              else if (
-                [
-                  ApplicationCommandOptionType.Channel,
-                  ApplicationCommandOptionType.Role,
-                  ApplicationCommandOptionType.User,
-                ].includes(option.type)
-              ) {
-                if (option.type === ApplicationCommandOptionType.Channel) {
-                  return (
-                    (interaction.data.resolved?.channels &&
-                      interaction.data.resolved?.channels[option.value]) ??
-                    ((await api.channels.get(option.value)) as Exclude<
-                      APIChannel,
-                      APIDMChannel | APIGroupDMChannel
-                    >)
-                  );
-                } else if (option.type === ApplicationCommandOptionType.Role) {
-                  return (
-                    (interaction.data.resolved?.roles &&
-                      interaction.data.resolved?.roles[option.value]) ??
-                    ((await api.rest.get(
-                      Routes.guildRole(interaction.guild_id!, option.value)
-                    )) as APIRole)
-                  );
-                } else if (option.type === ApplicationCommandOptionType.User) {
-                  return (
-                    (interaction.data.resolved?.users &&
-                      interaction.data.resolved?.users[option.value]) ??
-                    ((await api.users.get(option.value)) as APIUser)
-                  );
-                }
-              }
-            }
-
-            return null;
-          },
-          respond: async (int, type, data) => {
-            if (responded) {
-              return void (await api.rest.post(
-                Routes.interactionCallback(int.id, int.token),
-                { body: data }
-              ));
-            }
-
-            responded = true;
-
-            return res.send({ type, data });
-          },
-        });
-
-        if (execute && responded) {
-          return void (await api.rest.patch(
-            Routes.webhookMessage(
-              interaction.application_id,
-              interaction.token
-            ),
-            { body: execute }
-          ));
-        } else if (execute && !responded) {
-          return res.send({
-            type: InteractionResponseType.ChannelMessageWithSource,
-            data: execute,
-          });
-        }
-
-        if (!responded) throw new Error("No Response Given");
-    }
-  }
-);
+		return void res.status(200);
+	} else {
+		void logger.fatal("Attempted to handle an unknown interaction type");
+		return void res.status(500);
+	}
+});
 
 // eslint-disable-next-line promise/prefer-await-to-callbacks
 fastify.listen({ port: config.fastify.PORT, host: "::" }, (err, address) => {
