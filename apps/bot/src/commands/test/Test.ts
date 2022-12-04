@@ -15,7 +15,7 @@ export default class TestCommand extends SlashCommand.Handler<ApplicationCommand
     name: "test",
     description: "punishment time he he",
     type: ApplicationCommandType.ChatInput,
-  } satisfies RESTPostAPIChatInputApplicationCommandsJSONBody & {
+  } satisfies Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "options">  & {
     type: ApplicationCommandType.ChatInput;
   };
 
@@ -25,8 +25,7 @@ export default class TestCommand extends SlashCommand.Handler<ApplicationCommand
       type: ApplicationCommandOptionType.User,
       required: true,
     },
-    // eslint-disable-next-line semi
-  } satisfies Record<string, Omit<APIApplicationCommandOption, "name">>;
+  } satisfies { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
 
   public override async execute({
     getArgs,

@@ -5,11 +5,12 @@ export default class {{ titleCase name }}Command extends SlashCommand.Handler<Ap
 	public override data = {
 		name: '{{ lowerCase name }}',
 		description: '{{ description }}',
-	};
+	} satisfies Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "options"> & { type: ApplicationCommandType.ChatInput; };
 
 	public override options = {
-	// eslint-disable-next-line semi
-	} satisfies Record<string, Omit<APIApplicationCommandOption, 'name'>>
+	} satisfies Record<string, Omit<APIApplicationCommandOption, 'name'>>satisfies { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
 
-	public override async execute({}: SlashCommand.RunContext<TestCommand>): SlashCommand.Returnable {}
+	public override async execute({}: SlashCommand.RunContext<TestCommand>): SlashCommand.Returnable {
+		console.log("Hi")
+	}
 }
