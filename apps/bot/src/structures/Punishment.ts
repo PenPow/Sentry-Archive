@@ -162,10 +162,18 @@ abstract class Punishment {
 			where: { id: guildId },
 		});
 	}
+
+	public isGenericPunishment(): this is GenericPunishment {
+		return !("expires" in (this as unknown as ExpiringPunishment | GenericPunishment).data);
+	}
+	
+	public isExpringPunishment(): this is ExpiringPunishment {
+		return "expires" in (this as unknown as ExpiringPunishment | GenericPunishment).data;
+	}
 }
 
 export class GenericPunishment extends Punishment {
-	private readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId">  & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" };
+	public readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId">  & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" };
 
 	public constructor(data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" }) {
 		super();
@@ -208,7 +216,7 @@ export class GenericPunishment extends Punishment {
 }
 
 export class ExpiringPunishment extends Punishment {
-	private readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date };
+	public readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date };
 
 	// eslint-disable-next-line sonarjs/no-identical-functions
 	public constructor(data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date }) {
