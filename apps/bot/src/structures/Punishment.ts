@@ -1,4 +1,4 @@
-import { PunishmentType, type Punishment as PunishmentModel } from "database";
+import type { PunishmentType, Punishment as PunishmentModel } from "database";
 import type {
 	APIActionRowComponent,
     APIButtonComponent,
@@ -179,11 +179,11 @@ export class GenericPunishment extends Punishment {
 		super();
 
 		this.data = data;
-		void this.build();
 	}
 
+	// TODO: Implement Helper Function to ensure user is punishable
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-	private async build(): Promise<null | void> {
+	public async build(): Promise<null | void> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
 		const caseId = await this.getCaseId(this.data.guildId);
@@ -210,11 +210,12 @@ export class GenericPunishment extends Punishment {
 			return null;
 		}
 
-		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: PunishmentType.Ban }});
+		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: this.data.type }});
 		await this.createAuditLogMessage(id, this.data.guildId);
 	}
 }
 
+// TODO: Implement Other Time Based Punishments
 export class ExpiringPunishment extends Punishment {
 	public readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date };
 
@@ -223,11 +224,10 @@ export class ExpiringPunishment extends Punishment {
 		super();
 
 		this.data = data;
-		void this.build();
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-	private async build(): Promise<null | void> {
+	public async build(): Promise<null | void> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
 		try {
@@ -238,7 +238,7 @@ export class ExpiringPunishment extends Punishment {
 
 		const caseId = await this.getCaseId(this.data.guildId);
 
-		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: PunishmentType.Ban }});
+		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: "Timeout" }});
 		await this.createAuditLogMessage(id, this.data.guildId);
 	}
 }
