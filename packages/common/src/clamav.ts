@@ -7,9 +7,21 @@ type ISuccessfulResponse = {
   success: true;
 };
 
+export type ISuccessfulInfectedResponse = {
+	data: {
+	  infected: true;
+	  name: string;
+	  viruses: string[];
+	};
+	id: string;
+	success: true;
+};
+  
+
 type IErrorResponse = {
   error: string;
   success: false;
 };
 
-export type IClamAVResponse = IErrorResponse | ISuccessfulResponse;
+// eslint-disable-next-line @typescript-eslint/sort-type-union-intersection-members
+export type IClamAVResponse = (IErrorResponse | ISuccessfulResponse) & { id: string };

@@ -35,8 +35,9 @@ broker.on("scan", async ({ data, ack, reply }) => {
 
   logger.debug("Recieved Scan Request");
 
-  if (!Buffer.isBuffer(data)) {
+  if (!Buffer.isBuffer(data.data)) {
     const response: IClamAVResponse = {
+	  id: data.id,
       success: false,
       error: "Invalid Type Recieved For Data",
     };
@@ -47,7 +48,7 @@ broker.on("scan", async ({ data, ack, reply }) => {
   }
 
   const file = new Readable();
-  file.push(data);
+  file.push(data.data);
   file.push(null);
 
   try {
@@ -57,6 +58,7 @@ broker.on("scan", async ({ data, ack, reply }) => {
 
     const response: IClamAVResponse = {
       success: true,
+	  id: data.id,
       data: {
         name: result.file,
         infected: result.isInfected,
@@ -71,6 +73,7 @@ broker.on("scan", async ({ data, ack, reply }) => {
     logger.error(error);
 
     const response: IClamAVResponse = {
+	  id: data.id,
       success: false,
       error: error.message,
     };
