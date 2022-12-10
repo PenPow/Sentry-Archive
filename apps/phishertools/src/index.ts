@@ -18,7 +18,11 @@ fastify.get('/reload', async (req, res) => {
 	if(!req.headers.token) return res.status(401).send({ ok: false, error: { message: 'Missing Token' } });
 	if(req.headers.token !== config.discord.TOKEN) return res.status(403).send({ ok: false, error: { message: 'Invalid Token' } });
 
+	logger.info("Reloading Domains - this will take a while");
+
 	await reloadSources();
+
+	logger.debug("Successfully Reloaded Domains");
 
 	return res.status(200).send({ ok: true, data: null });
 });
