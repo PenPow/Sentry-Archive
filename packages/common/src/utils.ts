@@ -6,9 +6,6 @@ export type Config = {
     PUBLIC_KEY: string;
     TOKEN: `${string}.${string}.${string}`;
   };
-  fastify: {
-    PORT: number;
-  };
   interval: {
     DEV_API_KEY: string;
     PRODUCTION_API_KEY: string;
@@ -20,5 +17,6 @@ export type Config = {
   sentry: {
     DATABASE_URL: `postgresql://${string}:${string}@${string}:${number}/${string}`;
     ENCRYPTION_KEY: string;
+	PORT: number;
   };
 };

@@ -62,7 +62,7 @@ fastify.post("/", async (req: FastifyRequest<{ Body: APIInteraction, Headers: {"
 });
 
 // eslint-disable-next-line promise/prefer-await-to-callbacks
-fastify.listen({ port: config.fastify.PORT, host: "::" }, (err, address) => {
+fastify.listen({ port: config.sentry.PORT, host: "::" }, (err, address) => {
   if (err) return logger.fatal(err);
 
   return logger.info(`Listening on ${address}`);
