@@ -108,7 +108,7 @@ export default function (
         }],
         actions: [{
 			type: 'add',
-			path: `apps/bot/src/scripts/{{ name }}.ts`,
+			path: `apps/actions/src/scripts/{{ name }}.ts`,
 			templateFile: 'templates/script/action.ts.hbs'
 		}]
 	});

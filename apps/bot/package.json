@@ -33,6 +33,7 @@
     "fastify": "^4.10.2",
     "glob": "^8.0.3",
     "ioredis": "^5.2.4",
+    "normalize-url": "^8.0.0",
     "prisma-field-encryption": "^1.4.0",
     "shared": "*",
     "source-map-support": "^0.5.21",

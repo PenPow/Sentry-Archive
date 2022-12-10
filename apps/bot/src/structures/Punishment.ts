@@ -198,8 +198,9 @@ export class GenericPunishment extends Punishment {
 
 		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
 		const guild = await api.guilds.get(this.data.guildId);
-		if(["Ban", "Softban"].includes(this.data.type) && !(await PermissionsManager.canBanUser(member, guild)) || this.data.type === "Kick" && !(await PermissionsManager.canKickUser(member, guild))) Result.err(new Error("Cannot Punish User"));
 
+		if(['Ban', 'Softban'].includes(this.data.type) && !(await PermissionsManager.canBanUser(member, guild, this.data.moderatorId))) return Result.err(new Error("Cannot Ban User"));
+		else if(this.data.type === "Kick" && !(await PermissionsManager.canKickUser(member, guild, this.data.moderatorId))) return Result.err(new Error("Cannot Kick User"));
 		try {
 			switch(this.data.type) {
 				case "Ban":
@@ -244,7 +245,7 @@ export class ExpiringPunishment extends Punishment {
 
 		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
 		const guild = await api.guilds.get(this.data.guildId);
-		if(!(await PermissionsManager.canModerateUser(member, guild))) return Result.err(new Error("Cannot Punish User"));
+		if(!(await PermissionsManager.canModerateUser(member, guild, this.data.moderatorId))) return Result.err(new Error("Cannot Punish User"));
 
 		try {
 			await api.guilds.editMember(this.data.guildId, this.data.userId, { communication_disabled_until: this.data.expires.toISOString() }, this.data.reason);

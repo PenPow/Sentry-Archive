@@ -13,6 +13,7 @@ services:
       - redis:redis
       - rest:rest
       - postgres:postgres
+      - phishertools:phishertools
     depends_on:
       redis:
         condition: service_healthy
@@ -20,7 +21,7 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      phishing:
+      phishertools:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "nc -vz 127.0.0.1 8080 || exit 1"]
@@ -51,14 +52,17 @@ services:
     restart: always
     links:
       - redis:redis
+      - phishertools:phishertools
     depends_on:
       redis:
         condition: service_healthy
       rest:
         condition: service_healthy
+      phishertools:
+        condition: service_healthy
 
-  phishing:
-    container_name: phishing
+  phishertools:
+    container_name: phishertools
     build:
       context: .
       dockerfile: ./docker/Phishertools.Dockerfile

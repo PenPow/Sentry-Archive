@@ -23,8 +23,8 @@ fastify.get('/reload', async (req, res) => {
 	return res.status(200).send({ ok: true, data: null });
 });
 
-fastify.post('/scan', async (req: FastifyRequest<{ Body: { domain: string }}>, res) => {
-	const domain = (req.body as { domain?: string }).domain;
+fastify.post('/scan', async (req: FastifyRequest<{ Body: string }>, res) => {
+	const domain = JSON.parse(req.body).domain;
 	if(!domain) return res.status(401).send({ ok: false, error: { message: 'No Domain Specified' }});
 
 	const hasDomain = Boolean(await Redis.sismember("scam_domains", domain));
