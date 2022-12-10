@@ -17,3 +17,6 @@ MIRROR = "https://mirror.penpow.dev"
 DATABASE_URL = "postgresql://sentry:postgres@postgres:5432/mydb?schema=public"
 ENCRYPTION_KEY = ""
 PORT = 8080
+
+[phishertools]
+PORT = 3001

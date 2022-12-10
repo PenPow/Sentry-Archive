@@ -10,6 +10,9 @@ export type Config = {
     DEV_API_KEY: string;
     PRODUCTION_API_KEY: string;
   };
+  phishertools: {
+	PORT: number;
+  };
   proxy: {
     API_VERSION: 6 | 7 | 8 | 9 | 10;
     PORT: string;

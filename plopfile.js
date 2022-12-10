@@ -112,4 +112,28 @@ export default function (
 			templateFile: 'templates/script/action.ts.hbs'
 		}]
 	});
+
+	plop.setGenerator('scam_url', {
+        description: 'Create a new Scam URL Source',
+        prompts: [
+			{
+				type: 'input',
+				name: 'name',
+				message: 'What is the source called?'
+        	},
+			{
+				type: 'input',
+				name: 'url',
+				message: 'What is the URL for this source?'
+        	},
+		],
+		actions: [
+			{
+				type: 'add',
+				path: `apps/phishertools/src/sources/lists/{{ name }}.ts`,
+				templateFile: 'templates/phishing/source.ts.hbs'
+			},
+			"Created Source! Please modify ./apps/phishertools/src/sources/index.ts to contain the new source"
+		]
+	});
 };
