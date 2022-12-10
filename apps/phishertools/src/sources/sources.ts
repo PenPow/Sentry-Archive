@@ -1,4 +1,5 @@
 import { BlockListProject } from "./lists/BlockListProject.js";
+import { Dogino } from "./lists/Dogino.js";
 import { Elkbr } from "./lists/Elkbr.js";
 import { HyperPhish } from "./lists/HyperPhish.js";
 import { Jagrosh } from "./lists/Jagrosh.js";
@@ -14,4 +15,4 @@ export type Source = {
 	name: string
 }
 
-export const Sources: Source[] = [BlockListProject, Elkbr, HyperPhish, Jagrosh, PiholeBlocklist, SinkingYachts, URLhaus, WalshyDev, ZeroTwo, malvertising];
+export const Sources: Source[] = [BlockListProject, Dogino, Elkbr, HyperPhish, Jagrosh, PiholeBlocklist, SinkingYachts, URLhaus, WalshyDev, ZeroTwo, malvertising];
