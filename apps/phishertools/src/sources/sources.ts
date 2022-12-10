@@ -3,6 +3,7 @@ import { Elkbr } from "./lists/Elkbr.js";
 import { HyperPhish } from "./lists/HyperPhish.js";
 import { Jagrosh } from "./lists/Jagrosh.js";
 import { PiholeBlocklist } from "./lists/PiholeBlocklist.js";
+import { SinkingYachts } from "./lists/SinkingYachts.js";
 import { URLhaus } from "./lists/URLhaus.js";
 import { WalshyDev } from "./lists/WalshyDev.js";
 import { ZeroTwo } from "./lists/ZeroTwo.js";
@@ -13,4 +14,4 @@ export type Source = {
 	name: string
 }
 
-export const Sources: Source[] = [BlockListProject, Elkbr, HyperPhish, Jagrosh, PiholeBlocklist, URLhaus, WalshyDev, ZeroTwo, malvertising];
+export const Sources: Source[] = [BlockListProject, Elkbr, HyperPhish, Jagrosh, PiholeBlocklist, SinkingYachts, URLhaus, WalshyDev, ZeroTwo, malvertising];

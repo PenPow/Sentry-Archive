@@ -133,7 +133,7 @@ export default function (
 				path: `apps/phishertools/src/sources/lists/{{ name }}.ts`,
 				templateFile: 'templates/phishing/source.ts.hbs'
 			},
-			"Created Source! Please modify ./apps/phishertools/src/sources/index.ts to contain the new source"
+			"Created Source! Please modify ./apps/phishertools/src/sources/sources.ts to contain the new source"
 		]
 	});
 };
