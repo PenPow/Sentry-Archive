@@ -1,12 +1,10 @@
 import type { PunishmentType, Punishment as PunishmentModel } from "database";
-import type {
-	APIActionRowComponent,
-    APIButtonComponent,
-    APIEmbed,
-    APIMessageActionRowComponent,
-    Snowflake
-} from "discord-api-types/v10";
 import {
+  type APIActionRowComponent,
+  type APIButtonComponent,
+  type APIEmbed,
+  type APIMessageActionRowComponent,
+  type Snowflake,
   ComponentType,
   ButtonStyle,
   CDNRoutes,
@@ -16,6 +14,7 @@ import {
 } from "discord-api-types/v10";
 import { api } from "../REST.js";
 import { Prisma, Redis } from "../db.js";
+import { PermissionsManager } from "../utils/PermissionsHelpers.js";
 
 abstract class Punishment {
 	public static async fetch(data: { caseId: number, guildId: Snowflake } | { id: number }) {
@@ -181,12 +180,15 @@ export class GenericPunishment extends Punishment {
 		this.data = data;
 	}
 
-	// TODO: Implement Helper Function to ensure user is punishable
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 	public async build(): Promise<null | void> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
 		const caseId = await this.getCaseId(this.data.guildId);
+
+		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
+		const guild = await api.guilds.get(this.data.guildId);
+		if(["Ban", "Softban"].includes(this.data.type) && !(await PermissionsManager.canBanUser(member, guild)) || this.data.type === "Kick" && !(await PermissionsManager.canKickUser(member, guild))) return;
 
 		try {
 			switch(this.data.type) {
@@ -229,6 +231,10 @@ export class ExpiringPunishment extends Punishment {
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 	public async build(): Promise<null | void> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
+
+		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
+		const guild = await api.guilds.get(this.data.guildId);
+		if(!(await PermissionsManager.canModerateUser(member, guild))) return;
 
 		try {
 			await api.guilds.editMember(this.data.guildId, this.data.userId, { communication_disabled_until: this.data.expires.toISOString() }, this.data.reason);

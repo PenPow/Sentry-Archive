@@ -9,6 +9,8 @@ import { GenericPunishment } from "../structures/Punishment.js";
 
 export default {
 	async run({ data, logger, api }) {
+		if(data.author.bot || data.author.system) return;
+
 		if(data.attachments.length > 0) {
 			const results: Promise<IClamAVResponse>[] = [];
 			for(const attachment of data.attachments) {
