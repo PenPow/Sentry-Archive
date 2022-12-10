@@ -1,3 +1,4 @@
+import { Result } from "@sapphire/result";
 import type { PunishmentType, Punishment as PunishmentModel } from "database";
 import {
   type APIActionRowComponent,
@@ -11,6 +12,9 @@ import {
   ChannelType,
   ImageFormat,
   Routes,
+  type APIMessage,
+  type APIChannel,
+  type RESTGetAPIGuildChannelsResult,
 } from "discord-api-types/v10";
 import { api } from "../REST.js";
 import { Prisma, Redis } from "../db.js";
@@ -49,28 +53,34 @@ abstract class Punishment {
 		return Number.parseInt(caseNo, 10) + 1;
 	}
 
-	protected async createAuditLogMessage(id: number, guildId: Snowflake) {
+	protected async createAuditLogMessage(id: number, guildId: Snowflake): Promise<Result<APIMessage, Error>> {
 		const guildDatabase = await Prisma.guild.findUnique({ where: { id: guildId }});
 
 		if(guildDatabase?.modLogChannelId) {
-			const channel = await api.channels.get(guildDatabase.modLogChannelId).catch(() => undefined);
+			const channel: Result<APIChannel, Error> = await Result.fromAsync(async () => api.channels.get(guildDatabase.modLogChannelId!));
 
-			if(channel) {
-				const data = await this.createEmbed(id, channel.id);
-				const msg = await api.channels.createMessage(channel.id, { components: [data[1]], embeds: [data[0]] }).catch(() => undefined);
+			if(channel.isOk()) {
+				const data = await this.createEmbed(id, channel.unwrap().id);
+				const msg: Result<APIMessage, Error> = await Result.fromAsync(async () => api.channels.createMessage(channel.unwrap().id, { components: [data[1]], embeds: [data[0]] }));
 
-				if(msg) await Prisma.punishment.update({ where: { id }, data: { modLogId: msg.id }});
-			}
+				if(msg.isOk()) await Prisma.punishment.update({ where: { id }, data: { modLogId: msg.unwrap().id }});
+
+				return msg;
+			} else return channel;
 		} else {
-			const channels = await api.guilds.getChannels(guildId);
-			const channel = channels.filter((chnl) => chnl.type === ChannelType.GuildText && ["audit-logs", "sentry-logs", "server-logs", "mod-logs", "audit-log", "auditlogs", "auditlog", "logs"].includes(chnl?.name ?? "")).at(0);
+			const channels: Result<RESTGetAPIGuildChannelsResult, Error> = await Result.fromAsync(async () => api.guilds.getChannels(guildId));
+			if(channels.isErr()) return channels;
 
-			if(!channel) return;
+			const channel = channels.unwrap().filter((chnl) => chnl.type === ChannelType.GuildText && ["audit-logs", "sentry-logs", "server-logs", "mod-logs", "audit-log", "auditlogs", "auditlog", "logs"].includes(chnl?.name ?? "")).at(0);
+
+			if(!channel) return Result.err(new Error("No Channel Found"));
 
 			const data = await this.createEmbed(id, channel.id);
-			const msg = await api.channels.createMessage(channel.id, { components: [data[1]], embeds: [data[0]] }).catch(() => undefined);
+			const msg: Result<APIMessage, Error> = await Result.fromAsync(async () => api.channels.createMessage(channel.id, { components: [data[1]], embeds: [data[0]] }));
 
-			if(msg) await Prisma.punishment.update({ where: { id }, data: { modLogId: msg.id }});
+			if(msg.isOk()) await Prisma.punishment.update({ where: { id }, data: { modLogId: msg.unwrap().id }});
+
+			return msg;
 		}
 	}
 
@@ -181,14 +191,14 @@ export class GenericPunishment extends Punishment {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-	public async build(): Promise<null | void> {
+	public async build(): Promise<Result<APIMessage, Error>> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
 		const caseId = await this.getCaseId(this.data.guildId);
 
 		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
 		const guild = await api.guilds.get(this.data.guildId);
-		if(["Ban", "Softban"].includes(this.data.type) && !(await PermissionsManager.canBanUser(member, guild)) || this.data.type === "Kick" && !(await PermissionsManager.canKickUser(member, guild))) return;
+		if(["Ban", "Softban"].includes(this.data.type) && !(await PermissionsManager.canBanUser(member, guild)) || this.data.type === "Kick" && !(await PermissionsManager.canKickUser(member, guild))) Result.err(new Error("Cannot Punish User"));
 
 		try {
 			switch(this.data.type) {
@@ -208,12 +218,12 @@ export class GenericPunishment extends Punishment {
 				case "Warn":
 					break;
 			}
-		} catch {
-			return null;
+		} catch (error) {
+			return Result.err(error as Error);
 		}
 
 		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: this.data.type }});
-		await this.createAuditLogMessage(id, this.data.guildId);
+		return this.createAuditLogMessage(id, this.data.guildId);
 	}
 }
 
@@ -229,22 +239,22 @@ export class ExpiringPunishment extends Punishment {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-	public async build(): Promise<null | void> {
+	public async build(): Promise<Result<APIMessage, Error>> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
 		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
 		const guild = await api.guilds.get(this.data.guildId);
-		if(!(await PermissionsManager.canModerateUser(member, guild))) return;
+		if(!(await PermissionsManager.canModerateUser(member, guild))) return Result.err(new Error("Cannot Punish User"));
 
 		try {
 			await api.guilds.editMember(this.data.guildId, this.data.userId, { communication_disabled_until: this.data.expires.toISOString() }, this.data.reason);
-		} catch {
-			return null;
+		} catch(error) {
+			return Result.err(error as Error);
 		}
 
 		const caseId = await this.getCaseId(this.data.guildId);
 
 		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: "Timeout" }});
-		await this.createAuditLogMessage(id, this.data.guildId);
+		return this.createAuditLogMessage(id, this.data.guildId);
 	}
 }

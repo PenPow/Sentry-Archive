@@ -25,6 +25,7 @@
     "@discordjs/rest": "^1.3.0",
     "@interval/sdk": "^0.32.0",
     "@prisma/client": "^4.6.1",
+    "@sapphire/result": "^2.6.0",
     "database": "*",
     "discord-api-types": "^0.37.19",
     "discord-verify": "^1.0.0",

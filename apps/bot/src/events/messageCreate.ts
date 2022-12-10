@@ -45,7 +45,9 @@ export default {
 				const guild = ((await api.channels.get(data.channel_id)) as APIGuildTextChannel<ChannelType.GuildText>).guild_id;
 				if(!guild) return;
 
-				await new GenericPunishment({ guildId: guild, moderatorId: Buffer.from(config.discord.TOKEN.split(".")[0]!, "base64").toString(), reason: 'Malicious Attachment', references: null, userId: data.author.id, type: "Ban" }).build();
+				const punishment = await new GenericPunishment({ guildId: guild, moderatorId: Buffer.from(config.discord.TOKEN.split(".")[0]!, "base64").toString(), reason: 'Malicious Attachment', references: null, userId: data.author.id, type: "Ban" }).build();
+
+				if(punishment.isErr()) logger.error(`Failed to Create Punishment:\n${punishment.unwrapErr().stack}`);
 			}
 		}
 	}
