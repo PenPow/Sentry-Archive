@@ -378,13 +378,13 @@ export class GenericPunishment extends Punishment {
   public readonly data: Pick<
     PunishmentModel,
     "guildId" | "moderatorId" | "reason" | "references" | "userId"
-  > & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" };
+  > & { type: "Ban" | "Kick" | "Softban" | "Warn" };
 
   public constructor(
     data: Pick<
       PunishmentModel,
       "guildId" | "moderatorId" | "reason" | "references" | "userId"
-    > & { type: "Ban" | "Kick" | "Softban" | "Unban" | "Warn" }
+    > & { type: "Ban" | "Kick" | "Softban" | "Warn" }
   ) {
     super();
 
@@ -454,13 +454,6 @@ export class GenericPunishment extends Punishment {
             `Case #${caseId} - Removing Softban`
           );
           break;
-        case "Unban":
-          await api.guilds.unbanUser( // FIXME: Unbans are not supported as we need to fetch the user
-            this.data.guildId,
-            this.data.userId,
-            this.data.reason
-          );
-          break;
         case "Warn":
           break;
       }
@@ -474,6 +467,61 @@ export class GenericPunishment extends Punishment {
     return Punishment.createAuditLogMessage(id, this.data.guildId);
   }
 }
+
+/**
+ * Class that represents an unban
+ * 
+ * @public
+ */
+export class UnbanPunishment extends Punishment {
+	/**
+	 * The data that the punishment was instantiated with
+	 */
+	public readonly data: Pick<
+	  PunishmentModel,
+	  "guildId" | "moderatorId" | "reason" | "references" | "userId"
+	> & { type: "Unban" };
+  
+	public constructor(
+	  data: Pick<
+		PunishmentModel,
+		"guildId" | "moderatorId" | "reason" | "references" | "userId"
+	  >
+	) {
+	  super();
+  
+	  this.data = { ...data, type: "Unban" };
+	}
+  
+	/**
+	 * Executes the punishment, which handles the actual punishment, plus logging and database entries
+	 * 
+	 * @returns A result containing either the sent message, or a generic error
+	 */
+	public async build(): Promise<Result<APIMessage, Error>> {
+	  await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
+  
+	  const caseId = await Punishment.getCaseId(this.data.guildId);
+
+	  const guild = await api.guilds.get(this.data.guildId);
+	  if(!(await PermissionsManager.canUnbanUser(guild, this.data.moderatorId))) return Result.err(new Error("Cannot Unban User"));
+
+	  try {
+		await api.guilds.unbanUser(
+			  this.data.guildId,
+			  this.data.userId,
+			  this.data.reason
+		);
+	  } catch (error) {
+		return Result.err(error as Error);
+	  }
+  
+	  const { id } = await Prisma.punishment.create({
+		data: { ...this.data, caseId, type: this.data.type },
+	  });
+	  return Punishment.createAuditLogMessage(id, this.data.guildId);
+	}
+  }
 
 /**
  * Class that represents a punishment that has a expiration date

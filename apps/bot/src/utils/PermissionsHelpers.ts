@@ -248,4 +248,43 @@ export class PermissionsManager {
       )
     );
   }
+
+  /**
+   * Helper function to see if we can unban a user
+   *
+   * @public
+   * @param guild - Guild to get the permissions in
+   * @param moderator - The user id attempting to punish the member
+   * @defaultValue Default for `moderator` is the bot's id
+   * @returns A promise to a boolean which maps to whether we can punish the user
+   */
+  public static async canUnbanUser(
+    guild: APIGuild,
+    moderator = Buffer.from(
+      config.discord.TOKEN.split(".")[0]!,
+      "base64"
+    ).toString()
+  ): Promise<boolean> {
+    const clientId = Buffer.from(
+      config.discord.TOKEN.split(".")[0]!,
+      "base64"
+    ).toString();
+    const me = await api.guilds.getMember(guild.id, clientId);
+
+    const roles = await api.guilds.getRoles(guild.id);
+
+    const moderatorObject =
+      clientId === moderator
+        ? me
+        : await api.guilds.getMember(guild.id, moderator);
+
+    return (
+      (await this.getUserPermissions(moderatorObject, guild, roles)).has(
+        PermissionFlagsBits.BanMembers
+      ) &&
+      (await this.getUserPermissions(me, guild, roles)).has(
+        PermissionFlagsBits.BanMembers
+      )
+    );
+  }
 }
