@@ -1,4 +1,4 @@
-import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody, type APIApplicationCommandSubcommandOption, type APIApplicationCommandInteractionDataSubcommandOption, type APIEmbed } from "discord-api-types/v10";
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody, type APIApplicationCommandSubcommandOption, type APIApplicationCommandInteractionDataSubcommandOption, type APIEmbed, MessageFlags } from "discord-api-types/v10";
 import { TwoFactorAuthenticationManager } from "../../structures/2FAManager.js";
 import * as SlashCommand from "../../structures/Command.js";
 
@@ -43,7 +43,7 @@ export default class TwoFactorAuthenticationCommand extends SlashCommand.Handler
 					timestamp: new Date(Date.now()).toISOString()
 				};
 
-				return { embeds: [embed] };
+				return { embeds: [embed], flags: MessageFlags.Ephemeral };
 			}
 
 			const { secret, backup } = await TwoFactorAuthenticationManager.createUser2FA(user.id);
@@ -55,7 +55,7 @@ export default class TwoFactorAuthenticationCommand extends SlashCommand.Handler
 				timestamp: new Date(Date.now()).toISOString()
 			};
 
-			return { embeds: [embed] };
+			return { embeds: [embed], flags: MessageFlags.Ephemeral };
 		} else if(subcommand.name === "remove") {
 			if(!(await TwoFactorAuthenticationManager.has2FAEnabled(user.id))) {
 				const embed: APIEmbed = {
@@ -65,7 +65,7 @@ export default class TwoFactorAuthenticationCommand extends SlashCommand.Handler
 					timestamp: new Date(Date.now()).toISOString()
 				};
 
-				return { embeds: [embed] };
+				return { embeds: [embed], flags: MessageFlags.Ephemeral };
 			}
 
 			const token = subcommand.options!.find((option) => option.name === "token");
@@ -80,7 +80,7 @@ export default class TwoFactorAuthenticationCommand extends SlashCommand.Handler
 					timestamp: new Date(Date.now()).toISOString()
 				};
 
-				return { embeds: [embed] };
+				return { embeds: [embed], flags: MessageFlags.Ephemeral };
 			}
 
 			await TwoFactorAuthenticationManager.removeUser2FA(user.id);
@@ -91,7 +91,7 @@ export default class TwoFactorAuthenticationCommand extends SlashCommand.Handler
 				timestamp: new Date(Date.now()).toISOString()
 			};
 
-			return { embeds: [embed] };
+			return { embeds: [embed], flags: MessageFlags.Ephemeral };
 		}
 	}
 }
