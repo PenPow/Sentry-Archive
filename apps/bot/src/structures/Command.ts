@@ -1,17 +1,22 @@
 import type { API } from "@discordjs/core";
 import type {
-    APIApplicationCommandOption,
-    APIChatInputApplicationCommandInteraction,
-    APIMessageApplicationCommandInteraction,
-    APIUserApplicationCommandInteraction,
-    ApplicationCommandType,
-    RESTPostAPIChatInputApplicationCommandsJSONBody,
-    RESTPostAPIContextMenuApplicationCommandsJSONBody,
-    RESTPostAPIWebhookWithTokenJSONBody,
+  APIApplicationCommandOption,
+  APIChatInputApplicationCommandInteraction,
+  APIMessageApplicationCommandInteraction,
+  APIUserApplicationCommandInteraction,
+  ApplicationCommandType,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  RESTPostAPIContextMenuApplicationCommandsJSONBody,
+  RESTPostAPIWebhookWithTokenJSONBody,
 } from "discord-api-types/v10";
 import glob from "glob";
 import type { Logger } from "tslog";
-import type { ApplicationCommandFetchedOptionType, CommandInteractionsUnion, DataType, ValidDataTypes } from "../utils/helpers.js";
+import type {
+  ApplicationCommandFetchedOptionType,
+  CommandInteractionsUnion,
+  DataType,
+  ValidDataTypes,
+} from "../utils/helpers.js";
 
 export const Commands: Map<string, Handler<ApplicationCommandType>> = new Map();
 
@@ -30,24 +35,63 @@ export async function loadCommands() {
     ).default;
 
     // @ts-expect-error this works fine its just because SlashCommand is abstract to prevent instantiation, this is guaranteed to be a sub-class
-    const Command: SlashCommand<ApplicationCommandType> = new commandExport();
+    const Command: Handler<ApplicationCommandType> = new commandExport();
     Commands.set(Command.data.name, Command);
   }
 }
 
+/**
+ * Abstract class to represent a slash command
+ *
+ * @public
+ * @typeParam T - Which {@link ApplicationCommandType} to handle
+ */
 export abstract class Handler<T extends ApplicationCommandType> {
+  /**
+   * The data which the command registers, depending on the type of command (ChatInput or ContextMenu) it is either {@link RESTPostAPIChatInputApplicationCommandsJSONBody} or {@link RESTPostAPIContextMenuApplicationCommandsJSONBody}
+   * 
+   * @public
+   */
   public data!: T extends ApplicationCommandType.ChatInput
-    ? RESTPostAPIChatInputApplicationCommandsJSONBody
+    ? Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "options">
     : RESTPostAPIContextMenuApplicationCommandsJSONBody;
 
-  public options!: { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
+  /**
+   * The options which the command registers, which is a record of option names to their values
+   * 
+   * @public
+   */
+  public options!: {
+    [string: string]: Omit<APIApplicationCommandOption, "name">;
+  };
 
+  /**
+   * This is a stub to get some {@link RunContext} shenanigans to work
+   *
+   * @remarks Do not access at runtime
+   * @deprecated ⚠️ Do not access this property. This is a stub that is used as a hack to get {@link RunContext} to work properly. This does not exist at runtime and never will do
+   */
   public type!: T; // Note: This doesnt exist at runtime, and is a hack to get RunContext to work, DO NOT ACCESS
 
+  /**
+   * Function that gets executed when the command is run
+   * 
+   * @remarks This function should be overriden at runtime   * 
+   * @param _args - The context that it needs to run in
+   * @virtual
+   * @returns Optional return value of data that should be sent as either the initial reply, or as a follow up
+   */
   public async execute(_args: RunContext<any>): Returnable {
     throw new Error("Not Implemented");
   }
 
+  /**
+   * Utility function to convert a command to have its JSON data, so it can be registered at discord
+   * 
+   * @internal
+   * @sealed
+   * @returns The JSON data for the command
+   */
   public toJSON(): T extends ApplicationCommandType.ChatInput
     ? RESTPostAPIChatInputApplicationCommandsJSONBody
     : RESTPostAPIContextMenuApplicationCommandsJSONBody {
@@ -71,10 +115,16 @@ export abstract class Handler<T extends ApplicationCommandType> {
   // }
 }
 
+/**
+ * The context in which the command executes
+ * 
+ * @public
+ * @typeParam Command - The command which the context refers to
+ */
 export type RunContext<Command extends Handler<ApplicationCommandType>> = {
   api: API;
   getArgs<Name extends keyof Command["options"]>(
-	interaction: CommandInteractionsUnion,
+    interaction: CommandInteractionsUnion,
     argument: Name
   ): Awaitable<
     Command["options"][Name]["required"] extends true
@@ -89,13 +139,29 @@ export type RunContext<Command extends Handler<ApplicationCommandType>> = {
     ? APIMessageApplicationCommandInteraction
     : APIUserApplicationCommandInteraction;
   logger: Logger<unknown>;
-  respond<Interaction extends Command["type"] extends ApplicationCommandType.ChatInput ? APIChatInputApplicationCommandInteraction : Command["type"] extends ApplicationCommandType.Message ? APIMessageApplicationCommandInteraction : APIUserApplicationCommandInteraction, Type extends ValidDataTypes<Interaction>>(
+  respond<
+    Interaction extends Command["type"] extends ApplicationCommandType.ChatInput
+      ? APIChatInputApplicationCommandInteraction
+      : Command["type"] extends ApplicationCommandType.Message
+      ? APIMessageApplicationCommandInteraction
+      : APIUserApplicationCommandInteraction,
+    Type extends ValidDataTypes<Interaction>
+  >(
     interaction: Interaction,
     responseType: Type,
     data: DataType<Type>
   ): Promise<void>;
 };
 
+/**
+ * Utility type to represent something that could require awaiting
+ * 
+ * @internal
+ */
 type Awaitable<T> = Promise<T> | T;
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-export type Returnable = Promise<RESTPostAPIWebhookWithTokenJSONBody | void>;
+/**
+ * Utility type to represent the return type of a command execution
+ * 
+ * @public
+ */
+export type Returnable = Promise<RESTPostAPIWebhookWithTokenJSONBody | void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type

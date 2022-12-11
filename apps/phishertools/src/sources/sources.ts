@@ -11,8 +11,24 @@ import { WalshyDev } from "./lists/WalshyDev.js";
 import { ZeroTwo } from "./lists/ZeroTwo.js";
 import { malvertising } from "./lists/malvertising.js";
 
+/**
+ * Type to represent a data source to be consumed
+ * 
+ * @public
+ */
 export type Source = {
+	/**
+	 * Function to generate the domain list
+	 * 
+	 * @public
+	 * @returns A promise of array of domains (www.google.com rather than https://www.google.com) that should be registered
+	 */
 	fetch(): Promise<string[]>,
+	/**
+	 * The name of the data source
+	 * 
+	 * @public
+	 */
 	name: string
 }
 

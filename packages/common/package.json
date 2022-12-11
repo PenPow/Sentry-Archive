@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/PenPow/Sentry#readme",
   "devDependencies": {
+    "eslint-plugin-tsdoc": "^0.2.17",
     "typescript": "^4.9.3"
   },
   "dependencies": {
