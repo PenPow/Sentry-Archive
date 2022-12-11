@@ -17,6 +17,7 @@ import {
   hasResponded,
   respond,
 } from "./utils/helpers.js";
+import { api } from "./REST.js";
 
 const fastify = FastifyServer({
   logger: false,
@@ -73,6 +74,7 @@ fastify.post(
         // @ts-expect-error it works trust me
         getArgs,
         respond,
+		api
       });
 
       const responded = hasResponded(req.body);
