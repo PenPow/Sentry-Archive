@@ -1,4 +1,5 @@
 import type { API } from "@discordjs/core";
+import type { Result } from "@sapphire/result";
 import type {
   APIApplicationCommandOption,
   APIChatInputApplicationCommandInteraction,
@@ -150,7 +151,7 @@ export type RunContext<Command extends Handler<ApplicationCommandType>> = {
     interaction: Interaction,
     responseType: Type,
     data: DataType<Type>
-  ): Promise<void>;
+  ): Promise<Result<true, Error>>;
 };
 
 /**

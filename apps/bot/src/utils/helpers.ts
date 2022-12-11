@@ -1,3 +1,4 @@
+import { Result } from "@sapphire/result";
 import {
   type APIApplicationCommandAutocompleteInteraction,
   type APIApplicationCommandInteraction,
@@ -227,151 +228,156 @@ const responded: WeakMap<CommandInteractionsUnion, boolean> = new Map();
 export async function respond<
   Interaction extends CommandInteractionsUnion,
   Type extends ValidDataTypes<Interaction>
->(interaction: Interaction, type: Type, data: DataType<Type>) {
-  // TODO: move this function to @sapphire/result
-  switch (interaction.type) {
-    case InteractionType.ApplicationCommand:
-    case InteractionType.ModalSubmit:
-      if (
-        ![
-          CommandResponseType.Defer,
-          CommandResponseType.EditReply,
-          CommandResponseType.FollowUp,
-          CommandResponseType.Reply,
-          CommandResponseType.Modal,
-        ].includes(type)
-      )
-        throw new Error(`Unexpected Type ${type} for Application Command`);
+>(interaction: Interaction, type: Type, data: DataType<Type>): Promise<Result<true, Error>> {
+    try {
+		switch (interaction.type) {
+			case InteractionType.ApplicationCommand:
+			case InteractionType.ModalSubmit:
+			if (
+				![
+				CommandResponseType.Defer,
+				CommandResponseType.EditReply,
+				CommandResponseType.FollowUp,
+				CommandResponseType.Reply,
+				CommandResponseType.Modal,
+				].includes(type)
+			)
+				throw new Error(`Unexpected Type ${type} for Application Command`);
 
-      if (type === CommandResponseType.Reply) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+			if (type === CommandResponseType.Reply) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.interactions.reply(
-          interaction.id,
-          interaction.token,
-          data as RESTPostAPIWebhookWithTokenJSONBody
-        );
-      } else if (type === CommandResponseType.Defer) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+				await api.interactions.reply(
+				interaction.id,
+				interaction.token,
+				data as RESTPostAPIWebhookWithTokenJSONBody
+				);
+			} else if (type === CommandResponseType.Defer) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.rest.post(
-          Routes.interactionCallback(interaction.id, interaction.token),
-          { body: { type: CommandResponseType.Defer, ...data } }
-        );
-      } else if (type === CommandResponseType.EditReply) {
-        if (!hasResponded(interaction))
-          throw new Error("No Response Given, but trying to edit reply");
+				await api.rest.post(
+				Routes.interactionCallback(interaction.id, interaction.token),
+				{ body: { type: CommandResponseType.Defer, ...data } }
+				);
+			} else if (type === CommandResponseType.EditReply) {
+				if (!hasResponded(interaction))
+				throw new Error("No Response Given, but trying to edit reply");
 
-        await api.interactions.editReply(
-          interaction.application_id,
-          interaction.token,
-          data as RESTPostAPIWebhookWithTokenJSONBody
-        );
-      } else if (type === CommandResponseType.FollowUp) {
-        if (!hasResponded(interaction))
-          throw new Error("No Response Given, but trying to follow up");
+				await api.interactions.editReply(
+				interaction.application_id,
+				interaction.token,
+				data as RESTPostAPIWebhookWithTokenJSONBody
+				);
+			} else if (type === CommandResponseType.FollowUp) {
+				if (!hasResponded(interaction))
+				throw new Error("No Response Given, but trying to follow up");
 
-        await api.interactions.followUp(
-          interaction.application_id,
-          interaction.token,
-          data as RESTPostAPIWebhookWithTokenJSONBody
-        );
-      } else if (type === CommandResponseType.Modal) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+				await api.interactions.followUp(
+				interaction.application_id,
+				interaction.token,
+				data as RESTPostAPIWebhookWithTokenJSONBody
+				);
+			} else if (type === CommandResponseType.Modal) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.interactions.createModal(
-          interaction.id,
-          interaction.token,
-          data as APIModalInteractionResponseCallbackData
-        );
-      }
+				await api.interactions.createModal(
+				interaction.id,
+				interaction.token,
+				data as APIModalInteractionResponseCallbackData
+				);
+			}
 
-      break;
-    case InteractionType.ApplicationCommandAutocomplete:
-      if (type !== CommandResponseType.AutoComplete)
-        throw new Error(`Unexpected Type ${type} for Autocomplete`);
+			break;
+			case InteractionType.ApplicationCommandAutocomplete:
+			if (type !== CommandResponseType.AutoComplete)
+				throw new Error(`Unexpected Type ${type} for Autocomplete`);
 
-      await api.interactions.createAutocompleteResponse(
-        interaction.id,
-        interaction.token,
-        data as APICommandAutocompleteInteractionResponseCallbackData
-      );
-      break;
-    case InteractionType.MessageComponent:
-      if (
-        ![
-          CommandResponseType.MessageComponentDefer,
-          CommandResponseType.EditReply,
-          CommandResponseType.FollowUp,
-          CommandResponseType.Reply,
-          CommandResponseType.UpdateButtonMessage,
-          CommandResponseType.Modal,
-        ].includes(type)
-      )
-        throw new Error(`Unexpected Type ${type} for Application Command`);
+			await api.interactions.createAutocompleteResponse(
+				interaction.id,
+				interaction.token,
+				data as APICommandAutocompleteInteractionResponseCallbackData
+			);
+			break;
+			case InteractionType.MessageComponent:
+			if (
+				![
+				CommandResponseType.MessageComponentDefer,
+				CommandResponseType.EditReply,
+				CommandResponseType.FollowUp,
+				CommandResponseType.Reply,
+				CommandResponseType.UpdateButtonMessage,
+				CommandResponseType.Modal,
+				].includes(type)
+			)
+				throw new Error(`Unexpected Type ${type} for Application Command`);
 
-      if (type === CommandResponseType.Reply) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+			if (type === CommandResponseType.Reply) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.interactions.reply(
-          interaction.id,
-          interaction.token,
-          data as RESTPostAPIWebhookWithTokenJSONBody
-        );
-      } else if (type === CommandResponseType.MessageComponentDefer) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+				await api.interactions.reply(
+				interaction.id,
+				interaction.token,
+				data as RESTPostAPIWebhookWithTokenJSONBody
+				);
+			} else if (type === CommandResponseType.MessageComponentDefer) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.interactions.deferMessageUpdate(
-          interaction.id,
-          interaction.token
-        );
-      } else if (type === CommandResponseType.EditReply) {
-        if (!hasResponded(interaction))
-          throw new Error("No Response Given, but trying to edit reply");
+				await api.interactions.deferMessageUpdate(
+				interaction.id,
+				interaction.token
+				);
+			} else if (type === CommandResponseType.EditReply) {
+				if (!hasResponded(interaction))
+				throw new Error("No Response Given, but trying to edit reply");
 
-        await api.interactions.editReply(
-          interaction.application_id,
-          interaction.token,
-          data as RESTPostAPIWebhookWithTokenJSONBody
-        );
-      } else if (type === CommandResponseType.FollowUp) {
-        if (!hasResponded(interaction))
-          throw new Error("No Response Given, but trying to follow up");
+				await api.interactions.editReply(
+				interaction.application_id,
+				interaction.token,
+				data as RESTPostAPIWebhookWithTokenJSONBody
+				);
+			} else if (type === CommandResponseType.FollowUp) {
+				if (!hasResponded(interaction))
+				throw new Error("No Response Given, but trying to follow up");
 
-        await api.interactions.followUp(
-          interaction.application_id,
-          interaction.token,
-          data as RESTPostAPIWebhookWithTokenJSONBody
-        );
-      } else if (type === CommandResponseType.Modal) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+				await api.interactions.followUp(
+				interaction.application_id,
+				interaction.token,
+				data as RESTPostAPIWebhookWithTokenJSONBody
+				);
+			} else if (type === CommandResponseType.Modal) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.interactions.createModal(
-          interaction.id,
-          interaction.token,
-          data as APIModalInteractionResponseCallbackData
-        );
-      } else if (type === CommandResponseType.UpdateButtonMessage) {
-        if (hasResponded(interaction))
-          throw new Error("Cannot Respond to Already Responded Interaction");
+				await api.interactions.createModal(
+				interaction.id,
+				interaction.token,
+				data as APIModalInteractionResponseCallbackData
+				);
+			} else if (type === CommandResponseType.UpdateButtonMessage) {
+				if (hasResponded(interaction))
+				throw new Error("Cannot Respond to Already Responded Interaction");
 
-        await api.interactions.updateMessage(
-          interaction.id,
-          interaction.token,
-          data as APIInteractionResponseCallbackData
-        );
-      }
+				await api.interactions.updateMessage(
+				interaction.id,
+				interaction.token,
+				data as APIInteractionResponseCallbackData
+				);
+			}
 
-      break;
-  }
+			break;
+		}
 
-  responded.set(interaction, true);
+		responded.set(interaction, true);
+
+		return Result.ok(true);
+	} catch(error) {
+		return Result.err(error as Error);
+	}
 }
 
 /**
