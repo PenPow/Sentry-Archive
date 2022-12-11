@@ -14,6 +14,6 @@ export default defineConfig({
   keepNames: true,
   sourcemap: "inline",
   splitting: false,
-  dts: true, // FIXME: DTS Build Errors with: RollupError: Invalid substitution "./src/config" for placeholder "[name]" in "output.entryFileNames" pattern, can be neither absolute nor relative path.
+  dts: true,
   esbuildPlugins: [],
 });
