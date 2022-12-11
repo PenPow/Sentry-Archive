@@ -9,6 +9,7 @@ import {
 } from "discord-api-types/v10";
 import { verify, PlatformAlgorithm } from "discord-verify/node";
 import { type FastifyRequest, fastify as FastifyServer } from "fastify";
+import { api } from "./REST.js";
 import { config, logger } from "./config.js";
 import { Commands, loadCommands } from "./structures/Command.js";
 import {
@@ -17,7 +18,6 @@ import {
   hasResponded,
   respond,
 } from "./utils/helpers.js";
-import { api } from "./REST.js";
 
 const fastify = FastifyServer({
   logger: false,
