@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/PenPow/Sentry#readme",
   "dependencies": {
+    "certstream": "^1.1.1",
+    "ctph.js": "^0.0.5",
     "fastify": "^4.10.2",
     "ioredis": "^5.2.4",
     "neat-csv": "^7.0.0",

@@ -7,7 +7,7 @@ export default {
   execute: async () => {
 	await io.confirm("Are you sure?");
 
-	await ctx.loading.start({ title: 'Loading Domains from Sources', description: 'This should take ~15 seconds' });
+	await ctx.loading.start({ title: 'Loading Domains from Sources', description: 'This should take a while' });
 
 	await fetch("http://phishertools:3001/reload", { headers: { token: config.discord.TOKEN } });
   },
