@@ -36,7 +36,7 @@ abstract class Punishment {
 		return user.punishments.filter((punishment) => punishment.guildId === guildId).map((punishment) => punishment.type === "Timeout" ? new ExpiringPunishment(punishment) : new GenericPunishment(punishment));
 	}
 
-	protected async getCaseId(guildId: Snowflake) {
+	public static async getCaseId(guildId: Snowflake) {
 		const caseNoHashExists = await Redis.hexists("case_numbers", guildId);
 
 		if(!caseNoHashExists) {
@@ -53,7 +53,7 @@ abstract class Punishment {
 		return Number.parseInt(caseNo, 10) + 1;
 	}
 
-	protected async createAuditLogMessage(id: number, guildId: Snowflake): Promise<Result<APIMessage, Error>> {
+	public static async createAuditLogMessage(id: number, guildId: Snowflake): Promise<Result<APIMessage, Error>> {
 		const guildDatabase = await Prisma.guild.findUnique({ where: { id: guildId }});
 
 		if(guildDatabase?.modLogChannelId) {
@@ -84,7 +84,7 @@ abstract class Punishment {
 		}
 	}
 
-	private async createEmbed(id: number, channel: Snowflake): Promise<[APIEmbed, APIActionRowComponent<APIMessageActionRowComponent>]> {
+	private static async createEmbed(id: number, channel: Snowflake): Promise<[APIEmbed, APIActionRowComponent<APIMessageActionRowComponent>]> {
 		const modCase = await Punishment.fetch({ id });
 		if(!modCase) throw new Error("No Case Found");
 
@@ -139,7 +139,7 @@ abstract class Punishment {
 		];
 	}
 
-	private selectColor(type: PunishmentType): number {
+	private static selectColor(type: PunishmentType): number {
 		switch(type) {
 			case "Ban":
 				return 0xFF5C5C;
@@ -194,7 +194,7 @@ export class GenericPunishment extends Punishment {
 	public async build(): Promise<Result<APIMessage, Error>> {
 		await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
 
-		const caseId = await this.getCaseId(this.data.guildId);
+		const caseId = await Punishment.getCaseId(this.data.guildId);
 
 		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
 		const guild = await api.guilds.get(this.data.guildId);
@@ -224,16 +224,16 @@ export class GenericPunishment extends Punishment {
 		}
 
 		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: this.data.type }});
-		return this.createAuditLogMessage(id, this.data.guildId);
+		return Punishment.createAuditLogMessage(id, this.data.guildId);
 	}
 }
 
 // TODO: Implement Other Time Based Punishments
 export class ExpiringPunishment extends Punishment {
-	public readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date };
+	public readonly data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date, type: "Ban" | "Timeout" };
 
 	// eslint-disable-next-line sonarjs/no-identical-functions
-	public constructor(data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date }) {
+	public constructor(data: Pick<PunishmentModel, "guildId" | "moderatorId" | "reason" | "references" | "userId"> & { expires: Date, type: "Ban" | "Timeout" }) {
 		super();
 
 		this.data = data;
@@ -245,17 +245,23 @@ export class ExpiringPunishment extends Punishment {
 
 		const member = await api.guilds.getMember(this.data.guildId, this.data.userId);
 		const guild = await api.guilds.get(this.data.guildId);
-		if(!(await PermissionsManager.canModerateUser(member, guild, this.data.moderatorId))) return Result.err(new Error("Cannot Punish User"));
+		if(this.data.type === "Timeout" && !(await PermissionsManager.canModerateUser(member, guild, this.data.moderatorId))) return Result.err(new Error("Cannot Moderate User"));
+		if(this.data.type === "Ban" && !(await PermissionsManager.canBanUser(member, guild, this.data.moderatorId))) return Result.err(new Error("Cannot Ban User"));
 
 		try {
-			await api.guilds.editMember(this.data.guildId, this.data.userId, { communication_disabled_until: this.data.expires.toISOString() }, this.data.reason);
+			if(this.data.type === "Timeout") await api.guilds.editMember(this.data.guildId, this.data.userId, { communication_disabled_until: this.data.expires.toISOString() }, this.data.reason);
+			else if(this.data.type === "Ban") await api.guilds.banUser(this.data.guildId, this.data.userId, { delete_message_seconds: 604_800 }, this.data.reason);
 		} catch(error) {
 			return Result.err(error as Error);
 		}
 
-		const caseId = await this.getCaseId(this.data.guildId);
+		const caseId = await Punishment.getCaseId(this.data.guildId);
 
-		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId, type: "Timeout" }});
-		return this.createAuditLogMessage(id, this.data.guildId);
+		const { id } = await Prisma.punishment.create({ data: { ...this.data, caseId }});
+		if(this.data.type === "Ban") {
+			await Redis.set(`punishment_${id}`, "ok", "PXAT", this.data.expires.valueOf());
+		}
+
+		return Punishment.createAuditLogMessage(id, this.data.guildId);
 	}
 }

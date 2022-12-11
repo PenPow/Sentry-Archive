@@ -8,7 +8,7 @@ import {
 } from "discord-api-types/v10";
 import * as SlashCommand from "../../structures/Command.js";
 // import { GenericPunishment } from "../../structures/Punishment.js";
-import { CommandResponseType } from "../../utils/helpers.js";
+import { ExpiringPunishment } from "../../structures/Punishment.js";
 
 export default class TestCommand extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
   public override data = {
@@ -29,23 +29,15 @@ export default class TestCommand extends SlashCommand.Handler<ApplicationCommand
 
   public override async execute({
     getArgs,
-    respond,
     interaction,
   }: SlashCommand.RunContext<TestCommand>): SlashCommand.Returnable {
-    console.log("hi");
-
-    await respond(
-      interaction,
-      CommandResponseType.Defer,
-	  { flags: 64 }
-    );
 
     const user = await getArgs(interaction, "user");
 
     // const punishment = new GenericPunishment({ })
 
-    // const punishment = await new Punishment({ type: PunishmentType.Timeout, reason: 'ur bad pt 4', userId: user.id, guildId: interaction.guild_id!, references: 20, expiration: new Date(new Date(Date.now()).getTime() + 50000), moderatorId: interaction.member?.user.id! }).run()
+    const punishment = await new ExpiringPunishment({ type: "Ban", reason: 'ur bad pt 5', userId: user.id, guildId: interaction.guild_id!, references: null, expires: new Date(new Date(Date.now()).getTime() + 10_000), moderatorId: interaction.member!.user.id }).build();
 
-    return { content: `\`\`\`js\n${inspect(user)}\`\`\`` };
+    return { content: `\`\`\`js\n${inspect(punishment)}\`\`\`` };
   }
 }

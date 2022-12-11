@@ -25,13 +25,17 @@ export class PermissionsManager {
 		if(member.user.id === clientId) return false;
 		if(clientId === guild.owner_id) return true;
 
+		if(me.roles.map((val) => roles.find((role) => role.id === val)).filter((val) => val !== undefined).length === 0) return false;
+		
 		const sentryHighest = me.roles.map((val) => roles.find((role) => role.id === val)).filter((val) => val !== undefined).reduce((previous, current) => this.compareRolePositions(current!, previous!) > 0 ? current : previous);
 		if(!sentryHighest) return false;
 
+		if(member.roles.map((val) => roles.find((role) => role.id === val)).filter((val) => val !== undefined).length === 0) return true;
 		const memberHighest = member.roles.map((val) => roles.find((role) => role.id === val)).filter((val) => val !== undefined).reduce((previous, current) => this.compareRolePositions(current!, previous!) > 0 ? current : previous);
 		if(!memberHighest) return false;
 
 		const rolePositions = this.compareRolePositions(sentryHighest, memberHighest);
+
 		return rolePositions > 0;
 	}
 

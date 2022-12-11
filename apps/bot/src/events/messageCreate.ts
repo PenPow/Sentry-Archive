@@ -77,6 +77,7 @@ export default {
 			if(res.data.isMalicious) {
 				const channel = ((await api.channels.get(data.channel_id)) as APIGuildTextChannel<ChannelType.GuildText>);
 				const guild = channel.guild_id;
+				
 				if(!guild) return;
 
 				const punishment = await new GenericPunishment({ guildId: guild, moderatorId: Buffer.from(config.discord.TOKEN.split(".")[0]!, "base64").toString(), reason: 'Malicious URL', references: null, userId: data.author.id, type: "Ban" }).build();

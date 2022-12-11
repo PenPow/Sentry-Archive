@@ -26,7 +26,7 @@ fastify.post("/", async (req: FastifyRequest<{ Body: APIInteraction, Headers: {"
 	const body = JSON.stringify(req.body);
 
 	const signatureVerified = await verify(body, signature, timestamp, config.discord.PUBLIC_KEY, webcrypto.subtle, PlatformAlgorithm.NewNode);
-	if(!signatureVerified) return res.code(401);
+	if(!signatureVerified) return res.code(401).send({});
 
 	await loadCommands();
 
@@ -54,10 +54,10 @@ fastify.post("/", async (req: FastifyRequest<{ Body: APIInteraction, Headers: {"
 			await respond(req.body, CommandResponseType.Reply, result);
 		}
 
-		return void res.status(200);
+		return void res.status(200).send({});
 	} else {
 		void logger.fatal("Attempted to handle an unknown interaction type");
-		return void res.status(500);
+		return void res.status(500).send({});
 	}
 });
 
