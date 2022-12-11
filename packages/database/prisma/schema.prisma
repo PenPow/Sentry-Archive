@@ -45,4 +45,6 @@ model Guild {
 model User {
 	id String @id @unique
 	punishments Punishment[]
+	twofactor_secret String? /// @encrypted
+	backup_code String? /// @encrypted
 }
