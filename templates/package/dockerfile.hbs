@@ -3,8 +3,7 @@ FROM node:18-alpine AS builder
 LABEL org.opencontainers.image.source="https://github.com/penpow/sentry"
 LABEL org.opencontainers.image.description="Sentry {{ titleCase name }} Image"
 
-RUN apk add --no-cache libc6-compat python3 make g++
-RUN apk update
+RUN apk update && apk add --no-cache libc6-compat python3 make g++ openssl1.1-compat
 
 WORKDIR /app
 
@@ -14,8 +13,7 @@ RUN turbo prune --scope={{ lowerCase name }} --docker
 
 FROM node:18-alpine AS installer
 
-RUN apk add --no-cache libc6-compat python3 make g++
-RUN apk update
+RUN apk update && apk add --no-cache libc6-compat python3 make g++ openssl1.1-compat
 
 WORKDIR /app
 
@@ -29,6 +27,8 @@ COPY turbo.json turbo.json
 RUN npx turbo run build --filter={{ lowerCase name }}
 
 FROM node:18-alpine as runner
+
+RUN apk update && apk add --no-cache libc6-compat python3 make g++ openssl1.1-compat
 
 WORKDIR /app
 
