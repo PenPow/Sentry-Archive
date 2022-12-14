@@ -1,4 +1,3 @@
-import ctph from "ctph.js";
 import cron from "node-cron";
 import { Redis, logger } from "../config.js";
 import { Sources } from "../sources/sources.js";
@@ -25,15 +24,11 @@ export async function reloadSources() {
 
 	const domains: string[] = [];
 
-	await Redis.del('scam_domains_hash');
+	await Redis.del('scam_domains');
 
 	for(const list of successful) {
 		for(const domain of list) domains.push(domain);
 	}
-	
-	const hashes: string[] = [];
 
-	for(const domain of domains) hashes.push(ctph.digest(domain));
-
-	await Redis.sadd("scam_domain_hashes", hashes);
+	await Redis.sadd("scam_domains", domains);
 }

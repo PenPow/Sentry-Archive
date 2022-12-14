@@ -1,6 +1,5 @@
 import "source-map-support/register.js";
 
-import ctph from "ctph.js";
 import { fastify as FastifyServer, type FastifyRequest } from "fastify";
 import { config, logger, Redis } from "./config.js";
 import { initCT } from "./utils/certstream.js";
@@ -35,7 +34,7 @@ fastify.post('/scan', async (req: FastifyRequest<{ Body: string }>, res) => {
 	const domain = JSON.parse(req.body).domain;
 	if(!domain) return res.status(401).send({ ok: false, error: { message: 'No Domain Specified' }});
 
-	const hasDomain = Boolean(await Redis.sismember("scam_domains", ctph.digest(domain) ));
+	const hasDomain = Boolean(await Redis.sismember("scam_domains", domain));
 	return res.status(200).send({ ok: true, data: { isMalicious: hasDomain }});
 });
 
