@@ -41,7 +41,7 @@ export class PermissionsManager {
    * @param roles - All the roles in the guild
    * @returns A promise resolving to a boolean, representing whether we can modify the user
    */
-  private static async canManageUser(
+  public static async canManageUser(
     member: APIGuildMember,
     guild: APIGuild,
     me: APIGuildMember,
@@ -95,15 +95,15 @@ export class PermissionsManager {
   }
 
   /**
-   * Private utility function to extract the permissions of a user based upon their roles
+   * Helpful utility function to extract the permissions of a user based upon their roles
    *
-   * @internal
+   * @public
    * @param member - Member to get permissions of
    * @param guild - Guild to get the  permissions in
    * @param roles - Roles in that guild
    * @returns A readonly bitfield of their permissions
    */
-  private static async getUserPermissions(
+  public static async getUserPermissions(
     member: APIGuildMember,
     guild: APIGuild,
     roles: RESTGetAPIGuildRolesResult
@@ -244,7 +244,7 @@ export class PermissionsManager {
       ) ??
         false) &&
       (await this.getUserPermissions(me, guild, roles)).has(
-        PermissionFlagsBits.KickMembers
+        PermissionFlagsBits.ModerateMembers
       )
     );
   }
