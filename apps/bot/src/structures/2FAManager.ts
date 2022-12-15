@@ -43,7 +43,7 @@ export class TwoFactorAuthenticationManager {
 		return verifyToken(secret, token)?.delta === 0 || false;
 	}
 
-	public static async has2FAEnabled(id: Snowflake): Promise<boolean> {
+	public static async has2FAEnabled(id: Snowflake): Promise<boolean> { // TODO: Create setting to enforce 2FA for mod commands in server
 		return Boolean((await this.createUserObject(id)).twofactor_secret);
 	}
 
