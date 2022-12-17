@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { default as IORedis } from "ioredis";
 import { fieldEncryptionMiddleware } from "prisma-field-encryption";
 import { config, logger } from "./config.js";
-import { GenericPunishment, UnbanPunishment } from "./structures/Punishment.js";
+import { UnbanPunishment } from "./structures/Punishment.js";
 
 export const Prisma = new PrismaClient({
   datasources: {
@@ -36,7 +36,7 @@ SubscriberRedis.on(
       const key = message.split("__")[2]?.slice(1).split("_")[1]; // punishment_5
       if (!key || Number.isNaN(Number.parseInt(key, 10))) return;
 
-      const punishment = await GenericPunishment.fetch({
+      const punishment = await UnbanPunishment.fetch({
         id: Number.parseInt(key, 10),
       });
 

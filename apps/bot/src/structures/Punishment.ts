@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import { Result } from "@sapphire/result";
-import type { PunishmentType, Punishment as PunishmentModel } from "database";
+import type { PunishmentType, Punishment as PunishmentModel, Guild } from "database";
 import {
   type APIActionRowComponent,
   type APIButtonComponent,
@@ -28,7 +28,7 @@ import { PermissionsManager } from "../utils/PermissionsHelpers.js";
  * 
  * @internal
  */
-abstract class Punishment {
+export abstract class Punishment {
   /**
    * Function to fetch a case 
    * 
@@ -105,6 +105,41 @@ abstract class Punishment {
   }
 
   /**
+   * Utility function to grab the audit-log channel from any guild model
+   * 
+   * @param guild - The prisma model of a guild
+   * @returns 
+   */
+  public static async getAuditLogChannel(guild: Guild): Promise<Result<APIChannel, Error>> {
+	if (guild.modLogChannelId) {
+		return Result.fromAsync(
+			async () => api.channels.get(guild.modLogChannelId!)
+		);
+	} else {
+		const channels: Result<RESTGetAPIGuildChannelsResult, Error> = await Result.fromAsync(async () => api.guilds.getChannels(guild.id));
+
+		if(channels.isErr()) return channels;
+
+		const channel = channels.unwrap().filter(
+			(chnl) =>
+			  chnl.type === ChannelType.GuildText &&
+			  [
+				"audit-logs",
+				"sentry-logs",
+				"server-logs",
+				"mod-logs",
+				"audit-log",
+				"auditlogs",
+				"auditlog",
+				"logs",
+			  ].includes(chnl?.name ?? "")
+		  ).at(0);
+		  
+		return channel ? Result.ok(channel) : Result.err(new Error("No Channel Found"));
+	}
+  }
+
+  /**
    * Function to create an audit log message based upon a case details
    * 
    * @remarks This function is public so it can be accessed during a manual unban while we fix it not being supported - do not manually call
@@ -118,61 +153,16 @@ abstract class Punishment {
     id: number,
     guildId: Snowflake
   ): Promise<Result<APIMessage, Error>> {
-    const guildDatabase = await Prisma.guild.findUnique({
-      where: { id: guildId },
-    });
+      const guildDatabase = await Prisma.guild.findUnique({
+        where: { id: guildId },
+      });
 
-    if (guildDatabase?.modLogChannelId) {
-      const channel: Result<APIChannel, Error> = await Result.fromAsync(
-        async () => api.channels.get(guildDatabase.modLogChannelId!)
-      );
+	  const channel = await this.getAuditLogChannel(guildDatabase!);
+	  if(channel.isErr()) return channel;
 
-      if (channel.isOk()) {
-        const data = await this.createEmbed(id, channel.unwrap().id);
-        const msg: Result<APIMessage, Error> = await Result.fromAsync(
-          async () =>
-            api.channels.createMessage(channel.unwrap().id, {
-              components: [data[1]],
-              embeds: [data[0]],
-            })
-        );
-
-        if (msg.isOk())
-          await Prisma.punishment.update({
-            where: { id },
-            data: { modLogId: msg.unwrap().id },
-          });
-
-        return msg;
-      } else return channel;
-    } else {
-      const channels: Result<RESTGetAPIGuildChannelsResult, Error> =
-        await Result.fromAsync(async () => api.guilds.getChannels(guildId));
-      if (channels.isErr()) return channels;
-
-      const channel = channels
-        .unwrap()
-        .filter(
-          (chnl) =>
-            chnl.type === ChannelType.GuildText &&
-            [
-              "audit-logs",
-              "sentry-logs",
-              "server-logs",
-              "mod-logs",
-              "audit-log",
-              "auditlogs",
-              "auditlog",
-              "logs",
-            ].includes(chnl?.name ?? "")
-        )
-        .at(0);
-
-      if (!channel) return Result.err(new Error("No Channel Found"));
-
-      const data = await this.createEmbed(id, channel.id);
+      const data = await this.createEmbed(id, channel.unwrap().id);
       const msg: Result<APIMessage, Error> = await Result.fromAsync(async () =>
-        api.channels.createMessage(channel.id, {
+        api.channels.createMessage(channel.unwrap().id, {
           components: [data[1]],
           embeds: [data[0]],
         })
@@ -185,19 +175,18 @@ abstract class Punishment {
         });
 
       return msg;
-    }
   }
 
   /**
-   * Internal function to create an embed based upon the data of a case
+   * Helper function to create an embed based upon the data of a case
    * 
-   * @internal
+   * @public
    * @sealed
    * @param id - Database ID of case
    * @param channel - The guild's mod log channel
    * @returns A tuple, with the 0th index being the embed, and the 1st index being the components
    */
-  private static async createEmbed(
+  public static async createEmbed(
     id: number,
     channel: Snowflake
   ): Promise<[APIEmbed, APIActionRowComponent<APIMessageActionRowComponent>]> {
@@ -318,14 +307,14 @@ abstract class Punishment {
   }
 
   /**
-   * Internal function to create the user and guild database entries for the database relations
+   * Utility function to create the user and guild database entries for the database relations
    * 
-   * @internal
+   * @public
    * @sealed
    * @param userId - User to create
    * @param guildId - Guild to create
    */
-  protected static async createUserAndGuild(
+  public static async createUserAndGuild(
     userId: Snowflake,
     guildId: Snowflake
   ): Promise<void> {
