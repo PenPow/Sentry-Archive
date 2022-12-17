@@ -20,6 +20,8 @@
   "homepage": "https://github.com/PenPow/Sentry#readme",
   "dependencies": {
     "@discordjs/rest": "^1.4.0",
+    "bson": "^4.7.0",
+    "ioredis": "^5.2.4",
     "shared": "*",
     "source-map-support": "^0.5.21",
     "toml": "^3.0.0",

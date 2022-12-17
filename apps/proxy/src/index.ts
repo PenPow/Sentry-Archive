@@ -1,34 +1,33 @@
 import "source-map-support/register.js";
 
 /* eslint-disable require-atomic-updates */
-import { readFile } from "node:fs/promises";
 import {
   createServer,
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { pipeline } from "node:stream/promises";
 import { URL } from "node:url";
 import {
   DiscordAPIError,
   HTTPError,
   RateLimitError,
+  RequestMethod,
+  parseResponse,
   REST,
-  type RequestMethod,
   type RouteLike,
 } from "@discordjs/rest";
-import type { Config } from "shared";
-import { parse } from "toml";
 import { Logger } from "tslog";
+import { fetchCache, setCache } from "./cache.js";
+import { config } from "./db.js";
 
 const logger = new Logger();
 
 function proxyRequests(
   rest: REST
 ): (req: IncomingMessage, res: ServerResponse) => Promise<void> | void {
+	// @ts-expect-error all code paths do return
   return async (req, res) => {
     const { method, url, headers } = req;
-    logger.debug(`Request to ${url}`);
 
     if (!method || !url) throw new TypeError("Missing Method or URL");
 
@@ -39,8 +38,21 @@ function proxyRequests(
       ""
     ) as RouteLike;
 
+	if(method === RequestMethod.Get) {
+		const cache = await fetchCache(route);
+		if(cache) {
+			logger.trace(`Cache Hit on ${route}`);
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'application/json');
+			
+			return void res.end(JSON.stringify(cache));
+		}
+	}
+
+	logger.debug(`Request to ${url}`);
+
     try {
-      const data = await rest.raw({
+      const resp = await rest.raw({
         body: req,
         fullRoute: route,
         method: method as RequestMethod,
@@ -51,15 +63,18 @@ function proxyRequests(
         },
       });
 
-      res.statusCode = data.statusCode;
+      res.statusCode = resp.statusCode;
 
       // Remove Ratelimit Headers - We handle them, and we dont want upstream to handle it
-      for (const header of Object.keys(data.headers)) {
+      for (const header of Object.keys(resp.headers)) {
         if (header.includes("ratelimit")) continue;
-        res.setHeader(header, data.headers[header]!);
+        res.setHeader(header, resp.headers[header]!);
       }
 
-      await pipeline(data.body, res);
+      const data = await parseResponse(resp);
+	  res.write(JSON.stringify(data));
+
+	  await setCache(route, data);
     } catch (error) {
       if (error instanceof DiscordAPIError || error instanceof HTTPError) {
         res.statusCode = error.status;
@@ -83,20 +98,12 @@ function proxyRequests(
   };
 }
 
-const config: Config = parse(await readFile("config.toml", "utf8"));
-
-if (
-  !config.discord.TOKEN ||
-  ![6, 7, 8, 9, 10].includes(config.proxy.API_VERSION)
-) {
-  throw new Error("Invalid Config");
-}
-
 const rest = new REST({
   rejectOnRateLimit: () => true,
   retries: 0,
   version: config.proxy.API_VERSION.toString(),
 }).setToken(config.discord.TOKEN);
+
 const server = createServer(proxyRequests(rest));
 
 server.listen(config.proxy.PORT, () =>
