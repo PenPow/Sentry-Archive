@@ -1,4 +1,4 @@
-import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody, APIEmbed, MessageFlags } from "discord-api-types/v10";
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody, type APIEmbed, MessageFlags } from "discord-api-types/v10";
 import { Prisma } from "../../db.js";
 import * as SlashCommand from "../../structures/Command.js";
 import { Punishment } from "../../structures/Punishment.js";
