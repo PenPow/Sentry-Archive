@@ -4,6 +4,7 @@ import type {
   APIApplicationCommandOption,
   APIChatInputApplicationCommandInteraction,
   APIMessageApplicationCommandInteraction,
+  APIModalSubmitInteraction,
   APIUserApplicationCommandInteraction,
   ApplicationCommandType,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -87,6 +88,18 @@ export abstract class Handler<T extends ApplicationCommandType> {
   }
 
   /**
+   * Function to handle modal
+   * 
+   * @remarks This function should be overriden at runtime   * 
+   * @param _args - The context that it needs to run in
+   * @virtual
+   */
+  public async handleModal(_args: Omit<RunContext<any>, "getArgs" | "interaction"> & { interaction: APIModalSubmitInteraction }): Promise<void> {
+	// eslint-disable-next-line no-useless-return
+	return;
+  }
+
+  /**
    * Utility function to convert a command to have its JSON data, so it can be registered at discord
    * 
    * @internal
@@ -141,11 +154,7 @@ export type RunContext<Command extends Handler<ApplicationCommandType>> = {
     : APIUserApplicationCommandInteraction;
   logger: Logger<unknown>;
   respond<
-    Interaction extends Command["type"] extends ApplicationCommandType.ChatInput
-      ? APIChatInputApplicationCommandInteraction
-      : Command["type"] extends ApplicationCommandType.Message
-      ? APIMessageApplicationCommandInteraction
-      : APIUserApplicationCommandInteraction,
+    Interaction extends CommandInteractionsUnion,
     Type extends ValidDataTypes<Interaction>
   >(
     interaction: Interaction,

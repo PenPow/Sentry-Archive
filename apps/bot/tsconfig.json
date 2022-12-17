@@ -31,6 +31,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "ES2021",
+	"lib": ["ES2021"],
     "module": "node16",
     "moduleResolution": "node16",
     "useDefineForClassFields": true,

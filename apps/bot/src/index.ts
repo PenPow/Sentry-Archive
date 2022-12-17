@@ -1,14 +1,14 @@
 import "source-map-support/register.js";
 import "./brokers.js";
 
-import { webcrypto } from "node:crypto";
+import { Buffer } from "node:buffer";
 import {
   type APIInteraction,
   InteractionResponseType,
   InteractionType,
 } from "discord-api-types/v10";
-import { verify, PlatformAlgorithm } from "discord-verify/node";
 import { type FastifyRequest, fastify as FastifyServer } from "fastify";
+import nacl from "tweetnacl";
 import { api } from "./REST.js";
 import { config, logger } from "./config.js";
 import { Commands, loadCommands } from "./structures/Command.js";
@@ -39,23 +39,29 @@ fastify.post(
     const timestamp = req.headers["x-signature-timestamp"];
     const body = JSON.stringify(req.body);
 
-    const signatureVerified = await verify(
-      body,
-      signature,
-      timestamp,
-      config.discord.PUBLIC_KEY,
-      webcrypto.subtle,
-      PlatformAlgorithm.NewNode
-    );
+    const signatureVerified = nacl.sign.detached.verify(Buffer.from(timestamp + body), Buffer.from(signature, "hex"), Buffer.from(config.discord.PUBLIC_KEY, "hex"));
     if (!signatureVerified) return res.code(401).send({});
 
     await loadCommands();
 
     if (req.body.type === InteractionType.Ping) {
       return void res.send({ type: InteractionResponseType.Pong });
-    } else if (
+    } else if (req.body.type === InteractionType.ModalSubmit) {
+		const command = Commands.get(req.body.data.custom_id.split('.')[0]!);
+		if (!command) return void res.code(404);
+
+		if(!command.handleModal) return;
+
+		await command.handleModal({
+			interaction: req.body,
+			respond,
+			logger,
+			api
+		});
+
+		return void res.status(200).send({});
+	} else if (
       [
-        InteractionType.ModalSubmit,
         InteractionType.ApplicationCommandAutocomplete,
         InteractionType.MessageComponent,
       ].includes(req.body.type)

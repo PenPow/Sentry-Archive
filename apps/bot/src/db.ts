@@ -39,9 +39,10 @@ SubscriberRedis.on(
       const punishment = await GenericPunishment.fetch({
         id: Number.parseInt(key, 10),
       });
+
       if (!punishment?.expires) return;
 
-      new UnbanPunishment({ guildId: punishment.guildId, references: punishment.caseId, userId: punishment.userId, reason: "Timed Ban Expiration", moderatorId: Buffer.from(config.discord.TOKEN.split(".")[0]!, "base64").toString() });
+      await new UnbanPunishment({ guildId: punishment.guildId, references: punishment.caseId, userId: punishment.userId, reason: "Timed Ban Expiration", moderatorId: Buffer.from(config.discord.TOKEN.split(".")[0]!, "base64").toString() }).build();
     }
   }
 );

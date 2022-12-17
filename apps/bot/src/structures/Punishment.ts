@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { Result } from "@sapphire/result";
 import type { PunishmentType, Punishment as PunishmentModel } from "database";
 import {
@@ -15,8 +16,10 @@ import {
   type APIMessage,
   type APIChannel,
   type RESTGetAPIGuildChannelsResult,
+  PermissionFlagsBits,
 } from "discord-api-types/v10";
 import { api } from "../REST.js";
+import { config } from "../config.js";
 import { Prisma, Redis } from "../db.js";
 import { PermissionsManager } from "../utils/PermissionsHelpers.js";
 
@@ -617,3 +620,92 @@ export class ExpiringPunishment extends Punishment {
     return Punishment.createAuditLogMessage(id, this.data.guildId);
   }
 }
+
+/**
+ * Class that represents a punishment for somebody who is not in the server
+ * 
+ * @public
+ */
+export class NotInGuildPunishment extends Punishment {
+	/**
+	 * The data that the punishment was instantiated with
+	 */
+	public readonly data: Pick<
+	  PunishmentModel,
+	  "guildId" | "moderatorId" | "reason" | "references" | "userId"
+	> & { expires?: Date, type: "Ban" | "Softban" };
+  
+	// eslint-disable-next-line sonarjs/no-identical-functions
+	public constructor(
+	  data: Pick<
+		PunishmentModel,
+		"guildId" | "moderatorId" | "reason" | "references" | "userId"
+	  > & { expires?: Date, type: "Ban" | "Softban" }
+	) {
+	  super();
+  
+	  this.data = data;
+	}
+  
+	/**
+	 * Executes the punishment, which handles the actual punishment, plus logging and database entries
+	 * 
+	 * @returns A result containing either the sent message, or a generic error
+	 */
+	public async build(): Promise<Result<APIMessage, Error>> {
+	  await Punishment.createUserAndGuild(this.data.userId, this.data.guildId);
+
+	  const me = await api.guilds.getMember(this.data.guildId, Buffer.from(config.discord.TOKEN.split(".")[0]!,	"base64").toString());
+	  const moderator = this.data.moderatorId === me.user?.id ? me : await api.guilds.getMember(this.data.guildId, this.data.moderatorId);
+	  const guild = await api.guilds.get(this.data.guildId);
+	  const roles = await api.guilds.getRoles(this.data.guildId);
+
+	  if(!(await PermissionsManager.getUserPermissions(moderator, guild, roles)).has(PermissionFlagsBits.BanMembers) || !(await PermissionsManager.getUserPermissions(me, guild, roles)).has(PermissionFlagsBits.BanMembers)) return Result.err(new Error("Cannot Create Punishment"));
+
+	  const caseId = await Punishment.getCaseId(this.data.guildId);
+  
+	  const { id } = await Prisma.punishment.create({
+		data: { ...this.data, caseId, type: this.data.type },
+	  });
+
+	  try {
+		switch (this.data.type) {
+		  case "Ban":
+			await api.guilds.banUser(
+			  this.data.guildId,
+			  this.data.userId,
+			  { delete_message_seconds: 604_800 },
+			  this.data.reason
+			);
+
+			if(this.data.expires) {
+				await Redis.set(
+					`punishment_${id}`,
+					"ok",
+					"PXAT",
+					this.data.expires.valueOf()
+				  );
+			}
+			
+			break;
+		  case "Softban":
+			await api.guilds.banUser(
+			  this.data.guildId,
+			  this.data.userId,
+			  { delete_message_seconds: 604_800 },
+			  this.data.reason
+			);
+			await api.guilds.unbanUser(
+			  this.data.guildId,
+			  this.data.userId,
+			  `Case #${caseId} - Removing Softban`
+			);
+			break;
+		}
+	  } catch (error) {
+		return Result.err(error as Error);
+	  }
+  
+	  return Punishment.createAuditLogMessage(id, this.data.guildId);
+	}
+}  

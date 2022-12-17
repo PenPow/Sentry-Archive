@@ -38,6 +38,7 @@ export class PermissionsManager {
    * @param member - Member that we want to try and modify
    * @param guild - The guild that this member is a part of
    * @param me - Sentry's Guild Member
+   * @param moderator - The moderator trying to punish the user
    * @param roles - All the roles in the guild
    * @returns A promise resolving to a boolean, representing whether we can modify the user
    */
@@ -45,6 +46,7 @@ export class PermissionsManager {
     member: APIGuildMember,
     guild: APIGuild,
     me: APIGuildMember,
+	moderator: APIGuildMember,
     roles: RESTGetAPIGuildRolesResult
   ): Promise<boolean> {
     if (!member.user) return false;
@@ -86,12 +88,31 @@ export class PermissionsManager {
       );
     if (!memberHighest) return false;
 
-    const rolePositions = this.compareRolePositions(
+	if (
+		moderator.roles
+		  .map((val) => roles.find((role) => role.id === val))
+		  .filter((val) => val !== undefined).length === 0
+	  )
+		return true;
+	  const moderatorHighest = moderator.roles
+		.map((val) => roles.find((role) => role.id === val))
+		.filter((val) => val !== undefined)
+		.reduce((previous, current) =>
+		  this.compareRolePositions(current!, previous!) > 0 ? current : previous
+		);
+	  if (!moderatorHighest) return false;
+
+    const sentryMemberComparison = this.compareRolePositions(
       sentryHighest,
       memberHighest
     );
 
-    return rolePositions > 0;
+	const memberModeratorComparison = this.compareRolePositions(
+		moderatorHighest,
+		memberHighest
+	);
+
+    return sentryMemberComparison > 0 && memberModeratorComparison > 0;
   }
 
   /**
@@ -151,7 +172,7 @@ export class PermissionsManager {
         : await api.guilds.getMember(guild.id, moderator);
 
     return (
-      (await this.canManageUser(member, guild, me, roles)) &&
+      (await this.canManageUser(member, guild, me, moderatorObject, roles)) &&
       (await this.getUserPermissions(moderatorObject, guild, roles)).has(
         PermissionFlagsBits.BanMembers
       ) &&
@@ -193,7 +214,7 @@ export class PermissionsManager {
         : await api.guilds.getMember(guild.id, moderator);
 
     return (
-      (await this.canManageUser(member, guild, me, roles)) &&
+      (await this.canManageUser(member, guild, me, moderatorObject, roles)) &&
       (await this.getUserPermissions(moderatorObject, guild, roles)).has(
         PermissionFlagsBits.KickMembers
       ) &&
@@ -238,7 +259,7 @@ export class PermissionsManager {
       !(await this.getUserPermissions(member, guild, roles)).has(
         PermissionFlagsBits.Administrator
       ) &&
-      (await this.canManageUser(member, guild, me, roles)) &&
+      (await this.canManageUser(member, guild, me, moderatorObject, roles)) &&
       ((await this.getUserPermissions(moderatorObject, guild, roles)).has(
         PermissionFlagsBits.ModerateMembers
       ) ??

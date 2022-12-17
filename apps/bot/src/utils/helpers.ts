@@ -17,8 +17,7 @@ import {
   type Snowflake,
   type APIAttachment,
   type APIApplicationCommandInteractionDataSubcommandOption,
-  type APIApplicationCommandInteractionDataSubcommandGroupOption,
-  type MessageFlags,
+  type APIApplicationCommandInteractionDataSubcommandGroupOption, MessageFlags,
   ApplicationCommandOptionType,
   ApplicationCommandType,
   InteractionType,
@@ -259,7 +258,7 @@ export async function respond<
 
 				await api.rest.post(
 				Routes.interactionCallback(interaction.id, interaction.token),
-				{ body: { type: CommandResponseType.Defer, ...data } }
+				{ body: { type: CommandResponseType.Defer, data: { flags: (data as { flags?: MessageFlags }).flags ? MessageFlags.Ephemeral : undefined } } }
 				);
 			} else if (type === CommandResponseType.EditReply) {
 				if (!hasResponded(interaction))
