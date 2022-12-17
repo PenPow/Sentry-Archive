@@ -296,13 +296,13 @@ export abstract class Punishment {
       case "Softban":
         return 0xf77f54;
       case "Timeout":
-        return 0x1d1d21;
+        return 0x313138;
       case "Unban":
         return 0x5cff9d;
       case "Warn":
         return 0xffdc5c;
       default:
-        return 0x171d2e;
+        return 0x313138;
     }
   }
 
