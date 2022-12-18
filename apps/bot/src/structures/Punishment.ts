@@ -101,18 +101,21 @@ export abstract class Punishment {
    */
   public static async getAuditLogChannel(guild: Guild): Promise<Result<APIChannel, Error>> {
 	if (guild.modLogChannelId) {
-		return Result.fromAsync(
+		const channel = await Result.fromAsync(
 			async () => api.channels.get(guild.modLogChannelId!)
 		);
-	} else {
-		const channels: Result<RESTGetAPIGuildChannelsResult, Error> = await Result.fromAsync(async () => api.guilds.getChannels(guild.id));
 
-		if(channels.isErr()) return channels;
+		if(channel.isOk()) return channel;
+	}
+	
+	const channels: Result<RESTGetAPIGuildChannelsResult, Error> = await Result.fromAsync(async () => api.guilds.getChannels(guild.id));
 
-		const channel = channels.unwrap().filter(
-			(chnl) =>
-			  chnl.type === ChannelType.GuildText &&
-			  [
+	if(channels.isErr()) return channels;
+
+	const channel = channels.unwrap().filter(
+		(chnl) =>
+			chnl.type === ChannelType.GuildText &&
+			[
 				"audit-logs",
 				"sentry-logs",
 				"server-logs",
@@ -121,11 +124,10 @@ export abstract class Punishment {
 				"auditlogs",
 				"auditlog",
 				"logs",
-			  ].includes(chnl?.name ?? "")
-		  ).at(0);
+			].includes(chnl?.name ?? "")
+	).at(0);
 		  
-		return channel ? Result.ok(channel) : Result.err(new Error("No Channel Found"));
-	}
+	return channel ? Result.ok(channel) : Result.err(new Error("No Channel Found"));
   }
 
   /**

@@ -1,4 +1,4 @@
-import type { Snowflake } from "discord-api-types/v10";
+import { type APIGuild, GuildMFALevel, type Snowflake } from "discord-api-types/v10";
 import { nanoid } from 'nanoid';
 import { generateSecret, verifyToken } from "node-2fa";
 import { Prisma } from "../db.js";
@@ -43,8 +43,16 @@ export class TwoFactorAuthenticationManager {
 		return verifyToken(secret, token)?.delta === 0 || false;
 	}
 
-	public static async has2FAEnabled(id: Snowflake): Promise<boolean> { // TODO: Create setting to enforce 2FA for mod commands in server
+	public static async has2FAEnabled(id: Snowflake): Promise<boolean> {
 		return Boolean((await this.createUserObject(id)).twofactor_secret);
+	}
+
+	public static async doesUserRequire2FA(guild: APIGuild) {
+		const guildEntry = await Prisma.guild.upsert({ where: { id: guild.id }, update: {}, create: { id: guild.id } });
+		if(guildEntry.enforce2FA === true) return true;
+		else if(guildEntry.enforce2FA === false) return false;
+
+		return guild.mfa_level === GuildMFALevel.Elevated;
 	}
 
 	private static async createUserObject(id: Snowflake) {

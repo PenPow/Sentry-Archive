@@ -45,7 +45,23 @@ export default class TimeoutCommand extends SlashCommand.Handler<ApplicationComm
 	} satisfies { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
 
 	public override async execute({ interaction, respond, getArgs, api }: SlashCommand.RunContext<TimeoutCommand>): SlashCommand.Returnable {
-		if((await TwoFactorAuthenticationManager.has2FAEnabled(interaction.member!.user.id))) {
+		const guild = await api.guilds.get(interaction.guild_id!);
+		
+		const guild2FARequirement = await TwoFactorAuthenticationManager.doesUserRequire2FA(guild);
+		const userHas2FA = await TwoFactorAuthenticationManager.has2FAEnabled(interaction.member!.user.id);
+		
+		if(guild2FARequirement && !userHas2FA) {
+			const embed: APIEmbed = {
+				title: "🚨 Please Enable 2FA",
+				description: "This server requires two factor authentication through Sentry to be enabled before taking moderation actions, please enable this through Sentry and try again.",
+				color: 0xff5c5c,
+				timestamp: new Date(Date.now()).toISOString()
+			};
+
+			return void await respond(interaction, CommandResponseType.Reply, { embeds: [embed], flags: MessageFlags.Ephemeral });
+		}
+
+		if(userHas2FA) {
 			const id = nanoid().replaceAll('.', '-');
 			await respond(interaction, CommandResponseType.Modal, { custom_id: `${this.data.name}.twofactor.ask.${id}`, title: 'Verify 2FA', components: [{ type: ComponentType.ActionRow, components: [{ type: ComponentType.TextInput, style: TextInputStyle.Short, min_length: 6, max_length: 6, custom_id: `${this.data.name}.twofactor.ask.${id}.option.code`, placeholder: "XXXXXX", required: true, label: "Enter your Two Factor Authentication Code" }]}]});
 
