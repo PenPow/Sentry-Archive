@@ -55,7 +55,7 @@ export abstract class Punishment {
   public static async fetchUserPunishments(
     userId: Snowflake,
     guildId: Snowflake
-  ): Promise<(ExpiringPunishment | GenericPunishment)[]> {
+  ): Promise<PunishmentModel[]> {
     await this.createUserAndGuild(userId, guildId);
 
     const user = await Prisma.user.findUnique({
@@ -64,18 +64,7 @@ export abstract class Punishment {
     });
     if (!user) return [];
 
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    return user.punishments
-      .filter((punishment) => punishment.guildId === guildId)
-      .map((punishment) =>
-        punishment.type === "Timeout"
-		  // @ts-expect-error this works and im too lazy to fix the type error
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          ? new ExpiringPunishment(punishment)
-		  // @ts-expect-error this works and im too lazy to fix the type error 
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          : new GenericPunishment(punishment)
-      );
+    return user.punishments.filter((punishment) => punishment.guildId === guildId);
   }
 
   /**
