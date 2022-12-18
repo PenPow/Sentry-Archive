@@ -63,6 +63,8 @@ export default class CaseCommand extends SlashCommand.Handler<ApplicationCommand
 		
 		const [embed, components] = await Punishment.createEmbed(databaseEntry.id, channel.unwrap().id);
 
-		return void await respond(interaction, CommandResponseType.Reply, { embeds: [{ ...embed, timestamp: databaseEntry.updatedAt.toISOString() }], components: [components], flags: MessageFlags.Ephemeral });
+		const updatedEmbed = databaseEntry.flags.includes("Frozen") ? { ...embed, fields: [{ name: 'Flags', value: '🧊 Frozen'}] } satisfies APIEmbed : embed;
+
+		return void await respond(interaction, CommandResponseType.Reply, { embeds: [{ ...updatedEmbed, timestamp: databaseEntry.updatedAt.toISOString() }], components: [components], flags: MessageFlags.Ephemeral });
 	}
 }
