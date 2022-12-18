@@ -21,7 +21,7 @@ export default class CaseCommand extends SlashCommand.Handler<ApplicationCommand
 	} satisfies { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
 
 	public override async execute({ interaction, getArgs, respond }: SlashCommand.RunContext<CaseCommand>): SlashCommand.Returnable {
-		const caseId = await getArgs(interaction, "case_id");
+		const caseId = getArgs(interaction, "case_id");
 		const databaseEntry = await Punishment.fetch({ caseId, guildId: interaction.guild_id! });
 
 		if(!databaseEntry) {

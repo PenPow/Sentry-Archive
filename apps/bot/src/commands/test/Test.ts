@@ -34,7 +34,7 @@ export default class TestCommand extends SlashCommand.Handler<ApplicationCommand
     getArgs,
     interaction,
   }: SlashCommand.RunContext<TestCommand>): SlashCommand.Returnable {
-    const user = await getArgs(interaction, "user");
+    const user = getArgs(interaction, "user");
 
     // const punishment = new GenericPunishment({ })
 

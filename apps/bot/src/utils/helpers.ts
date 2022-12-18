@@ -72,10 +72,10 @@ export type ApplicationCommandFetchedOptionType<
  * @param name - Name of the option to fetch
  * @returns The resolved type from {@link ApplicationCommandFetchedOptionType}
  */
-export async function getArgs(
+export function getArgs(
   interaction: APIInteraction,
   name: string
-): Promise<ApplicationCommandFetchedOptionType<ApplicationCommandOptionType> | null> {
+): ApplicationCommandFetchedOptionType<ApplicationCommandOptionType> | null {
   if (
     interaction.type !== InteractionType.ApplicationCommand ||
     interaction.data.type !== ApplicationCommandType.ChatInput

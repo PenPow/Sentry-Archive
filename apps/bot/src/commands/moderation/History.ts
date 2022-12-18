@@ -21,7 +21,7 @@ export default class HistoryCommand extends SlashCommand.Handler<ApplicationComm
 	} satisfies { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
 
 	public override async execute({ interaction, getArgs, respond }: SlashCommand.RunContext<HistoryCommand>): SlashCommand.Returnable {
-		const user = await getArgs(interaction, "user") ?? interaction.member!.user;
+		const user = getArgs(interaction, "user") ?? interaction.member!.user;
 		const cases = await Punishment.fetchUserPunishments(user.id, interaction.guild_id!);
 
 		const description: `**${PunishmentType}** <t:${number}:R> by <@${Snowflake}>`[] = [];

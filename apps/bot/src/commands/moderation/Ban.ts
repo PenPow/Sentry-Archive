@@ -65,10 +65,10 @@ export default class BanCommand extends SlashCommand.Handler<ApplicationCommandT
 			const id = nanoid().replaceAll('.', '-');
 			await respond(interaction, CommandResponseType.Modal, { custom_id: `${this.data.name}.twofactor.ask.${id}`, title: 'Verify 2FA', components: [{ type: ComponentType.ActionRow, components: [{ type: ComponentType.TextInput, style: TextInputStyle.Short, min_length: 6, max_length: 6, custom_id: `${this.data.name}.twofactor.ask.${id}.option.code`, placeholder: "XXXXXX", required: true, label: "Enter your Two Factor Authentication Code" }]}]});
 
-			inProgress.set(id, { user: await getArgs(interaction, "user"), reason: await getArgs(interaction, "reason"), expiration: await getArgs(interaction, "expiration") ?? undefined, references: await getArgs(interaction, "case_reference") ?? undefined });
+			inProgress.set(id, { user: getArgs(interaction, "user"), reason: getArgs(interaction, "reason"), expiration: getArgs(interaction, "expiration") ?? undefined, references: getArgs(interaction, "case_reference") ?? undefined });
 		} else {
 			await respond(interaction, CommandResponseType.Defer, { flags: MessageFlags.Ephemeral });
-			await this.createPunishment({ interaction, api, options: { reason: await getArgs(interaction, "reason"), user: await getArgs(interaction, "user"), expiration: await getArgs(interaction, "expiration") ?? undefined, references: await getArgs(interaction, "case_reference") ?? undefined}, respond });
+			await this.createPunishment({ interaction, api, options: { reason: getArgs(interaction, "reason"), user: getArgs(interaction, "user"), expiration: getArgs(interaction, "expiration") ?? undefined, references: getArgs(interaction, "case_reference") ?? undefined}, respond });
 		}
 	}
 

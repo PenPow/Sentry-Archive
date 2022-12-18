@@ -54,9 +54,9 @@ export default class EditCommand extends SlashCommand.Handler<ApplicationCommand
 			const id = nanoid().replaceAll('.', '-');
 			await respond(interaction, CommandResponseType.Modal, { custom_id: `${this.data.name}.twofactor.ask.${id}`, title: 'Verify 2FA', components: [{ type: ComponentType.ActionRow, components: [{ type: ComponentType.TextInput, style: TextInputStyle.Short, min_length: 6, max_length: 6, custom_id: `${this.data.name}.twofactor.ask.${id}.option.code`, placeholder: "XXXXXX", required: true, label: "Enter your Two Factor Authentication Code" }]}]});
 
-			inProgress.set(id, { case_id: await getArgs(interaction, "case_id"), reason: await getArgs(interaction, "reason") });
+			inProgress.set(id, { case_id: getArgs(interaction, "case_id"), reason: getArgs(interaction, "reason") });
 		} else {
-			await this.editCase({ interaction, api, options: { case_id: await getArgs(interaction, "case_id"), reason: await getArgs(interaction, "reason") }, respond });
+			await this.editCase({ interaction, api, options: { case_id: getArgs(interaction, "case_id"), reason: getArgs(interaction, "reason") }, respond });
 		}
 	}
 

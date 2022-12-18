@@ -130,6 +130,13 @@ export abstract class Handler<T extends ApplicationCommandType> {
 }
 
 /**
+ * Utility type to represent the return type of a command execution
+ * 
+ * @public
+ */
+export type Returnable = Promise<RESTPostAPIWebhookWithTokenJSONBody | void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
+
+/**
  * The context in which the command executes
  * 
  * @public
@@ -140,13 +147,12 @@ export type RunContext<Command extends Handler<ApplicationCommandType>> = {
   getArgs<Name extends keyof Command["options"]>(
     interaction: CommandInteractionsUnion,
     argument: Name
-  ): Awaitable<
+  ): 
     Command["options"][Name]["required"] extends true
       ? ApplicationCommandFetchedOptionType<Command["options"][Name]["type"]>
       : ApplicationCommandFetchedOptionType<
           Command["options"][Name]["type"]
-        > | null
-  >;
+        > | null;
   interaction: Command["type"] extends ApplicationCommandType.ChatInput
     ? APIChatInputApplicationCommandInteraction
     : Command["type"] extends ApplicationCommandType.Message
@@ -162,16 +168,3 @@ export type RunContext<Command extends Handler<ApplicationCommandType>> = {
     data: DataType<Type>
   ): Promise<Result<true, Error>>;
 };
-
-/**
- * Utility type to represent something that could require awaiting
- * 
- * @internal
- */
-type Awaitable<T> = Promise<T> | T;
-/**
- * Utility type to represent the return type of a command execution
- * 
- * @public
- */
-export type Returnable = Promise<RESTPostAPIWebhookWithTokenJSONBody | void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
