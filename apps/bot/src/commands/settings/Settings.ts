@@ -10,7 +10,8 @@ import { CommandResponseType, type DataType, type ValidDataTypes } from "../../u
 type LoggingOptions = { channelId: Snowflake };
 type TwoFactorOptions = { enforce: boolean };
 type FreezeOptions = { freeze: boolean };
-const inProgress: Map<string, LoggingOptions | TwoFactorOptions | FreezeOptions> = new Map();
+type ScanningOptions = { av?: boolean, phishertools?: boolean };
+const inProgress: Map<string, LoggingOptions | TwoFactorOptions | FreezeOptions | ScanningOptions> = new Map();
 
 export default class SettingsCommand extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
 	public override data = {
@@ -36,7 +37,7 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 		} as Omit<APIApplicationCommandSubcommandOption, "name">,
 		"2fa": {
 			type: ApplicationCommandOptionType.Subcommand,
-			description: "Require that moderators have two factor authentication enabled.",
+			description: "Adjust settings regarding 2FA",
 			options: [
 				{
 					name: "enforce-for-moderation",
@@ -48,13 +49,31 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 		} as Omit<APIApplicationCommandSubcommandOption, "name">,
 		"punishments": {
 			type: ApplicationCommandOptionType.Subcommand,
-			description: "Automatically freeze punishments after they are made",
+			description: "Adjust settings regarding punishments",
 			options: [
 				{
 					name: "auto-freeze",
 					type: ApplicationCommandOptionType.Boolean,
 					description: "Should Sentry automatically freeze punishments?",
 					required: true
+				}
+			]
+		} as Omit<APIApplicationCommandSubcommandOption, "name">,
+		"scanning": {
+			type: ApplicationCommandOptionType.Subcommand,
+			description: "Adjust settings related to the anti virus and our phishing domains database",
+			options: [
+				{
+					name: "enable-av",
+					type: ApplicationCommandOptionType.Boolean,
+					description: "Should Sentry scan attachments with our anti-virus",
+					required: false
+				},
+				{
+					name: "enable-phishertools",
+					type: ApplicationCommandOptionType.Boolean,
+					description: "Should Sentry scan domains with our phishing domains database.",
+					required: false
 				}
 			]
 		} as Omit<APIApplicationCommandSubcommandOption, "name">
@@ -148,6 +167,34 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 			} else {
 				await this.freezePunishments({ interaction, options: { freeze }, respond });
 			}
+		} else if(subcommand.name === "scanning") {
+			const av = subcommand.options!.find((option) => option.name === "enable-av")!.value as boolean | undefined;
+			const phishertools = subcommand.options!.find((option) => option.name === "enable-phishertools")!.value as boolean | undefined;
+
+			const guild = await api.guilds.get(interaction.guild_id!);
+		
+			const guild2FARequirement = await TwoFactorAuthenticationManager.doesUserRequire2FA(guild);
+			const userHas2FA = await TwoFactorAuthenticationManager.has2FAEnabled(interaction.member!.user.id);
+			
+			if(guild2FARequirement && !userHas2FA) {
+				const embed: APIEmbed = {
+					title: "🚨 Please Enable 2FA",
+					description: "This server requires two factor authentication through Sentry to be enabled before taking moderation actions, please enable this through Sentry and try again.",
+					color: 0xff5c5c,
+					timestamp: new Date(Date.now()).toISOString()
+				};
+	
+				return void await respond(interaction, CommandResponseType.Reply, { embeds: [embed], flags: MessageFlags.Ephemeral });
+			}
+	
+			if(userHas2FA) {
+				const id = nanoid().replaceAll('.', '-');
+				await respond(interaction, CommandResponseType.Modal, { custom_id: `${this.data.name}.twofactor.ask.${id}`, title: 'Verify 2FA', components: [{ type: ComponentType.ActionRow, components: [{ type: ComponentType.TextInput, style: TextInputStyle.Short, min_length: 6, max_length: 6, custom_id: `${this.data.name}.twofactor.ask.${id}.option.code`, placeholder: "XXXXXX", required: true, label: "Enter your Two Factor Authentication Code" }]}]});
+
+				inProgress.set(id, { av, phishertools });
+			} else {
+				await this.modifyScanning({ interaction, options: { av, phishertools }, respond });
+			}
 		}
 	}
 
@@ -172,6 +219,7 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 		if("channelId" in data) await this.editLogging({ interaction, options: data!, respond });
 		else if("enforce" in data) await this.edit2FA({ interaction, options: data!, respond });
 		else if("freeze" in data) await this.freezePunishments({ interaction, options: data!, respond });
+		else if("av" in data) await this.modifyScanning({ interaction, options: data!, respond });
 	}
 
 	private async editLogging({ interaction, options, respond }: { interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, options: LoggingOptions, respond(interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, responseType: ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>, data: DataType<ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>>): Promise<Result<true, Error>>}) {
@@ -207,6 +255,24 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 		await Punishment.createUserAndGuild(interaction.member!.user.id, interaction.guild_id!);
 
 		await Prisma.guild.update({ where: { id: interaction.guild_id! }, data: { freezePunishments: options.freeze }});
+
+		const embed: APIEmbed = {
+			title: "Updated Settings",
+			color: 0x5cff9d,
+			timestamp: new Date(Date.now()).toISOString()
+		};
+
+		return void await respond(interaction, CommandResponseType.Reply, { flags: MessageFlags.Ephemeral, embeds: [embed] });
+	}
+
+	private async modifyScanning({ interaction, options, respond }: { interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, options: ScanningOptions, respond(interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, responseType: ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>, data: DataType<ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>>): Promise<Result<true, Error>>}) {
+		await Punishment.createUserAndGuild(interaction.member!.user.id, interaction.guild_id!);
+
+		const settings: { av?: boolean, phishertools?: boolean } = {}
+		if(options.av === true || options.av === false) settings.av = options.av
+		else if(options.phishertools === true || options.phishertools === false) settings.phishertools = options.av
+
+		await Prisma.guild.update({ where: { id: interaction.guild_id! }, data: settings });
 
 		const embed: APIEmbed = {
 			title: "Updated Settings",

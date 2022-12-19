@@ -7,13 +7,26 @@ import { AVBroker } from "../brokers.js";
 import { config } from "../config.js";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type { EventType, EventListener } from "../structures/Event.js";
-import { GenericPunishment } from "../structures/Punishment.js";
+import { GenericPunishment, Punishment } from "../structures/Punishment.js";
+import { Prisma } from "../db.js";
 
 export default {
   async run({ data, logger, api }) {
     if (data.author.bot || data.author.system) return;
 
-    if (data.attachments.length > 0) {
+	const guild = (
+		(await api.channels.get(
+		  data.channel_id
+		)) as APIGuildTextChannel<ChannelType.GuildText>
+	  ).guild_id;
+	
+	if (!guild) return;
+
+	await Punishment.createUserAndGuild(data.author.id, guild);
+	const settings = await Prisma.guild.findUnique({ where: { id: guild }});
+	if(!settings) return;
+
+    if (settings.enableAV && data.attachments.length > 0) {
       const results: Promise<IClamAVResponse>[] = [];
       for (const attachment of data.attachments) {
         logger.debug(`Scanning Attachment ${attachment.id}`);
@@ -52,13 +65,6 @@ export default {
       }
 
       if (infected.length > 0) {
-        const guild = (
-          (await api.channels.get(
-            data.channel_id
-          )) as APIGuildTextChannel<ChannelType.GuildText>
-        ).guild_id;
-        if (!guild) return;
-
         const punishment = await new GenericPunishment({
           guildId: guild,
           moderatorId: Buffer.from(
@@ -77,6 +83,8 @@ export default {
           );
       }
     }
+
+	if(!settings.enablePhishertools) return;
 
     const URL_REGEX =
 	  // eslint-disable-next-line no-useless-escape, prefer-named-capture-group, unicorn/better-regex
@@ -115,13 +123,6 @@ export default {
       }
 
       if (res.data.isMalicious) {
-        const channel = (await api.channels.get(
-          data.channel_id
-        )) as APIGuildTextChannel<ChannelType.GuildText>;
-        const guild = channel.guild_id;
-
-        if (!guild) return;
-
         const punishment = await new GenericPunishment({
           guildId: guild,
           moderatorId: Buffer.from(
