@@ -297,6 +297,20 @@ export abstract class Punishment {
     }
   }
 
+  protected async freezeIfGuildEnabled(id: number): Promise<void> {
+	const data = await Punishment.fetch({ id });
+	if(!data) return;
+
+	await Punishment.createUserAndGuild(data.userId, data.guildId);
+
+	const guild = await Prisma.guild.findUnique({ where: { id: data.guildId } });
+	if(!guild) return;
+
+	if(!guild.freezePunishments) return;
+
+	await Prisma.punishment.update({ where: { id }, data: { flags: { push: 'Frozen' }}});
+  } 
+
   /**
    * Utility function to create the user and guild database entries for the database relations
    * 
@@ -502,6 +516,9 @@ export class UnbanPunishment extends Punishment {
 	  const { id } = await Prisma.punishment.create({
 		data: { ...this.data, caseId, type: this.data.type },
 	  });
+
+	  await this.freezeIfGuildEnabled(id);
+
 	  return Punishment.createAuditLogMessage(id, this.data.guildId);
 	}
   }
@@ -597,6 +614,8 @@ export class ExpiringPunishment extends Punishment {
       );
     }
 
+	await this.freezeIfGuildEnabled(id);
+
     return Punishment.createAuditLogMessage(id, this.data.guildId);
   }
 }
@@ -685,6 +704,8 @@ export class NotInGuildPunishment extends Punishment {
 	  } catch (error) {
 		return Result.err(error as Error);
 	  }
+
+	  await this.freezeIfGuildEnabled(id);
   
 	  return Punishment.createAuditLogMessage(id, this.data.guildId);
 	}

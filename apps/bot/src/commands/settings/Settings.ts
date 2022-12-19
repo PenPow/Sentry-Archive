@@ -9,7 +9,8 @@ import { CommandResponseType, type DataType, type ValidDataTypes } from "../../u
 
 type LoggingOptions = { channelId: Snowflake };
 type TwoFactorOptions = { enforce: boolean };
-const inProgress: Map<string, LoggingOptions | TwoFactorOptions> = new Map();
+type FreezeOptions = { freeze: boolean };
+const inProgress: Map<string, LoggingOptions | TwoFactorOptions | FreezeOptions> = new Map();
 
 export default class SettingsCommand extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
 	public override data = {
@@ -41,6 +42,18 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 					name: "enforce-for-moderation",
 					type: ApplicationCommandOptionType.Boolean,
 					description: "Should Sentry enforce 2FA for moderation",
+					required: true
+				}
+			]
+		} as Omit<APIApplicationCommandSubcommandOption, "name">,
+		"punishments": {
+			type: ApplicationCommandOptionType.Subcommand,
+			description: "Automatically freeze punishments after they are made",
+			options: [
+				{
+					name: "auto-freeze",
+					type: ApplicationCommandOptionType.Boolean,
+					description: "Should Sentry automatically freeze punishments?",
 					required: true
 				}
 			]
@@ -108,6 +121,33 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 			} else {
 				await this.edit2FA({ interaction, options: { enforce }, respond });
 			}
+		} else if(subcommand.name === "punishments") {
+			const freeze = subcommand.options!.find((option) => option.name === "auto-freeze")!.value as boolean;
+
+			const guild = await api.guilds.get(interaction.guild_id!);
+		
+			const guild2FARequirement = await TwoFactorAuthenticationManager.doesUserRequire2FA(guild);
+			const userHas2FA = await TwoFactorAuthenticationManager.has2FAEnabled(interaction.member!.user.id);
+			
+			if(guild2FARequirement && !userHas2FA) {
+				const embed: APIEmbed = {
+					title: "🚨 Please Enable 2FA",
+					description: "This server requires two factor authentication through Sentry to be enabled before taking moderation actions, please enable this through Sentry and try again.",
+					color: 0xff5c5c,
+					timestamp: new Date(Date.now()).toISOString()
+				};
+	
+				return void await respond(interaction, CommandResponseType.Reply, { embeds: [embed], flags: MessageFlags.Ephemeral });
+			}
+	
+			if(userHas2FA) {
+				const id = nanoid().replaceAll('.', '-');
+				await respond(interaction, CommandResponseType.Modal, { custom_id: `${this.data.name}.twofactor.ask.${id}`, title: 'Verify 2FA', components: [{ type: ComponentType.ActionRow, components: [{ type: ComponentType.TextInput, style: TextInputStyle.Short, min_length: 6, max_length: 6, custom_id: `${this.data.name}.twofactor.ask.${id}.option.code`, placeholder: "XXXXXX", required: true, label: "Enter your Two Factor Authentication Code" }]}]});
+
+				inProgress.set(id, { freeze });
+			} else {
+				await this.freezePunishments({ interaction, options: { freeze }, respond });
+			}
 		}
 	}
 
@@ -131,6 +171,7 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 
 		if("channelId" in data) await this.editLogging({ interaction, options: data!, respond });
 		else if("enforce" in data) await this.edit2FA({ interaction, options: data!, respond });
+		else if("freeze" in data) await this.freezePunishments({ interaction, options: data!, respond });
 	}
 
 	private async editLogging({ interaction, options, respond }: { interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, options: LoggingOptions, respond(interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, responseType: ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>, data: DataType<ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>>): Promise<Result<true, Error>>}) {
@@ -152,6 +193,20 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 		await Punishment.createUserAndGuild(interaction.member!.user.id, interaction.guild_id!);
 
 		await Prisma.guild.update({ where: { id: interaction.guild_id! }, data: { enforce2FA: options.enforce }});
+
+		const embed: APIEmbed = {
+			title: "Updated Settings",
+			color: 0x5cff9d,
+			timestamp: new Date(Date.now()).toISOString()
+		};
+
+		return void await respond(interaction, CommandResponseType.Reply, { flags: MessageFlags.Ephemeral, embeds: [embed] });
+	}
+
+	private async freezePunishments({ interaction, options, respond }: { interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, options: FreezeOptions, respond(interaction: APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction, responseType: ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>, data: DataType<ValidDataTypes<APIChatInputApplicationCommandInteraction | APIModalSubmitInteraction>>): Promise<Result<true, Error>>}) {
+		await Punishment.createUserAndGuild(interaction.member!.user.id, interaction.guild_id!);
+
+		await Prisma.guild.update({ where: { id: interaction.guild_id! }, data: { freezePunishments: options.freeze }});
 
 		const embed: APIEmbed = {
 			title: "Updated Settings",

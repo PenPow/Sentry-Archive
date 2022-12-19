@@ -46,6 +46,7 @@ model Guild {
 	punishments Punishment[]
 	modLogChannelId String? @unique
 	enforce2FA Boolean?
+	freezePunishments Boolean?
 }
 
 model User {
