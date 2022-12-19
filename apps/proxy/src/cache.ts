@@ -17,7 +17,7 @@ class Cache<T extends Document> {
 	protected readonly TTL: number;
 
 	public constructor() {
-		this.TTL = 60_000;
+		this.TTL = 30_000;
 
 		this.transformer = {
 			toBuffer(data) {
