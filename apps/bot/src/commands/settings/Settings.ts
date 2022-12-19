@@ -1,5 +1,5 @@
 import type { Result } from "@sapphire/result";
-import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody, type APIApplicationCommandChannelOption, ChannelType, type APIEmbed, MessageFlags, type APIChatInputApplicationCommandInteraction, type APIModalSubmitInteraction, type Snowflake, ComponentType, TextInputStyle, type APIApplicationCommandSubcommandOption, type APIApplicationCommandInteractionDataSubcommandOption } from "discord-api-types/v10";
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody, type APIApplicationCommandChannelOption, ChannelType, type APIEmbed, MessageFlags, type APIChatInputApplicationCommandInteraction, type APIModalSubmitInteraction, type Snowflake, ComponentType, TextInputStyle, type APIApplicationCommandSubcommandOption, type APIApplicationCommandInteractionDataSubcommandOption, PermissionFlagsBits } from "discord-api-types/v10";
 import { nanoid } from "nanoid";
 import { Prisma } from "../../db.js";
 import { TwoFactorAuthenticationManager } from "../../structures/2FAManager.js";
@@ -18,7 +18,8 @@ export default class SettingsCommand extends SlashCommand.Handler<ApplicationCom
 		name: 'settings',
 		description: 'Modify your server settings',
 		type: ApplicationCommandType.ChatInput,
-		dm_permission: false
+		dm_permission: false,
+		default_member_permissions: PermissionFlagsBits.Administrator.toString(10), 
 	} satisfies Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "options"> & { type: ApplicationCommandType.ChatInput; };
 
 	public override options = {

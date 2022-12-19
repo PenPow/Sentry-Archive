@@ -47,6 +47,8 @@ model Guild {
 	modLogChannelId String? @unique
 	enforce2FA Boolean?
 	freezePunishments Boolean?
+	enableAV Boolean?
+	enablePhishertools Boolean?
 }
 
 model User {
