@@ -297,6 +297,12 @@ export abstract class Punishment {
     }
   }
 
+  /**
+   * Internal helper function to automatically freeze a case if its enabled in guild settings
+   * 
+   * @internal
+   * @param id - The database id of the entry
+   */
   protected async freezeIfGuildEnabled(id: number): Promise<void> {
 	const data = await Punishment.fetch({ id });
 	if(!data) return;
@@ -461,6 +467,9 @@ export class GenericPunishment extends Punishment {
     const { id } = await Prisma.punishment.create({
       data: { ...this.data, caseId, type: this.data.type },
     });
+
+	await this.freezeIfGuildEnabled(id);
+
     return Punishment.createAuditLogMessage(id, this.data.guildId);
   }
 }
