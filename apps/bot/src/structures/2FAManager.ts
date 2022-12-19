@@ -86,7 +86,6 @@ export class TwoFactorAuthenticationManager {
 	public static async doesUserRequire2FA(guild: APIGuild) {
 		const guildEntry = await Prisma.guild.upsert({ where: { id: guild.id }, update: {}, create: { id: guild.id } });
 		if(guildEntry.enforce2FA === true) return true;
-		else if(guildEntry.enforce2FA === false) return false;
 
 		return guild.mfa_level === GuildMFALevel.Elevated;
 	}
