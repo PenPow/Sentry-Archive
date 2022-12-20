@@ -38,6 +38,9 @@ export async function loadCommands() {
 
     // @ts-expect-error this works fine its just because SlashCommand is abstract to prevent instantiation, this is guaranteed to be a sub-class
     const Command: Handler<ApplicationCommandType> = new commandExport();
+
+	if(Command.data.name === "test") continue;
+	
     Commands.set(Command.data.name, Command);
   }
 }

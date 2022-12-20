@@ -1,2 +1,9 @@
 node_modules/
-.turbo
+.turbo/
+out/
+dist/
+templates/
+.vscode/
+.github/
+.git/
+.devcontainer/
