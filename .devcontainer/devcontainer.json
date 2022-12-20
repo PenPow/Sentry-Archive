@@ -22,7 +22,9 @@
 				"mikestead.dotenv",
 				"dbaeumer.vscode-eslint",
 				"Prisma.prisma",
-				"Gruntfuggly.todo-tree"
+				"Gruntfuggly.todo-tree",
+				"bradlc.vscode-tailwindcss",
+				"unifiedjs.vscode-mdx"
 			]
 		}
 	}

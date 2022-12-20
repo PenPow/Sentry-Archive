@@ -1,0 +1,30 @@
+{
+	"sentry": {
+		"type": "separator",
+		"title": "Sentry"
+	},
+	"index": "Getting Started",
+	"releases": "Release Notes",
+	"guides": "Guides",
+	"reference": "Command Reference",
+	"troubleshooting": "Troubleshooting Issues",
+	"phishertools-section": {
+		"type": "separator",
+		"title": "Phishertools Developer Section"
+	},
+	"phishertools": "Phishertools",
+	"developer-corner": {
+		"type": "separator",
+		"title": "Developer Corner"
+	},
+	"contributing": "Contribution Guide",
+	"code_of_conduct": "Code of Conduct",
+	"self-host": "How to Self Host Sentry",
+	"policy": {
+		"type": "separator",
+		"title": "Policies"
+	},
+	"tos": "Terms of Service",
+	"privacy": "Privacy Policy",
+	"security": "Security Disclousure"
+  }

@@ -1,0 +1,12 @@
+{
+	"ban": "Ban",
+	"softban": "Softban",
+	"kick": "Kick",
+	"timeout": "Timeout",
+	"warn": "Warn",
+	"unban": "Unban",
+	"case": "Case",
+	"Edit": "Edit",
+	"freeze": "Freeze",
+	"history": "History"
+}

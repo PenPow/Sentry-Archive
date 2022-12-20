@@ -1,0 +1,37 @@
+# Timeout
+
+Mute a user and prevent all forms of interaction.
+
+By applying a timeout to a user, they can no longer:
+
+- Send Messages
+- React to Messages
+- Join Voice Channels
+
+## Syntax
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info" emoji="ℹ️">
+  `/timeout [user] [reason] [duration] (case_reference)`
+</Callout>
+
+### Options
+
+| Option         | Type                           | Required | Description                                                    |
+|----------------|--------------------------------|----------|----------------------------------------------------------------|
+| User           | User                           | True     | The user that is to recieve the punishment                     |
+| Reason         | String                         | True     | The reason why they are being punished                         |
+| Duration       | String (in format of Nm/h/d/w) | True     | How long (up to 28 days) to time the user out for              |
+| Case Reference | Number                         | False    | Optionally a reference to a case number to link this case with |
+
+## Permissions
+
+This command requires the `Moderate Members` permission. 
+
+Sentry can apply a punishment to any user who
+
+- Is beneath Sentry on the role hierarchy
+- Is beneath the moderator on the role hierarchy
+- Has not got the `Administrator` permission
+- Is not the owner of the server

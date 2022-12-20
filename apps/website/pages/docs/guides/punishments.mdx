@@ -1,0 +1,72 @@
+# How Punishments Work
+
+Sentry has a lot of options regarding punishments, this guide showcases how to master making punishments with Sentry.
+
+## Freezing a Punishment
+
+Sentry has the option to amend punishments after they have been enacted. To improve accountability in a server, an administrator can either manually freeze a punishment, or can enable the settings to freeze all cases immediately.
+
+When you 🧊 a punishment, its details freeze in time, and the case is unable to be edited with the `/edit` command.
+
+import {
+  DiscordActionRow,
+  DiscordAttachments,
+  DiscordButton,
+  DiscordEmbed,
+  DiscordEmbedDescription,
+  DiscordMention,
+  DiscordMessage,
+  DiscordMessages,
+  DiscordSystemMessage,
+  DiscordTime
+} from "@skyra/discord-components-react";
+
+<DiscordMessages>
+        <DiscordMessage author="Sentry" avatar="/logo.jpg">
+          <DiscordEmbed
+            slot="embeds"
+            authorImage="/logo.jpg"
+            authorName="PenPow#7067 (207198455301537793)"
+            authorUrl="https://sentry.penpow.dev"
+            color="#ff5c5c"
+            embedTitle=""
+          >
+            <DiscordEmbedDescription slot="description">
+              <b>Member</b>: <DiscordMention>typescript</DiscordMention> (1053668982651109386)
+			  <b>Moderator</b>: <DiscordMention>PenPow</DiscordMention> (207198455301537793)
+			  <b>Action</b>: Ban
+			  <b>Reason</b>: Frozen Punishment Test!
+			  <b>Expiration</b>: <DiscordTime>In a month</DiscordTime>
+			  <br/>
+			  <b>Flags</b>
+			  🧊 Frozen
+            </DiscordEmbedDescription>
+          </DiscordEmbed>
+		  <DiscordAttachments slot="components">
+            <DiscordActionRow>
+			  <p>&nbsp;</p>
+              <DiscordButton type="primary" disabled>Case #40</DiscordButton>
+            </DiscordActionRow>
+          </DiscordAttachments>
+        </DiscordMessage>
+</DiscordMessages>
+
+To freeze a punishment, you require `Administrator` permissions. If you are an administrator, run the `/freeze` command with the case id to freeze it.
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="warning" emoji="⚠️">This is a one way operation, once a case is frozen, it cannot be unfrozen.</Callout>
+
+### Automatically Freezing Punishments
+
+If you want to apply this setting to all future punishments, you can enable it with the `/settings punishments` command. Read the documentation for this command [here](/docs/settings/punishments).
+
+This operation does not apply retroactively, and all punishments frozen while it is active cannot be unfrozen. However, once the feature is disabled, no further cases will be automatically frozen.
+
+## Using Case References
+
+Case References are an amazing way to improve the ease of navigation between linked cases.
+
+For example, when unbanning somebody, you can reference their original punishment's case-id, so that it shows as a reference. Then, if somebody wants to look at the punishment at a later date, it becomes easier to understand what punishment this was referring to.
+
+Its simple to add a reference to a case, simply add the reference option, and pass in the case-id. Sentry will then link your case to that old case.

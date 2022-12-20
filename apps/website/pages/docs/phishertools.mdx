@@ -1,0 +1,17 @@
+# Phishertools
+
+Phishertools is our solution to scam domains. We use 13 different sources to track millions of domains.
+
+## Usage with Sentry
+
+Domain Scanning with Phishertools is enabled by default with the public version of Sentry. You can read more about configuring it over in our [dedicated guide](/docs/guides/phishertools).
+
+## Usage with Sentry Self-Hosted
+
+Phishertools is configured out of the box when self-hosting a Sentry instance. To disable it, simply stop the phishertools container and no more domains will be scanned.
+
+## Usage with Other Bots
+
+Phishertools is not currently available as a simplified API but we are currently looking into the prospect of a unified API to scan domains. In the meantime, you can view the [source code]("https://github.com/PenPow/Sentry/tree/main/apps/phishertools") to create your own instance.
+
+We cannot officially support the usage of Phishertools with other bots, and we recommend you review the sources for their licenses.

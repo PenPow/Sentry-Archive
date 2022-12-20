@@ -1,3 +1,6 @@
 {
-	"todo-tree.tree.showBadges": true
+	"todo-tree.tree.showBadges": true,
+	"files.associations": {
+		"mdx": "mdx"
+	}
 }

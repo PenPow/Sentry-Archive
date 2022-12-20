@@ -1,0 +1,15 @@
+{
+	"index": {
+	  "title": "Sentry",
+	  "type": "page"
+	},
+	"_error": {
+		"title": "Error",
+		"type": "page",
+		"display": "hidden"
+	},
+	"docs": {
+	  "title": "Documentation",
+	  "type": "page"
+	}
+  }

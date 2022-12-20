@@ -1,0 +1,54 @@
+# Responsible Security Vulnerability Disclosure Policy
+
+*Last Updated: 20/12/2022*
+
+While we try our best to provide an error free experience, through open source development and rigorous testing, we cannot guarantee that the Sentry experience is free from issues.
+
+If you find a serious vulnerability in Sentry, please  **do not** open an issue on Github. Please follow these guidelines so that we can mitigate the issue quickly and securely.
+
+We ask that any vulnerabilities you report are in compliance with this policy. We value the fact that you have taken the time and effort to report this vulnerability, however we do not offer monetary rewards for disclosure.
+
+## Reporting
+
+If you find a [valid](/docs/security#what-is-a-valid-vulnerability) vulnerability, please [email](mailto:josh@penpow.dev?subject=%5BSecurity%20Disclosure%5D%20%3CShort%20Description%20of%20Issue%20Here%3E&body=Please%20include%20the%20following%20information%20in%20your%20report%3A%0D%0A%0D%0A-%20What%20sort%20of%20vulnerability%20have%20you%20found%0D%0A-%20That%20you%20have%20read%20the%20Responsible%20Security%20Vulnerability%20Disclosure%20Policy%20and%20that%20your%20issue%20is%20in%20compliance%0D%0A-%20Clear%20steps%20to%20reproduce%20the%20issue%0D%0A%0D%0AWe%20recommend%20following%20Stack%20Overflow's%20advice%20for%20making%20the%20steps%20to%20reproduce%3A%0D%0A%0D%0A*%20Make%20it%20clear%20and%20simple%0D%0A*%20Ensure%20it%20works%0D%0A%0D%0AEnsure%20your%20PoC%20is%20not%20destructive%2C%20nor%20can%20cause%20damage%20to%20our%20servers.) us. We do not accept disclosure through our github or discord channels.
+
+## What Happens Next?
+
+We will respond to your email within 5 working days. In that follow up, we will confirm whether we have validated your report, and we will keep you informed with out progress.
+
+We will notify you once we have remediated the issue, and we may ask for you to confirm that the issue is fixed.
+
+Once the issue has been resolved, we are happy to disclose your report. Please contact us before publicly disclosing it, as we would like to coordinate the public release with our own announcement if we feel we need to make one.
+
+## Guidance
+
+We ask that all disclosures follow the following guidance, to ensure that your vulnerability is fixed as soon as possible, without it causing severe damage to our infrastructure.
+
+### What is a Valid Vulnerability?
+
+We ask that all vulnerabilities reported are "in scope".
+
+We consider a vulnerability to be out of scope when it falls under the following issues:
+
+- Regarding this website
+- An attack using physical access to the user's device
+- An attack using MITM
+- Brute force attacks
+- Denial of Service attacks
+- Social Engineering or Phishing Attacks targeting Sentry Users
+
+If your issue isn't listed there, then please reach out, as it is most likely in scope!
+
+### Expectations
+
+We expect that while testing, you follow these expectations. These ensure that your bug hunting affects the fewest number of people.
+
+- Test using a private server, that only you and your alt accounts are on
+- Your hunting should only affect accounts you own. Your bug-hunting should not affect access to Sentry for other users.
+- You should not access unnecessary amounts of data. If your vulnerability causes a data breach, you must not continue further once you have access to user data. You must stop and report it to Sentry immediately.
+- You must not modify any data. Like with the issue above, if you can access user data, you must stop and report it immediately.
+- You must not attempt a Denial of Service Attack
+- You must not demand finanical compensation
+- You shouldnt disclose this vulnerability publicly until the issue has been resolved by Sentry
+
+You must delete any data retrieved immediately after the issue is resolved.

@@ -1,0 +1,208 @@
+# Contribution Guide
+
+We are excited that you are wanting to contribute to Sentry. We actively encourage contribution and hope that you continue to contribute.
+
+By following these guidelines, you help us manage and maintain the development of Sentry, while keeping contribution as simple as possible.
+
+We accept all forms of contribution, from documentation, to sub-package development. If you can help improve Sentry, we will happily accept your improvement.
+
+## Our Expectations
+
+If you spot an issue or wish to implement a new feature, please open an issue first. This allows us to internally track changes, and allows the core team to provide feedback so that time is not wasted developing features that we feel do not fit the essence of Sentry.
+
+When making a pull request, ensure your code meets our style guide, and use our codegen to build new features, as having a standardised template helps improve developer productivity.
+
+Limit the scope of your pull requests, if you have multiple features or bug fixes, please open them independently so that we can better track our resources.
+
+## Your First Contribution
+
+Check out any issues tagged with "help wanted" as these issues are always a great start.
+
+## Getting Started with Sentry
+
+Sentry is not the easiest of projects to develop. Start by installing the following software:
+
+- Docker
+- Git
+- Ngrok
+
+We use [devcontainers](https://code.visualstudio.com/docs/devcontainers/containers) to standardise our development environment here. Its recommended that you use Visual Studio Code with the Remote Development extension enabled, but experienced contributors can use other IDEs.
+
+<div className="steps-container">
+
+### Configuration Setup
+
+Begin by preparing your configuration files. Rename the `config.example.toml` to `config.toml`.
+
+```toml copy
+[discord]
+PUBLIC_KEY = ""
+TOKEN = ""
+
+[interval]
+DEV_API_KEY = ""
+PRODUCTION_API_KEY = ""
+
+[proxy]
+PORT = 3000
+API_VERSION = 10
+
+[clamav]
+MIRROR = "https://mirror.penpow.dev"
+
+[sentry]
+DATABASE_URL = "postgresql://sentry:postgres@postgres:5432/mydb?schema=public"
+ENCRYPTION_KEY = ""
+PORT = 8080
+
+[phishertools]
+PORT = 3001
+```
+
+Of this, most settings are already configured for us. We only need to edit a few properties.
+
+```toml {2-3,6-7}
+[discord]
+PUBLIC_KEY = ""
+TOKEN = ""
+
+[interval]
+DEV_API_KEY = ""
+PRODUCTION_API_KEY = ""
+
+[proxy]
+PORT = 3000
+API_VERSION = 10
+
+[clamav]
+MIRROR = "https://mirror.penpow.dev"
+
+[sentry]
+DATABASE_URL = "postgresql://sentry:postgres@postgres:5432/mydb?schema=public"
+ENCRYPTION_KEY = ""
+PORT = 8080
+
+[phishertools]
+PORT = 3001
+```
+
+#### Structure of the Config File
+
+Before we begin filling in the config settings, lets look at what settings we have, and what they adjust
+
+##### Discord
+
+- `PUBLIC_KEY`: The public key found on https://discord.com/developers/applications. This is used with interactions to verify their tokens.
+- `TOKEN`: Our discord token used for connecting to the gateway and recieving interaction events.
+
+##### Interval
+
+Interval supplies our actions hosting, so that our scripts have an easy to use frontend. To use it in development, you can sign up [here](https://interval.com/) and generate a development key and production key.
+
+##### Proxy
+
+This adjusts settings relating to our REST proxy, which is used to obtain shared ratelimiting across our packages.
+
+- `PORT`: For the most part, this shouldn't be changed.
+- `API_VERSION`: Once again, this shouldn't be updated too often. This specifies which version of discord's API we want to use.
+
+##### ClamAV
+
+- `MIRROR`: This is set to my own source, so that we get less ratelimiting while in development.
+
+##### Sentry
+
+This adjusts settings relating to the main bot instance.
+
+- `DATABASE_URL`: This is the connection URL to prisma, and it shouldn't be changed
+- `ENCRYPTION_KEY`: This is left intentionally blank. It is used to encrypt data at rest between the bot and the database. This gets filled in using one of our scripts.
+- `PORT`: This shouldnt be changed.
+
+##### Phishertools
+
+- `PORT`: For the most part, this shouldn't be changed.
+
+#### Filling It In
+
+Lets start filling in our config items. Lets start with the discord settings.
+
+Go to the [discord developer portal](https://discord.com/developers/applications) and create a new application. Once created, copy the public key, and add it to the config.
+
+Click on Bot, and create a bot by pressing Add Bot. Click on <em>Reset Token</em> and paste this into `sentry.TOKEN`. You also need to adjust the `Privileged Gateway Intents` by selecting the message content intent.
+
+Head back on over to `OAuth2` > `URL Generator` and select the following scopes and permissions:
+
+![](/img/scopes.png)
+![](/img/permissions.png)
+
+Copy this URL and open it in a new tab, and invite it to a testing server.
+
+Next, lets handle Interval. After you sign up at https://interval.com/, go to your dashboard, and click on settings. From there, go to API keys. Copy your personal development key, and place it under the `interval.DEV_API_KEY` setting. Then generate a "live mode" key, and place it under the `interval.PRODUCTION_API_KEY`.
+
+Our config file is now complete. We can continue on to initial setup.
+
+### Starting Docker
+
+Navigate to the root of the directory and launch the containers through the following command: `docker compose up --build --force-recreate`. 
+
+While this is happening, take a break and relax as this will take a fair few minutes to download and build all the subpackages.
+
+Once it is online, your main "bot" instance should show a fatal message saying: `Encryption Key Not Configured - Create One Using Interval`. This refers to the encryption key property specified earlier in our config. Head over to https://interval.com/dashboard, and go to development. Begin by running the "GenerateEncryptionKeys" script. Enter the code it gives you into the `sentry.ENCRYPTION_KEY` field and keep it safe, as it is the only way to decrypt the database.
+
+Then, run the `UpdatePhisherman` script to update all of the sources from Phisherman so that our domains are active. This will prompt you to confirm, and it will take around 30 seconds to complete.
+
+Finally, run the `DeployCommands` script to deploy the commands to your server. When asked, select all your commands, and ignore the "Register Guild Commands?" prompt. 
+
+Once the commands are registered, press <kbd>CTRL</kbd> + <kbd>C</kbd> to close the docker containers, and wait for them to stop. Then, restart them again using the compose up command and there should be no errors in the console.
+
+### The Folder Structure of Sentry
+
+Firstly, lets install our packages by runnning `npm i`. This installs our packages and sets up symbolic links to our subpackages.
+
+Sentry is a massive monorepo, with two kinds of package, an `app` and a `package`.
+
+A package provides code that are used by apps. Due to current issues however, these should contain types only.
+An app is a project that runs by it self, such as this website, or the websocket proxy.
+
+Lets look at the main folder structure:
+
+```
+apps/
+	actions/
+	antivirus/
+	bot/
+	...
+docker/
+	Actions.Dockerfile
+	Bot.Dockerfile
+	ClamAV.Dockerfile
+	...
+packages/
+	common/
+	database/
+templates/
+	command/
+		command.ts.hbs
+	...
+```
+
+There are 4 main folders we care about
+
+1. Apps, these apps are our main applications that we run. Each is a package managed by turborepo
+2. Packages, our type only shared code
+3. Docker, these are the docker images of the applications we want to run
+4. Templates, these are [handlebars](https://handlebarsjs.com/) templates used in our codegen
+
+### Using Codegen
+
+We have a code generation tool to eliminate the need to create boilerplate. Run it with `npm run codegen` and select the options as specified to build the script.
+
+
+### Exposing Sentry during Development
+
+Once our containers have started, we need to tunnel to a URL to allow discord to send us events. To do this during development, we use `Ngrok`. Once installed, run the command `ngrok http 8080`, and grab the URL it gives you. Keep this open in the background during development, and go to the discord developer portal. Click on your app and set the `Interactions Endpoint URL` to this domain. 
+</div>
+
+## Responsible Security Disclosure
+
+Please review our [security disclosure policy](/docs/security) to see how to responsibly disclose a vulnerability in Sentry.
