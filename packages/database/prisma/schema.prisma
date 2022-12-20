@@ -34,7 +34,7 @@ model Punishment {
 	reason String /// @encrypted
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
-	moderatorId String
+	moderatorId String /// @encrypted
 	flags PunishmentFlags[]
 	references Int?
 	expires DateTime?
