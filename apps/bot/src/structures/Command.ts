@@ -4,6 +4,7 @@ import type {
   APIApplicationCommandOption,
   APIChatInputApplicationCommandInteraction,
   APIMessageApplicationCommandInteraction,
+  APIMessageComponentInteraction,
   APIModalSubmitInteraction,
   APIUserApplicationCommandInteraction,
   ApplicationCommandType,
@@ -81,7 +82,7 @@ export abstract class Handler<T extends ApplicationCommandType> {
   /**
    * Function that gets executed when the command is run
    * 
-   * @remarks This function should be overriden at runtime   * 
+   * @remarks This function should be overriden at runtime
    * @param _args - The context that it needs to run in
    * @virtual
    * @returns Optional return value of data that should be sent as either the initial reply, or as a follow up
@@ -93,7 +94,7 @@ export abstract class Handler<T extends ApplicationCommandType> {
   /**
    * Function to handle modal
    * 
-   * @remarks This function should be overriden at runtime   * 
+   * @remarks This function should be overriden at runtime
    * @param _args - The context that it needs to run in
    * @virtual
    */
@@ -101,6 +102,18 @@ export abstract class Handler<T extends ApplicationCommandType> {
 	// eslint-disable-next-line no-useless-return
 	return;
   }
+
+  /**
+   * Function to handle modal
+   * 
+   * @remarks This function should be overriden at runtime
+   * @param _args - The context that it needs to run in
+   * @virtual
+   */
+	public async handleComponent(_args: Omit<RunContext<any>, "getArgs" | "interaction"> & { interaction: APIMessageComponentInteraction }): Promise<void> {
+		// eslint-disable-next-line no-useless-return
+		return;
+	}
 
   /**
    * Utility function to convert a command to have its JSON data, so it can be registered at discord

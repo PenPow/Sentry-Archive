@@ -23,14 +23,6 @@ export class TwoFactorAuthenticationManager {
 
 		const backupCode = nanoid(15);
 
-		await Prisma.user.update({
-			where: { id },
-			data: { 
-				twofactor_secret: secret,
-				backup_code: backupCode
-			}
-		});
-
 		return { secret, backup: backupCode };
 	}
 

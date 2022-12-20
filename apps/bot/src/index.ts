@@ -60,12 +60,21 @@ fastify.post(
 		});
 
 		return void res.status(200).send({});
-	} else if (
-      [
-        InteractionType.ApplicationCommandAutocomplete,
-        InteractionType.MessageComponent,
-      ].includes(req.body.type)
-    ) {
+	} else if (req.body.type === InteractionType.MessageComponent) {
+		const command = Commands.get(req.body.data.custom_id.split('.')[0]!);
+		if (!command) return void res.code(404);
+
+		if(!command.handleComponent) return;
+
+		await command.handleComponent({
+			interaction: req.body,
+			respond,
+			logger,
+			api
+		});
+
+		return void res.status(200).send({});
+	} else if (req.body.type === InteractionType.ApplicationCommandAutocomplete) {
       // TODO: Implement these interaction types
       return void logger.fatal(
         "Attempted to handle an invalid interaction type"
