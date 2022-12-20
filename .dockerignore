@@ -7,3 +7,4 @@ templates/
 .github/
 .git/
 .devcontainer/
+apps/website/
