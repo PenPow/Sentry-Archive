@@ -11,5 +11,9 @@
 	"docs": {
 	  "title": "Documentation",
 	  "type": "page"
-	}
+	},
+	"legal": {
+		"title": "Legal",
+		"type": "page"
+	  }
   }

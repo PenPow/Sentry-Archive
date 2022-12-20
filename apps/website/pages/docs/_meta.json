@@ -19,12 +19,5 @@
 	},
 	"contributing": "Contribution Guide",
 	"code_of_conduct": "Code of Conduct",
-	"self-host": "How to Self Host Sentry",
-	"policy": {
-		"type": "separator",
-		"title": "Policies"
-	},
-	"tos": "Terms of Service",
-	"privacy": "Privacy Policy",
-	"security": "Security Disclousure"
-  }
+	"self-host": "How to Self Host Sentry"
+}
