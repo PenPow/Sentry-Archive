@@ -1,5 +1,5 @@
 import type { API } from "@discordjs/core";
-import type { APIMessage } from "discord-api-types/v10";
+import type { APIGuild, APIMessage } from "discord-api-types/v10";
 import type { Logger } from "tslog";
 
 /**
@@ -9,6 +9,7 @@ import type { Logger } from "tslog";
  */
 export enum EventType {
   MessageCreate,
+  GuildDelete
 }
 
 /**
@@ -30,7 +31,8 @@ export type EventListenerRunContext<Type extends EventType> = {
  * @internal
  */
 type EventTypeToFunctionDefinition<Type extends EventType> =
-  Type extends EventType.MessageCreate ? APIMessage : never;
+  Type extends EventType.MessageCreate ? APIMessage : 
+  Type extends EventType.GuildDelete ? APIGuild : never;
 
 /**
  * Type Definiton for a listener

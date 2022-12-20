@@ -23,8 +23,9 @@ const REST = new RestClient({
   version: "10",
   api: "http://rest:3000/api",
 }).setToken(config.discord.TOKEN);
+
 const manager = new WebSocketManager({
-  intents: GatewayIntentBits.GuildMessages + GatewayIntentBits.MessageContent,
+  intents: GatewayIntentBits.GuildMessages + GatewayIntentBits.MessageContent + GatewayIntentBits.Guilds,
   token: config.discord.TOKEN,
   rest: REST,
 });
@@ -39,9 +40,13 @@ logger.info("Connected Brokers to Redis");
 manager.on(WebSocketShardEvents.Dispatch, async ({ data }) => {
   if (data.t === GatewayDispatchEvents.Ready) {
     logger.info("Connected to Gateway");
+
   } else if (data.t === GatewayDispatchEvents.MessageCreate) {
     logger.debug(`Sending Message ${data.d.id}`);
     await broker.publish("messages", data.d);
+  } else if (data.t === GatewayDispatchEvents.GuildDelete) {
+	logger.debug("Purging Guild");
+	await broker.publish("guildDelete", data.d)
   }
 });
 

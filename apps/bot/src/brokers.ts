@@ -1,9 +1,10 @@
 import { PubSubRedisBroker, RPCRedisBroker } from "@discordjs/brokers";
-import type { APIMessage } from "discord-api-types/v10";
+import type { APIGuild, APIMessage } from "discord-api-types/v10";
 import { api } from "./REST.js";
 import { logger } from "./config.js";
 import { Redis } from "./db.js";
 import messageCreateEvent from "./events/messageCreate.js";
+import guildDeleteEvent from "./events/guildDelete.js";
 import { Commands, loadCommands } from "./structures/Command.js";
 
 logger.debug("Preparing Brokers");
@@ -35,4 +36,12 @@ PubSubBroker.on("messages", ({ data, ack }) => {
   void messageCreateEvent.run({ api, logger, data: message });
 });
 
-await PubSubBroker.subscribe("subscribers", ["messages"]);
+PubSubBroker.on("guildDelete", ({ data, ack }) => {
+	void ack();
+  
+	const guild: APIGuild = data;
+  
+	void guildDeleteEvent.run({ api, logger, data: guild });
+  });
+
+await PubSubBroker.subscribe("subscribers", ["messages", "guildDelete"]);
