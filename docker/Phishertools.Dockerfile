@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache libc6-compat python3 make g++ openssl1.1-co
 
 WORKDIR /app
 
-RUN npm i turbo turbo-linux-64 -g
+RUN npm i turbo -g
 COPY . .
 RUN turbo prune --scope=phishertools --docker
 
@@ -21,8 +21,7 @@ COPY .gitignore .gitignore
 COPY --from=builder /app/out/json .
 COPY --from=builder /app/out/package-lock.json ./package-lock.json
 
-RUN npm i turbo turbo-linux-64 -g
-RUN npm i
+RUN npm ci
 
 COPY --from=builder /app/out/full .
 COPY turbo.json turbo.json
