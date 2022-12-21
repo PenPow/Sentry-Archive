@@ -19,7 +19,7 @@ services:
       - 8080
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sentry.rule=Host(`sentry.penpow.dev/ingest`)"
+      - "traefik.http.routers.sentry.rule=Host(`sentry-ingest.penpow.dev`)"
       - "traefik.http.routers.sentry.entrypoints=web"
     links:
       - redis:redis
@@ -39,6 +39,8 @@ services:
       test: ["CMD-SHELL", "nc -vz 127.0.0.1 8080 || exit 1"]
       interval: 10s
       timeout: 5s
+    volumes:
+      - ${PWD}/config.toml:/app
 
   ws-proxy:
     container_name: ws-proxy
@@ -54,6 +56,8 @@ services:
         condition: service_healthy
       rest:
         condition: service_healthy
+    volumes:
+      - ${PWD}/config.toml:/app
 
   actions:
     container_name: actions
@@ -72,6 +76,8 @@ services:
         condition: service_healthy
       phishertools:
         condition: service_healthy
+    volumes:
+      - ${PWD}/config.toml:/app
 
   phishertools:
     container_name: phishertools
@@ -91,6 +97,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - ${PWD}/config.toml:/app
 
   rest:
     container_name: rest-proxy
@@ -105,6 +113,8 @@ services:
       test: ["CMD-SHELL", "nc -vz 127.0.0.1 3000 || exit 1"]
       interval: 10s
       timeout: 5s
+    volumes:
+      - ${PWD}/config.toml:/app
 
   clamd:
     container_name: clamd
@@ -133,6 +143,8 @@ services:
     links:
       - clamd:clamd
     tty: true
+    volumes:
+      - ${PWD}/config.toml:/app
 
   redis:
     image: redis:7.0.5-alpine

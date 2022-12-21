@@ -39,7 +39,6 @@ USER sentry
 COPY --from=installer /app/apps/bot/package.json .
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer --chown=sentry:nodejs /app/apps/bot/dist ./dist
-COPY config.toml .
 
 ENTRYPOINT [ "node" ]
 CMD [ "--no-warnings", "--experimental-specifier-resolution=node", "dist/index.js" ]
