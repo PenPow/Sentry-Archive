@@ -8,6 +8,10 @@
 		"dependsOn": ["^db:generate"],
 		"outputs": ["dist/**"]
 	  },
+	  "export": {
+		"dependsOn": ["^build"],
+		"outputs": ["out/**"]
+	  },
 	  "lint": {
 		"outputs": [],
 		"inputs": ["src/**/*"]
