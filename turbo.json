@@ -9,7 +9,7 @@
 		"outputs": ["dist/**"]
 	  },
 	  "export": {
-		"dependsOn": ["^build"],
+		"dependsOn": ["build"],
 		"outputs": ["out/**"]
 	  },
 	  "lint": {
