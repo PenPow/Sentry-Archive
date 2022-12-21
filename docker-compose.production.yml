@@ -10,9 +10,7 @@ services:
     
   sentry:
     container_name: bot
-    build:
-      context: .
-      dockerfile: ./docker/Bot.Dockerfile
+    image: ghcr.io/penpow/sentry:latest
     tty: true
     restart: always
     expose:
@@ -44,9 +42,7 @@ services:
 
   ws-proxy:
     container_name: ws-proxy
-    build:
-      context: .
-      dockerfile: ./docker/Websocket.Dockerfile
+    image: ghcr.io/penpow/sentry-ws:latest
     tty: true
     restart: always
     links:
@@ -61,9 +57,7 @@ services:
 
   actions:
     container_name: actions
-    build:
-      context: .
-      dockerfile: ./docker/Actions.Dockerfile
+    image: ghcr.io/penpow/sentry-actions:latest
     tty: true
     restart: always
     links:
@@ -81,9 +75,7 @@ services:
 
   phishertools:
     container_name: phishertools
-    build:
-      context: .
-      dockerfile: ./docker/Phishertools.Dockerfile
+    image: ghcr.io/penpow/phishertools:latest
     tty: true
     restart: always
     expose:
@@ -105,9 +97,7 @@ services:
     expose:
       - "3000:3000"
     restart: always
-    build:
-      context: .
-      dockerfile: ./docker/Rest.Dockerfile
+    image: ghcr.io/penpow/sentry-rest:latest
     tty: true
     healthcheck:
       test: ["CMD-SHELL", "nc -vz 127.0.0.1 3000 || exit 1"]
@@ -121,9 +111,7 @@ services:
     restart: always
     expose:
       - "3310:3310"
-    build:
-      context: .
-      dockerfile: ./docker/Clamd.Dockerfile
+    image: ghcr.io/penpow/clamd:latest
     healthcheck:
       test: ["CMD-SHELL", "nc -vz 127.0.0.1 3310 || exit 1"]
       interval: 10s
@@ -134,9 +122,7 @@ services:
   clamav:
     container_name: clamav
     restart: always
-    build:
-      context: .
-      dockerfile: ./docker/ClamAV.Dockerfile
+    image: ghcr.io/penpow/sentry-clamav:latest
     depends_on:
       clamd:
         condition: service_healthy
