@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-	"export": "next export"
+    "export": "next export"
   },
   "dependencies": {
+    "@cloudflare/next-on-pages": "^0.2.0",
     "@skyra/discord-components-react": "^3.4.1",
     "@types/node": "18.11.17",
     "@types/react": "^17.0.52",
