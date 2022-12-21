@@ -1,0 +1,22 @@
+# Scanning Settings
+
+Adjust whether messages are ran through our Anti Virus and our Phishing Domains Database.
+
+## Syntax
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info" emoji="ℹ️">
+  `/settings scanning [enable-av] [enable-phishertools]`
+</Callout>
+
+### Options
+
+| Option              | Type    | Required | Description                                                   |
+|---------------------|---------|----------|---------------------------------------------------------------|
+| Enable AV           | Boolean | False    | Should Sentry scan attachments with our anti virus?           |
+| Enable Phishertools | Boolean | False    | Should Sentry scan domains against our phishing domains list? |
+
+## Permissions
+
+This command requires the `Administrator` permission.

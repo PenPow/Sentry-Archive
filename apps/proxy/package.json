@@ -1,0 +1,41 @@
+{
+  "name": "proxy",
+  "version": "1.0.0",
+  "description": "Sentry HTTP Proxy",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npx tsup --no-splitting ./src/* ./src/**/*",
+    "lint": "npx eslint --ext .js,.ts . && npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PenPow/Sentry.git"
+  },
+  "author": "PenPow <josh@penpow.dev>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PenPow/Sentry/issues"
+  },
+  "homepage": "https://github.com/PenPow/Sentry#readme",
+  "dependencies": {
+    "@discordjs/rest": "^1.4.0",
+    "bson": "^4.7.0",
+    "ioredis": "^5.2.4",
+    "shared": "*",
+    "source-map-support": "^0.5.21",
+    "toml": "^3.0.0",
+    "tslog": "^4.4.4"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.3.19",
+    "@types/node": "^18.11.9",
+    "@types/source-map-support": "^0.5.6",
+    "eslint": "^8.28.0",
+    "eslint-config-neon": "^0.1.40",
+    "eslint-plugin-tsdoc": "^0.2.17",
+    "prettier": "^2.7.1",
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.3"
+  }
+}

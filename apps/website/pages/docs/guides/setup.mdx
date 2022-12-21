@@ -1,0 +1,156 @@
+# Setting Up Sentry
+
+Sentry is designed to be simple to setup. We believe you can do it in a matter of minutes.
+
+## Invitation and Permissions setup
+
+Use our official [invite link](https://discord.com/api/oauth2/authorize?client_id=934121887829737562&permissions=1374389619718&scope=applications.commands%20bot) to add Sentry to your server. It is pre-setup with all the permissions it needs.
+
+| Permission                  	| Why Does Sentry Need It?                                                                                        	|
+| :---------------------------:	| :--------------------------------------------------------------------------------------------------------------:	|
+| Read Messages/View Channels 	| As part of our antivirus and domain scanner, we need access to read messages to scan them for malicious content 	|
+| Send Messages               	| Sentry needs the Send Messages permission to send log messages upon moderation actions being complete.        	|
+| Embed Links                 	| This permission allows Sentry to create fancy embeds in our log messages and command responses                  	|
+| Read Message History        	| This permission is used to fetch older cases to update their information                                        	|
+| Moderate Members            	| The Moderate Members permission is used for adding timeouts to members.                                       	|
+| Kick Members                	| The Kick Members permission is used to kick members from the server                                           	|
+| Ban Members                 	| The Ban Members permission is used to ban members from the server.                                            	|
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info" emoji="🗨️">Sentry has access to read messages through the `Message Content` priviliged intent. We handle your data in accordance with our privacy policy. If you have any other questions surrounding our data usage, feel free to contact us using the information provided on the privacy policy!</Callout>
+
+Next, we need to setup the role hierarchy so that Sentry can apply moderation actions to people. Move Sentry's role above the roles of the people who you want to apply moderation actions to
+
+<figure>
+  <div style={{ margin: "auto", paddingLeft: "100px", paddingTop: "20px", borderRadius: "0%", top: "50%" }}>
+	![](/img/roles.webp)
+  </div>
+  <figcaption>
+    Example: We move the sentry role to be above moderators, but below administrators and developers.<br/>This allows moderators and below to recieve punishments.
+  </figcaption>
+</figure>
+
+## Settings
+
+You now have a working Sentry setup! While everything beyond this point is optional, it is recommended to continue past this point to get the most out of Sentry.
+
+### 2FA Setup
+
+Its recommended to setup two factor authentication through both discord and Sentry to ensure that in the case that your account gets hacked, no malicious actions can be taken.
+
+<Callout emoji="🕵️" type="info">Sentry will never ask for you to scan a code with your discord mobile app. If you find a bot impersonating Sentry asking to scan a code to authenticate, file a report to us, and we will take the bot down.</Callout>
+
+To enable two factor authentication, begin by downloading an authenticator app to your phone. We recommend [Authy](https://authy.com/) or [Google Authenticator](https://googleauthenticator.net/) but any authenticator app that supports TOTPs (time-based one time passwords) will work.
+
+![](/img/authy.png)
+
+import {
+  DiscordCommand,
+  DiscordEmbed,
+  DiscordEmbedDescription,
+  DiscordMessage,
+  DiscordMessages,
+} from "@skyra/discord-components-react";
+
+Next, head over to sentry in your server or in its messages, and run `/2fa setup`, which will provide you with a token, and a backup code.
+<br/>
+
+<DiscordMessages>
+        <DiscordMessage author="Sentry" avatar="/logo.jpg">
+		  <DiscordCommand
+            slot="reply"
+            profile="PenPow"
+			avatar="/img/penpow.png"
+			roleColor="#00aff4"
+            command="/2fa setup"
+          ></DiscordCommand>
+          <DiscordEmbed
+            slot="embeds"
+            authorImage="/logo.jpg"
+            authorName="Sentry#0297 (934121887829737562)"
+            authorUrl="https://sentry.penpow.dev"
+            color="#5cff9d"
+            embedTitle="2FA Configured"
+          >
+            <DiscordEmbedDescription slot="description">
+              Please enter this secret into your authenticator app.
+			  <b>Secret</b>: FEK57IIHSHVIBJK42LPMPYDNEO3GNDCR
+
+              Keep this code safe! If you lose access to your authenticator app, this code allows you to reset your 2FA. We cannot manually reset 2FA codes without this code being shown.
+              <b>Backup Code</b>: 1qtFzw9o2RRPLgy
+            </DiscordEmbedDescription>
+          </DiscordEmbed>
+        </DiscordMessage>
+</DiscordMessages>
+
+Write down the backup code in a secure location. Ensure you always have access to it, as it is the only way to remove your 2FA settings if you lose access to your authenticator app.
+
+<Callout type="warning" emoji="⚠️">Sentry Developers will not reset your 2FA manually without proof of this code. If you lose access to it, we cannot do anything to restore access to Sentry for you.</Callout>
+
+Go back to your authenticator app, and add the code, called `Secret` to your authenticator app.
+
+![](/img/adding_code.png)
+
+Once you have finished setting up 2FA with your authentication app, it should begin giving you 30s long codes. You will be prompted to input this code before modifying any server settings, or before taking moderation actions.
+
+### Enforcing 2FA For Moderation
+
+A recommended setting to enable is 2FA before moderation. By default, 2FA is an opt-in system for moderators, however this setting mandates it for moderators.
+
+There are two ways to enable 2FA before moderation for your guild
+
+- Through Sentry
+- Through Discord (recommended)
+
+#### Through Sentry
+
+To enable through Sentry, run the command `/settings 2fa` and set the `enforce-for-moderation` option to `True`.
+
+If you have already setup 2FA, you will now be prompted from your token from your authenticator app.
+If you haven't, follow the instructions [here](#2fa-setup) so that you can perform moderation actions after enabling.
+
+This action applies immediately.
+
+#### Through Discord
+
+This is the preferred way as it affects the entire discord server, restricting discord built in punishments without using your discord two factor codes. 
+
+To set this up, begin by ensuring that your discord account has 2FA enabled. If it isn't, you can follow the discord support article [here](https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Two-Factor-Authentication) to enable it.
+
+Then, head to your server settings, and then click on `Safety Setup`. Then enable the requirement for 2FA for moderator actions.
+
+<figure>
+  <div style={{ margin: "auto", paddingLeft: "80px", paddingTop: "20px", borderRadius: "0%", top: "50%" }}>
+	![](/img/2fa.webp)
+  </div>
+  <figcaption>
+    This option requires your discord account to have 2FA enabled, and Sentry follows its lead.
+  </figcaption>
+</figure>
+
+Wait 30 seconds to allow the change to apply and for our cache to clear.
+
+### Logging Channels
+
+Sentry tries its best to detect a log channel, but sometimes, we cannot find one. Its recommended to explicitly set a channel for Sentry.
+
+Firstly, ensure that Sentry has permissions to send messages in this channel.
+
+<figure>
+  <div style={{ margin: "auto", paddingLeft: "100px", paddingTop: "20px", borderRadius: "0%", top: "50%" }}>
+	![](/img/logpermissions.webp)
+  </div>
+  <figcaption>
+    Either select the Sentry bot user, or its role, and click done.
+	<br/>Then scroll down, and explicitly enable `Send Messages` and `Embed Links`
+  </figcaption>
+</figure>
+
+Then, inform Sentry to use this channel by running configuring it with the `/settings logs` commands, specifying this channel as the `audit-channel`.
+
+## Where Next?
+
+Have a read through of our command reference section, or take a look at our other guides to learn more about our advanced features.
+
+If you ever need any support, reach out to us on [discord](https://discord.gg/qGweuQQwMR).

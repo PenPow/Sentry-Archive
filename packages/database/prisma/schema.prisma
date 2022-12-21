@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://sentry:postgres@localhost:5432/mydb?schema=public"
+}
+
+enum PunishmentType {
+	Warn
+	Timeout
+	Kick
+	Softban
+	Ban
+	Unban
+}
+
+enum PunishmentFlags {
+	Frozen
+}
+
+model Punishment {
+	id Int @id @unique @default(autoincrement())
+	caseId Int
+	type PunishmentType
+	user User @relation(fields: [userId], references: [id])
+	userId String
+	guild Guild @relation(fields: [guildId], references: [id])
+	guildId String
+	reason String /// @encrypted
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
+	moderatorId String /// @encrypted
+	flags PunishmentFlags[]
+	references Int?
+	expires DateTime?
+	modLogId String?
+}
+
+model Guild {
+	id String @id @unique
+	punishments Punishment[]
+	modLogChannelId String? @unique
+	enforce2FA Boolean?
+	freezePunishments Boolean?
+	enableAV Boolean?
+	enablePhishertools Boolean?
+}
+
+model User {
+	id String @id @unique
+	punishments Punishment[]
+	twofactor_secret String? /// @encrypted
+	backup_code String? /// @encrypted
+}

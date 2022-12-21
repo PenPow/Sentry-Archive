@@ -1,8 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm install
-npm run prepare
-
-npm run lint:ci
-npx tsc --project ./ --noEmit
+npm run build:changed && npx lint-staged

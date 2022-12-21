@@ -1,0 +1,13 @@
+{
+	"root": true,
+	"extends": ["neon/common", "neon/node", "neon/typescript", "neon/module", "neon/no-deprecated", "neon/prettier"],
+	"plugins": ["eslint-plugin-tsdoc"],
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	},
+	"rules": {
+		"semi": "error",
+		"tsdoc/syntax": "warn"
+	},
+	"ignorePatterns": ["**/dist/*"]
+}

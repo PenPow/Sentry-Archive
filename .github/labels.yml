@@ -12,6 +12,8 @@
   color: '4b1f8e'
 - name: 'invalid'
   color: '4b1f8e'
+- name: 'help wanted'
+  color: '4b1f8e'
 
 - name: 'feature'
   color: '0075ca'

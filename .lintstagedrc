@@ -1,4 +1,0 @@
-{
-  "*.ts": "eslint",
-  "*": "echo Doing Nothing"
-}

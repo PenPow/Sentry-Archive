@@ -1,9 +1,10 @@
 {
+	// Mapped from https://www.typescriptlang.org/tsconfig
 	"compilerOptions": {
 		// Type Checking
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
-		"exactOptionalPropertyTypes": true,
+		"exactOptionalPropertyTypes": false,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
@@ -11,11 +12,7 @@
 		"noUnusedParameters": true,
 		"strict": true,
 		"useUnknownInCatchVariables": true,
-
-		// Modules
-		"module": "Node16",
-		"moduleResolution": "nodenext",
-		"resolveJsonModule": true,
+		"noUncheckedIndexedAccess": true,
 
 		// Emit
 		"declaration": false,
@@ -24,30 +21,22 @@
 		"inlineSources": true,
 		"newLine": "lf",
 		"noEmitHelpers": true,
-		"sourceRoot": "/",
-		"outDir": "dist",
-		"preserveConstEnums": false,
+		"preserveConstEnums": true,
 		"removeComments": false,
-		"sourceMap": true,
+		"inlineSourceMap": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 
 		// Language and Environment
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"target": "es2022",
+		"target": "ES2021",
+		"module": "node16",
+		"moduleResolution": "node16",
 		"useDefineForClassFields": true,
 
 		// Completeness
 		"skipLibCheck": true,
-		"noImplicitAny": true, 
-
-		// Custom Types
-		"typeRoots": [
-			"node_modules/@types",
-			"src/@types"
-		]
+		"outDir": "./dist"
 	},
-	"include": ["src/**/*.ts", "src/bot/listeners/debug.ts"],
-	"exclude": ["node_modules", "dist"]
 }

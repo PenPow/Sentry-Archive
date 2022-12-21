@@ -1,0 +1,31 @@
+# Ban
+
+Remove a user from your guild.
+
+## Syntax
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info" emoji="ℹ️">
+  `/ban [user] [reason] (expiration) (case_reference)`
+</Callout>
+
+### Options
+
+| Option         | Type                           | Required | Description                                                                         |
+|----------------|--------------------------------|----------|-------------------------------------------------------------------------------------|
+| User           | User                           | True     | The user that is to recieve the punishment                                          |
+| Reason         | String                         | True     | The reason why they are being punished                                              |
+| Expiration     | String (in format of Nm/h/d/w) | False    | Optionally, to convert this ban into a temporary ban, how long this ban should last |
+| Case Reference | Number                         | False    | Optionally a reference to a case number to link this case with                      |
+
+## Permissions
+
+This command requires the `Ban Members` permission. 
+
+Sentry can apply a punishment to any user who
+
+- Is beneath Sentry on the role hierarchy
+- Is beneath the moderator on the role hierarchy
+- Has not got the `Administrator` permission
+- Is not the owner of the server

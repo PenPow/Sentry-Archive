@@ -1,0 +1,168 @@
+version: "3.9"
+services:
+  traefik:
+    image: traefik:latest
+    command: --providers.docker --providers.docker.exposedbydefault=false --entryPoints.web.address=:80
+    ports:
+      - 8000:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+  sentry:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: ./docker/Bot.Dockerfile
+    tty: true
+    restart: always
+    expose:
+      - 8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sentry.rule=Host(`sentry.penpow.dev/ingest`)"
+      - "traefik.http.routers.sentry.entrypoints=web"
+    links:
+      - redis:redis
+      - rest:rest
+      - postgres:postgres
+      - phishertools:phishertools
+    depends_on:
+      redis:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      phishertools:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+
+  ws-proxy:
+    container_name: ws-proxy
+    build:
+      context: .
+      dockerfile: ./docker/Websocket.Dockerfile
+    tty: true
+    restart: always
+    links:
+      - redis:redis
+    depends_on:
+      redis:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+
+  actions:
+    container_name: actions
+    build:
+      context: .
+      dockerfile: ./docker/Actions.Dockerfile
+    tty: true
+    restart: always
+    links:
+      - redis:redis
+      - phishertools:phishertools
+    depends_on:
+      redis:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+      phishertools:
+        condition: service_healthy
+
+  phishertools:
+    container_name: phishertools
+    build:
+      context: .
+      dockerfile: ./docker/Phishertools.Dockerfile
+    tty: true
+    restart: always
+    expose:
+      - 3001
+    links:
+      - redis:redis
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 3001 || exit 1"]
+      interval: 10s
+      timeout: 5s
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  rest:
+    container_name: rest-proxy
+    expose:
+      - "3000:3000"
+    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/Rest.Dockerfile
+    tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 3000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+
+  clamd:
+    container_name: clamd
+    restart: always
+    expose:
+      - "3310:3310"
+    build:
+      context: .
+      dockerfile: ./docker/Clamd.Dockerfile
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz 127.0.0.1 3310 || exit 1"]
+      interval: 10s
+      timeout: 5s
+    logging:
+      driver: none
+
+  clamav:
+    container_name: clamav
+    restart: always
+    build:
+      context: .
+      dockerfile: ./docker/ClamAV.Dockerfile
+    depends_on:
+      clamd:
+        condition: service_healthy
+    links:
+      - clamd:clamd
+    tty: true
+
+  redis:
+    image: redis:7.0.5-alpine
+    restart: always
+    expose:
+      - "6379:6379"
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 5s
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=sentry
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432:5432"
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sentry']
+      interval: 10s
+      timeout: 5s
+
+volumes:
+  postgres:
+    driver: local

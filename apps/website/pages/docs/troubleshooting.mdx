@@ -1,0 +1,11 @@
+# Troubleshooting
+
+If you are having an issue with Sentry, check if its on this list first before filing a bug report.
+
+## "Please Enable 2FA" despite the Setting being Disabled
+
+If you recieve a message prompting you to enable 2FA, despite having the option to enforce it disabled, follow these steps to ensure that the setting is disabled.
+
+1. Disable it through Sentry with `/settings 2fa enforce-for-moderation:False`
+2. Ensure it is disabled in your guild settings by going to `Settings` > `Safety Setup` > `Enforce 2FA For Mod Actions`
+3. Wait 30 seconds and try again. Sentry caches certain objects to reduce the strain on discord, and this cache is cleared after 30 seconds of inactivity. If you are struggling with this error after disabling it through your guild settings, give 30 seconds to allow the cache to clear and for the most recent settings to be updated.

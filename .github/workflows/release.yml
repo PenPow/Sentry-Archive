@@ -1,4 +1,4 @@
-name: Release Updates
+name: Build & Package Docker Releases
 
 on:
   release:
@@ -15,27 +15,49 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Bot
-            dockerfile: "Sentry.Dockerfile"
+          - name: Actions
+            dockerfile: "Actions.Dockerfile"
+            image: ghcr.io/penpow/sentry-actions
+
+          - name: Sentry
+            dockerfile: "Bot.Dockerfile"
             image: ghcr.io/penpow/sentry
+
+          - name: ClamAV
+            dockerfile: "ClamAV.Dockerfile"
+            image: ghcr.io/penpow/sentry-clamav
+
+          - name: Clamd
+            dockerfile: "Clamd.Dockerfile"
+            image: ghcr.io/penpow/clamd
+
+          - name: Phishertools
+            dockerfile: "Phishertools.Dockerfile"
+            image: ghcr.io/penpow/phishertools
+
+          - name: REST
+            dockerfile: "Rest.Dockerfile"
+            image: ghcr.io/penpow/sentry-rest
+
+          - name: WS
+            dockerfile: "Websocket.Dockerfile"
+            image: ghcr.io/penpow/sentry-ws
+
 
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -51,41 +73,10 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: docker/${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-
-  sentry:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install Node v16
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-          cache: 'npm'
-
-      - run: npm set-script prepare ""
-        
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build Typescript
-        run: npm run build
-
-      - name: Create Sentry release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
-          environment: production
-          sourcemaps: "./dist"
-          version: ${{ github.event.release.tag_name }}.

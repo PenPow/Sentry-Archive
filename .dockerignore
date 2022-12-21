@@ -1,0 +1,10 @@
+node_modules/
+.turbo/
+out/
+dist/
+templates/
+.vscode/
+.github/
+.git/
+.devcontainer/
+apps/website/

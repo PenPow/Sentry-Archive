@@ -1,0 +1,85 @@
+<img className="rounded-xl logo" src="/logo.jpg" width={200} height={200} style={{ position: "float", float: "right", margin: "10px" }}/>
+
+<div className="large">
+# Sentry Makes Moderation<br/>Simple.
+</div>
+
+<br />
+
+import {
+  DiscordActionRow,
+  DiscordAttachments,
+  DiscordButton,
+  DiscordEmbed,
+  DiscordEmbedDescription,
+  DiscordMention,
+  DiscordMessage,
+  DiscordMessages,
+  DiscordSystemMessage,
+} from "@skyra/discord-components-react";
+
+<p className="large">
+Sentry puts a focus on providing useful tools to secure your server, for <em>free</em>. Why wouldn't you switch?
+
+We track over <em>2.8 million</em> domains to power tools such as our <br/>
+malware engine, which scans uploaded attachments to ensure that they are safe, and our "Phishertools" service, which scans domains sent in our servers and scans them against over 13 reputable sources of phishing domains.
+
+Even better, our entire codebase is open source! Check us out <em><a href="https://github.com/PenPow/Sentry" style={{ color: "#3498db"}}>here</a></em>.
+
+<br/>
+
+<DiscordMessage>
+	<DiscordAttachments slot="components">
+        <DiscordActionRow>
+			<p>&nbsp;</p>
+            <DiscordButton
+                url="/docs"
+            >
+            	View our Documentation
+            </DiscordButton>
+         </DiscordActionRow>
+    </DiscordAttachments>
+</DiscordMessage>
+</p>
+
+<br />
+
+<DiscordMessages>
+		<DiscordSystemMessage type="join">
+         	Welcome, <i style={{ color: "#3498db" }}>Malicious User</i>. We hope you
+          	brought pizza.
+        </DiscordSystemMessage>
+		<DiscordMessage author="Malicious User" avatar="/evil-discord.png">
+			https://a.malicious.link
+		</DiscordMessage>
+        <DiscordMessage author="Sentry" avatar="/logo.jpg">
+          <DiscordEmbed
+            slot="embeds"
+            authorImage="/logo.jpg"
+            authorName="Sentry#0297 (934121887829737562)"
+            authorUrl="https://sentry.penpow.dev"
+            color="#ff5c5c"
+            embedTitle=""
+          >
+            <DiscordEmbedDescription slot="description">
+              <b>Member</b>: <DiscordMention>Malicious User</DiscordMention> (330004783350153218)
+			  <b>Moderator</b>: <DiscordMention>Sentry</DiscordMention> (934121887829737562)
+			  <b>Action</b>: Ban
+			  <b>Reason</b>: Malicious URL
+            </DiscordEmbedDescription>
+          </DiscordEmbed>
+		  <DiscordAttachments slot="components">
+            <DiscordActionRow>
+			  <p>&nbsp;</p>
+              <DiscordButton type="primary" disabled>Case #18</DiscordButton>
+              <DiscordButton
+                url="/docs/guides/punishments#using-case-references"
+              >
+                Open Case Reference
+              </DiscordButton>
+            </DiscordActionRow>
+          </DiscordAttachments>
+        </DiscordMessage>
+      </DiscordMessages>
+
+<br/>

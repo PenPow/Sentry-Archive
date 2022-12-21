@@ -1,0 +1,22 @@
+[discord]
+PUBLIC_KEY = ""
+TOKEN = ""
+
+[interval]
+DEV_API_KEY = ""
+PRODUCTION_API_KEY = ""
+
+[proxy]
+PORT = 3000
+API_VERSION = 10
+
+[clamav]
+MIRROR = "https://mirror.penpow.dev"
+
+[sentry]
+DATABASE_URL = "postgresql://sentry:postgres@postgres:5432/mydb?schema=public"
+ENCRYPTION_KEY = ""
+PORT = 8080
+
+[phishertools]
+PORT = 3001

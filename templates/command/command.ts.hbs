@@ -1,0 +1,17 @@
+import { type APIApplicationCommandOption, ApplicationCommandOptionType, ApplicationCommandType, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v10";
+import * as SlashCommand from "../../structures/Command.js";
+
+export default class {{ titleCase name }}Command extends SlashCommand.Handler<ApplicationCommandType.ChatInput> {
+	public override data = {
+		name: '{{ lowerCase name }}',
+		description: '{{ description }}',
+		type: ApplicationCommandType.ChatInput,
+	} satisfies Omit<RESTPostAPIChatInputApplicationCommandsJSONBody, "options"> & { type: ApplicationCommandType.ChatInput; };
+
+	public override options = {
+	} satisfies { [ string: string ]: Omit<APIApplicationCommandOption, "name"> };
+
+	public override async execute({}: SlashCommand.RunContext<{{ titleCase name }}Command>): SlashCommand.Returnable {
+		console.log("Hi")
+	}
+}

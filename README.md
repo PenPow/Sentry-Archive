@@ -1,26 +1,20 @@
 <p align="center">
-<img src="https://ss.penpow.dev/i/hvV2lF.png">
+<img src="./apps/website/public/logo.jpg">
 </p>
 
 
-<h3 align="center"><b> Sentry </b></h3>
+<h3 align="center" width="200" height="200"><b> Sentry </b></h3>
 
 -------
 
-### 💫 Self Hosting
+### 🤖 Sentry Discord Bot
 
-Please read [this](https://github.com/PenPow/Sentry/wiki/Self-Hosting#why-should-you-self-host) before deciding to self host, as it details how to do so, and the question of whether you should do so.
+Sentry is a discord bot to **make moderation simple.** We focus on providing powerful features with a simple interface.
 
-### ✔️ Features
+### 📜 Documentation
 
-- Scalable
-- Uses New Discord Features
-- Easy to Configure
-- Scam Domain Detection
-- Anti-Spam
+You can find documentation about Sentry over on [our website](https://sentry.penpow.dev)
 
-### 💾 Contributing
+### ⌨️ Contributing
 
-You can read our (WIP) contributing guide [here](https://github.com/PenPow/Sentry/blob/main/.github/CONTRIBUTING.md).
-
-If you wish to translate the bot into another Locale, please send me an [email](mailto:josh@penpow.dev?subject=%5BTranslation%5D%20New%20Language%20Request)! I would love to make the bot as accessible as possible, so your help would be amazing.
+Before contributing, please see our [contribution guide](https://sentry.penpow.dev/docs/contributing).

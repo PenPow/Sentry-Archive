@@ -1,0 +1,30 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "Sentry Prisma Package",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate",
+	"db:studio": "prisma studio",
+    "lint": "npx eslint --ext .js,.ts . && npx prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PenPow/Sentry.git"
+  },
+  "author": "PenPow <josh@penpow.dev>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PenPow/Sentry/issues"
+  },
+  "homepage": "https://github.com/PenPow/Sentry#readme",
+  "dependencies": {
+    "@prisma/client": "^4.6.1"
+  },
+  "devDependencies": {
+    "prisma": "^4.6.1"
+  }
+}

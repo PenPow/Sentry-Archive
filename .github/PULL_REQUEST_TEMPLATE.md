@@ -1,15 +1,23 @@
-## Description
+* **Please check if the PR fulfills these requirements**
+- [ ] The commit message follows our guidelines
+- [ ] Tests for the changes have been added (for bug fixes / features)
+- [ ] Docs have been added / updated (for bug fixes / features)
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
 
-Fixes # (issue)
+* **What kind of change does this PR introduce?** (Bug fix, feature, docs update, ...)
 
-## Checklist:
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] Any dependent changes have been merged and published in downstream modules
-- [ ] I have checked my code and corrected any misspellings
+
+* **What is the current behavior?** (You can also link to an open issue here)
+
+
+
+* **What is the new behavior (if this is a feature change)?**
+
+
+
+* **Does this PR introduce a breaking change?** (What changes might users need to make in their application due to this PR?)
+
+
+
+* **Other information**:

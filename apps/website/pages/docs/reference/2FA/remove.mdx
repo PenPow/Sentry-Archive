@@ -1,0 +1,23 @@
+# Remove 2FA
+
+If you feel you no longer need the extra touch of 2FA on your account, or if you have lost access to your authenticator app, you can use this command to remove your 2FA settings.
+
+You need either your backup code or your authenticator app to remove your current 2FA settings. If you do not have access to these, then we cannot remove 2FA. The Support Team cannot remove 2FA from a user without being given their backup code.
+
+## Syntax
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout type="info" emoji="ℹ️">
+  `/2fa remove [token]`
+</Callout>
+
+### Options
+
+| Option | Type   | Required | Description                                                                                                    |
+|--------|--------|----------|----------------------------------------------------------------------------------------------------------------|
+| Token  | String | Yes      | Your current code provided by your authenticator app or your backup code that you created while setting up 2FA |
+
+## Permissions
+
+This command doesnt require any specific permissions to run.
