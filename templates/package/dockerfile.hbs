@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache libc6-compat python3 make g++ openssl1.1-co
 
 WORKDIR /app
 
-RUN npm i turbo -g
+RUN npm i turbo turbo-linux-64 -g
 COPY . .
 RUN turbo prune --scope={{ lowerCase name }} --docker
 
