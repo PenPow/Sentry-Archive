@@ -5,11 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npx turbo run build",
-    "lint": "npx turbo run lint --continue",
-    "db:push": "npx turbo run db:push",
-    "db:generate": "npx turbo run db:generate",
-	"codegen": "npx plop"
+    "build": "turbo run build",
+    "build:changed": "turbo run build --filter='...[origin/main]'",
+    "lint": "turbo run lint --continue",
+    "db:push": "turbo run db:push",
+    "db:generate": "turbo run db:generate",
+    "codegen": "npx plop",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,9 @@
   ],
   "homepage": "https://github.com/PenPow/Sentry#readme",
   "devDependencies": {
+    "@commitlint/cli": "^17.3.0",
+    "@commitlint/config-conventional": "^17.3.0",
+    "husky": "^8.0.0",
     "plop": "^3.1.1",
     "turbo": "^1.6.3"
   }
