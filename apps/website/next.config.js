@@ -8,7 +8,8 @@ const nextraConfig = {
 const nextConfig = {
 	images: {
 		unoptimized: true
-	}
+	},
+	distDir: 'out'
 }
 
 const withNextra = require('nextra')(nextraConfig)
