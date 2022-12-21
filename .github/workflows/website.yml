@@ -31,7 +31,7 @@ jobs:
       - run: npm set-script prepare ""
         
       - name: Install Dependencies
-        run: npm ci
+        run: npm i
 
       - name: Build Website
         run: npx turbo prune --scope="website"
@@ -68,7 +68,7 @@ jobs:
         - run: npm set-script prepare ""
           
         - name: Install Dependencies
-          run: npm ci
+          run: npm i
 
         - name: Build Website
           run: npx turbo prune --scope="website"
