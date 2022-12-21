@@ -1,5 +1,13 @@
 version: "3.9"
 services:
+  traefik:
+    image: traefik:latest
+    command: --providers.docker --providers.docker.exposedbydefault=false --entryPoints.web.address=:80
+    ports:
+      - 8000:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    
   sentry:
     container_name: bot
     build:
@@ -7,8 +15,12 @@ services:
       dockerfile: ./docker/Bot.Dockerfile
     tty: true
     restart: always
-    ports:
-      - 8080:8080
+    expose:
+      - 8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sentry.rule=Host(`sentry.penpow.dev/ingest`)"
+      - "traefik.http.routers.sentry.entrypoints=web"
     links:
       - redis:redis
       - rest:rest
