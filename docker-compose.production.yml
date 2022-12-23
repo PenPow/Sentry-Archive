@@ -38,7 +38,7 @@ services:
       interval: 10s
       timeout: 5s
     volumes:
-      - ./config.toml:/app
+      - ./config.toml:/app/config.toml:ro
 
   ws-proxy:
     container_name: ws-proxy
@@ -53,7 +53,7 @@ services:
       rest:
         condition: service_healthy
     volumes:
-      - ./config.toml:/app
+      - ./config.toml:/app/config.toml:ro
 
   actions:
     container_name: actions
@@ -71,7 +71,7 @@ services:
       phishertools:
         condition: service_healthy
     volumes:
-      - ./config.toml:/app
+      - ./config.toml:/app/config.toml:ro
 
   phishertools:
     container_name: phishertools
@@ -90,7 +90,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./config.toml:/app
+      - ./config.toml:/app/config.toml:ro
 
   rest:
     container_name: rest-proxy
@@ -104,7 +104,7 @@ services:
       interval: 10s
       timeout: 5s
     volumes:
-      - ./config.toml:/app
+      - ./config.toml:/app/config.toml:ro
 
   clamd:
     container_name: clamd
@@ -130,7 +130,7 @@ services:
       - clamd:clamd
     tty: true
     volumes:
-      - ./config.toml:/app
+      - ./config.toml:/app/config.toml:ro
 
   redis:
     image: redis:7.0.5-alpine
