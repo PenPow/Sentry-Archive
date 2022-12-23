@@ -21,8 +21,8 @@ body:
     attributes:
       label: Are you using the Docker Container?
       options:
-        - Yes
-        - No
+        - 'Yes'
+        - 'No'
     validations:
       required: true
 
