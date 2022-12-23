@@ -1,24 +1,12 @@
 version: "3.9"
-services:
-  traefik:
-    image: traefik:latest
-    command: --providers.docker --providers.docker.exposedbydefault=false --entryPoints.web.address=:80
-    ports:
-      - 8000:80
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    
+services:    
   sentry:
     container_name: bot
     image: ghcr.io/penpow/sentry:latest
     tty: true
     restart: always
-    expose:
-      - 8080
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sentry.rule=Host(`sentry-ingest.penpow.dev`)"
-      - "traefik.http.routers.sentry.entrypoints=web"
+    ports:
+      - 8000:8080
     links:
       - redis:redis
       - rest:rest
