@@ -21,7 +21,7 @@
   "dependencies": {
     "@discordjs/brokers": "^0.2.0-dev.1668816619-ff85481.0",
     "@discordjs/rest": "^1.3.0",
-    "@discordjs/ws": "^0.4.1",
+    "@discordjs/ws": "^0.6.0",
     "discord-api-types": "^0.37.19",
     "eslint": "^8.28.0",
     "eslint-config-neon": "^0.1.40",
